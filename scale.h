@@ -30,6 +30,8 @@ struct Scale
     Triad VI;
     Triad VII;
     Triad VIII;
+
+    const Triad & degree(int i) const;
 };
 
 } // midiate

@@ -1,5 +1,7 @@
 #include "scale.h"
 
+#include <assert.h>
+
 namespace midiate
 {
 
@@ -131,5 +133,19 @@ Scale::Scale(Pitch root, Mode mode) :
     VII (root + DESCRIPTION(mode).VII.interval,  DESCRIPTION(mode).VII.quality),
     VIII(root + DESCRIPTION(mode).VIII.interval, DESCRIPTION(mode).VIII.quality)
 {}
+
+const Triad & Scale::degree(int i) const
+{
+    if      (i == 1) { return I;    }
+    else if (i == 2) { return II;   }
+    else if (i == 3) { return III;  }
+    else if (i == 4) { return IV;   }
+    else if (i == 5) { return V;    }
+    else if (i == 6) { return VI;   }
+    else if (i == 7) { return VII;  }
+    else if (i == 8) { return VIII; }
+
+    assert(false);
+}
 
 } // midiate
