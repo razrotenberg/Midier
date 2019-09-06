@@ -1,4 +1,5 @@
 #include "interval.h"
+#include "looper.h"
 #include "note.h"
 #include "pitch.h"
 #include "scale.h"
