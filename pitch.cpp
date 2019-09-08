@@ -7,7 +7,7 @@ Pitch::Pitch() : Pitch(0)
 {}
 
 Pitch::Pitch(Note note, Accidental accidental, Octave octave) :
-    _pitch(21 + static_cast<int>(note) + static_cast<int>(accidental) + (12 * octave))
+    _pitch(24 + static_cast<int>(note) + static_cast<int>(accidental) + (12 * (octave - 1)))
 {}
 
 Pitch::Pitch(int pitch) :
