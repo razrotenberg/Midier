@@ -5,7 +5,7 @@
 namespace midiate
 {
 
-enum class Mode
+enum class Mode : char
 {
     Ionian,
     Dorian,

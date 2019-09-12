@@ -5,7 +5,7 @@
 namespace midiate
 {
 
-enum class Quality
+enum class Quality : char
 {
     Major,
     Minor,

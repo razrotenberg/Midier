@@ -3,7 +3,7 @@
 namespace midiate
 {
 
-enum class Interval
+enum class Interval : char
 {
     // the values are the corresponding numbers of semitones
 
