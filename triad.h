@@ -20,6 +20,8 @@ struct Triad
     Pitch I;
     Pitch III;
     Pitch V;
+
+    const Pitch & degree(int i) const;
 };
 
 } // midiate

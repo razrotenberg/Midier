@@ -1,5 +1,7 @@
 #include "triad.h"
 
+#include <assert.h>
+
 namespace midiate
 {
 
@@ -39,5 +41,14 @@ Triad::Triad(Pitch root, Quality quality) :
     III(root + DESCRIPTION(quality).III),
     V  (root + DESCRIPTION(quality).V)
 {}
+
+const Pitch & Triad::degree(int i) const
+{
+    if      (i == 1) { return I;    }
+    else if (i == 3) { return III;  }
+    else if (i == 5) { return V;    }
+
+    assert(false);
+}
 
 } // midiate
