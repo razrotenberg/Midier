@@ -1,6 +1,7 @@
 #pragma once
 
 #include "scale.h"
+#include "layer.h"
 
 namespace midiate
 {
@@ -14,19 +15,17 @@ struct Looper
         Octave      octave;
         Mode        mode;
         int         bpm;
+        Style       style;
+        Rhythm      rhythm;
     };
 
     Looper(const Config & config);
 
     void config(const Config & config); // set the configuration
 
-    void play(int degree, int tag); // start playing a certain degree of the scale
-    void stop(int tag); // stop playing every note labeled as 'tag'
+    void play(int degree, char tag); // start playing a certain degree of the scale
+    void stop(char tag); // stop playing every note labeled as 'tag'
     void run();
-
-private:
-    Config _config;
-    Scale  _scale;
 
     // bars are in 1/4 time signature
     // we support the following note values:
@@ -37,18 +36,13 @@ private:
     // as it gives us the needed rhythmic precision
     // we use 96 in order to shorten the delay after every subdivision played
     //
-    constexpr static int Subdivisions = 96;
+    constexpr static auto Subdivisions = 96;
 
-    struct Description
-    {
-        Pitch  pitch;
-        int    subdivision = -1; // unused
-        int    tag         = -1; // untagged
-    };
-
-    Description _descriptions[4 /* layers */ * 4 /* bars */ * 3 /* notes */];
-
-    int _pos;
+private:
+    Config _config;
+    Scale _scale;
+    Layer _layers[16];
+    char _subdivision = 0; // we can use 'char' as long as Looper::Subdivisions is less than 127
 };
 
 } // midiate

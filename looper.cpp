@@ -32,40 +32,37 @@ void Looper::config(const Config & config)
     _config = config;
 }
 
-void Looper::play(int degree, int tag)
+void Looper::play(int degree, char tag)
 {
-    const auto & triad = _scale.degree(degree);
-
-    Pitch pitches[] = { triad.I, triad.III, triad.V };
-
-    for (int i = 0; i < sizeof(pitches) / sizeof(Pitch); ++i)
+    for (auto & layer : _layers)
     {
-        for (auto & description : _descriptions)
+        if (layer.tag != -1)
         {
-            if (description.tag != -1)
-            {
-                continue; // this description is used
-            }
-
-            description.pitch = pitches[i];
-            description.subdivision = (_pos + 1 + (Looper::Subdivisions / 3 * i)) % Looper::Subdivisions; // currently we support only 1/8 note triplets
-            description.tag = tag;
-            break;
+            continue; // this layer is used
         }
+
+        layer = Layer(
+            _scale.degree(degree),
+            _config.style,
+            _config.rhythm,
+            _subdivision + 1,
+            tag
+        );
+
+        break;
     }
 }
 
-void Looper::stop(int tag)
+void Looper::stop(char tag)
 {
-    for (auto & description : _descriptions)
+    for (auto & layer : _layers)
     {
-        if (description.tag != tag)
+        if (layer.tag != tag)
         {
             continue;
         }
 
-        description.subdivision = -1;
-        description.tag = -1;
+        layer.tag = -1; // mark as unused
     }
 }
 
@@ -73,24 +70,19 @@ void Looper::run()
 {
     while (true)
     {
-        if (_pos == Looper::Subdivisions)
+        for (auto & layer : _layers)
         {
-            _pos = 0;
-        }
-
-        for (const auto & description : _descriptions)
-        {
-            if (description.subdivision != _pos)
+            if (layer.tag == -1)
             {
-                continue;
+                continue; // unused layer
             }
 
-            midi::play(description.pitch);
+            layer.play(_subdivision);
         }
         
         delay(60.f / static_cast<float>(_config.bpm) * 1000.f / static_cast<float>(Looper::Subdivisions));
 
-        ++_pos;
+        _subdivision = (_subdivision + 1) % Looper::Subdivisions;
     }
 }
 
