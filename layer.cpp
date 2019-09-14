@@ -68,55 +68,29 @@ static_assert(sizeof(__rhythms) / sizeof(__rhythms[0]) == 7, "Expected 7 rhythms
 Layer::Layer(const Triad & triad, Style style, Rhythm rhythm, char start, char tag) :
     tag(tag)
 {
-    int i;
-    
     char const * const degrees = __styles[static_cast<int>(style)];
 
-    for (i = 0; degrees[i] != -1; ++i)
+    for (auto i = 0; degrees[i] != -1; ++i)
     {
         _pitches[i] = triad.degree(degrees[i]);
     }
 
-    for (; i < Layer::Pitches; ++i)
-    {
-        _pitches[i] = -1; // mark as unused
-    }
-
     float const * const portions = __rhythms[static_cast<int>(rhythm)];
 
-    for (i = 0; portions[i] != -1; ++i)
+    for (auto i = 0; portions[i] != -1; ++i)
     {
-        _subdivisions[i] = (start + static_cast<int>(portions[i] * Looper::Subdivisions)) % Looper::Subdivisions;
-    }
-
-    for (; i < Layer::Subdivisions; ++i)
-    {
-        _subdivisions[i] = -1; // mark as unused
+        _subdivisions[i] = (static_cast<int>(start) + static_cast<int>(portions[i] * Looper::Subdivisions)) % Looper::Subdivisions;
     }
 }
 
 void Layer::play(char now)
 {
-    for (auto subdivision : _subdivisions)
+    if (*_subdivisions == now)
     {
-        if (subdivision == -1)
-        {
-            break; // iterated through all subdivisions
-        }
+        midi::play(*_pitches);
 
-        if (subdivision == now)
-        {
-            midi::play(_pitches[_pitch]);
-
-            _pitch = (_pitch + 1) % Layer::Pitches;
-            
-            if (static_cast<int>(_pitches[_pitch]) == -1)
-            {
-                _pitch = 0;
-            }
-
-            break; // our job here is done
-        }
+        ++_subdivisions;
+        ++_pitches;
     }
 }
 

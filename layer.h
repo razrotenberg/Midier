@@ -1,5 +1,6 @@
 #pragma once
 
+#include "sequence.h"
 #include "triad.h"
 
 namespace midiate
@@ -45,9 +46,8 @@ struct Layer
     constexpr static auto Subdivisions = 4;
 
 private:
-    Pitch _pitches[Pitches];
-    char _subdivisions[Subdivisions]; // we can use 'char' as long as Looper::Subdivisions is less than 127
-    char _pitch = 0;
+    Sequence<Pitch, Pitches> _pitches;
+    Sequence<char, Subdivisions> _subdivisions;
 };
 
 } // midiate
