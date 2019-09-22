@@ -45,7 +45,7 @@ void Looper::play(int degree, char tag)
             _scale.degree(degree),
             _config.style,
             _config.rhythm,
-            _subdivision + 1,
+            _beat + 1,
             tag
         );
 
@@ -66,7 +66,7 @@ void Looper::stop(char tag)
     }
 }
 
-void Looper::run()
+void Looper::run(callback_t callback)
 {
     while (true)
     {
@@ -77,12 +77,17 @@ void Looper::run()
                 continue; // unused layer
             }
 
-            layer.play(_subdivision);
+            layer.play(_beat);
         }
         
-        delay(60.f / static_cast<float>(_config.bpm) * 1000.f / static_cast<float>(Looper::Subdivisions));
+        delay(60.f / static_cast<float>(_config.bpm) * 1000.f / static_cast<float>(Beat::Subdivisions));
 
-        _subdivision = (_subdivision + 1) % Looper::Subdivisions;
+        ++_beat;
+
+        if (_beat.subdivision == 0 && callback != nullptr)
+        {
+            callback(_beat.bar.index);
+        }
     }
 }
 

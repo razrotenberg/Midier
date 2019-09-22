@@ -42,7 +42,7 @@ static_assert(sizeof(__styles) / sizeof(__styles[0]) == 10, "Expected 10 styles 
 #define THIRD(i)    (i / 3.f)
 #define QUARTER(i)  (i / 4.f)
 
-const float __rhythms[][Layer::Subdivisions + 1] = // '+1' for the end indicator
+const float __rhythms[][Layer::Beats + 1] = // '+1' for the end indicator
     {
         SEQUENCE(QUARTER(0), QUARTER(1), QUARTER(2), QUARTER(3)),   // 1/16 1/16 1/16 1/16
         SEQUENCE(QUARTER(0), QUARTER(1), QUARTER(2)),               // 1/16 1/16 1/8
@@ -65,7 +65,7 @@ static_assert(sizeof(__rhythms) / sizeof(__rhythms[0]) == 7, "Expected 7 rhythms
 
 } //
 
-Layer::Layer(const Triad & triad, Style style, Rhythm rhythm, char start, char tag) :
+Layer::Layer(const Triad & triad, Style style, Rhythm rhythm, const Beat & start, char tag) :
     tag(tag)
 {
     char const * const degrees = __styles[static_cast<int>(style)];
@@ -79,19 +79,31 @@ Layer::Layer(const Triad & triad, Style style, Rhythm rhythm, char start, char t
 
     for (auto i = 0; portions[i] != -1; ++i)
     {
-        _subdivisions[i] = (static_cast<int>(start) + static_cast<int>(portions[i] * Looper::Subdivisions)) % Looper::Subdivisions;
+        _beats[i] = start + (portions[i] * Beat::Subdivisions);
     }
 }
 
-void Layer::play(char now)
+void Layer::play(const Beat & now)
 {
-    if (*_subdivisions == now)
-    {
-        midi::play(*_pitches);
+    const auto & next = *_beats;
 
-        ++_subdivisions;
-        ++_pitches;
+    if (next.subdivision != now.subdivision)
+    {
+        return;
     }
+
+    if (now.bar.index != -1)
+    {
+        if (next.bar.mask & (1 << now.bar.index) == 0)
+        {
+            return; // the next beat should not be played in this bar
+        }
+    }
+
+    midi::play(*_pitches);
+
+    ++_beats;
+    ++_pitches;
 }
 
 } // midiate

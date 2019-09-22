@@ -2,6 +2,7 @@
 
 #include "interval.h"
 #include "note.h"
+#include "sequence.h"
 
 namespace midiate
 {
@@ -23,5 +24,19 @@ private:
 Pitch operator+(Pitch pitch, Interval inteval);
 bool operator==(Pitch lhs, Pitch rhs);
 bool operator!=(Pitch lhs, Pitch rhs);
+
+template<>
+struct Traits<Pitch>
+{
+    static void end(Pitch & pitch)
+    {
+        pitch = -1;
+    }
+
+    static bool ended(const Pitch & pitch)
+    {
+        return static_cast<int>(pitch) == -1;
+    }
+};
 
 } // midiate
