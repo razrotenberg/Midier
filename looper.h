@@ -23,8 +23,8 @@ struct Looper
 
     void config(const Config & config); // set the configuration
 
-    void play(int degree, char tag); // start playing a certain degree of the scale
-    void stop(char tag); // stop playing every note labeled as 'tag'
+    char start(int degree);
+    void stop(char tag);
 
     using callback_t = void(*)(int); // (-1) means we are not in a loop
 

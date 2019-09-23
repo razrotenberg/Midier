@@ -32,24 +32,24 @@ void Looper::config(const Config & config)
     _config = config;
 }
 
-void Looper::play(int degree, char tag)
+char Looper::start(int degree)
 {
-    for (auto & layer : _layers)
+    for (char i = 0; i < sizeof(_layers) / sizeof(Layer); ++i)
     {
-        if (layer.tag != -1)
+        if (_layers[i].tag != -1)
         {
             continue; // this layer is used
         }
 
-        layer = Layer(
+        _layers[i] = Layer(
             _scale.degree(degree),
             _config.style,
             _config.rhythm,
             _beat + 1,
-            tag
+            i
         );
 
-        break;
+        return i;
     }
 }
 
