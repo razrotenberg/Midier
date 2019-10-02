@@ -1,6 +1,7 @@
 #pragma once
 
 #include "beat.h"
+#include "moment.h"
 #include "sequence.h"
 #include "triad.h"
 
@@ -37,18 +38,18 @@ enum class Rhythm : char
 struct Layer
 {
     Layer() = default;
-    Layer(const Triad & triad, Style style, Rhythm rhythm, const Beat & start, char tag);
+    Layer(const Triad & triad, Style style, Rhythm rhythm, char start, char tag);
 
     void play(const Beat & now); // (maybe) play the next pitch
 
     char tag = -1;
 
     constexpr static auto Pitches = 5;
-    constexpr static auto Beats   = 4;
+    constexpr static auto Moments = 4;
 
 private:
-    Sequence<Pitch, Pitches> _pitches;
-    Sequence<Beat,  Beats>   _beats;
+    Sequence<Pitch,  Layer::Pitches> _pitches;
+    Sequence<Moment, Layer::Moments> _moments;
 };
 
 } // midiate

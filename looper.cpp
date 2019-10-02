@@ -45,7 +45,7 @@ char Looper::start(int degree)
             _scale.degree(degree),
             _config.style,
             _config.rhythm,
-            _beat + 1,
+            _beat.subdivision + 1, // it's ok to overlflow as we correct this in Layer::Layer()
             i
         );
 
@@ -86,7 +86,7 @@ void Looper::run(callback_t callback)
 
         if (_beat.subdivision == 0 && callback != nullptr)
         {
-            callback(_beat.bar.index);
+            callback(_beat.bar);
         }
     }
 }
