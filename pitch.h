@@ -2,7 +2,7 @@
 
 #include "interval.h"
 #include "note.h"
-#include "sequence.h"
+#include "marker.h"
 
 namespace midiate
 {
@@ -26,7 +26,7 @@ bool operator==(Pitch lhs, Pitch rhs);
 bool operator!=(Pitch lhs, Pitch rhs);
 
 template<>
-struct Traits<Pitch>
+struct Marker<Pitch>
 {
     static void end(Pitch & pitch)
     {

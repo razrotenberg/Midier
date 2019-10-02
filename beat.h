@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sequence.h"
+#include "marker.h"
 
 namespace midiate
 {
@@ -36,7 +36,7 @@ struct Beat
 Beat operator+(const Beat & beat, int subdivisions);
 
 template<>
-struct Traits<Beat>
+struct Marker<Beat>
 {
     static void end(Beat & beat)
     {

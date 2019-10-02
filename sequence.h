@@ -1,14 +1,9 @@
 #pragma once
 
+#include "marker.h"
+
 namespace midiate
 {
-
-template <typename T>
-struct Traits // a per-type implementation of marking an element as an end indicator
-{
-    static void end(T&);
-    static bool ended(const T&);
-};
 
 template <typename T, char S>
 struct Sequence
@@ -17,7 +12,7 @@ struct Sequence
     {
         for (auto & element : _elements)
         {
-            Traits<T>::end(element);
+            Marker<T>::end(element);
         }
     }
 
@@ -35,7 +30,7 @@ struct Sequence
     {
         _pos = (_pos + 1) % S;
 
-        if (Traits<T>::ended(this->operator*()))
+        if (Marker<T>::ended(this->operator*()))
         {
             _pos = 0;
         }
