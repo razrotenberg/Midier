@@ -51,6 +51,7 @@ const float __rhythms[][Layer::Moments + 1] = // '+1' for the end indicator
         SEQUENCE(            QUARTER(1), QUARTER(2), QUARTER(3)),   //      1/16 1/16 1/16
         SEQUENCE(THIRD(0),      THIRD(1),      THIRD(2)),           // 1/8th note triplet
         SEQUENCE(THIRD(0),                     THIRD(2)),           // 1/8th note swung triplet
+        SEQUENCE(THIRD(0), THIRD(3),           THIRD(5)),           // 2-bar 1/8th note swing
     };
 
 ASSERT(Rhythm::A,   0);
@@ -60,8 +61,9 @@ ASSERT(Rhythm::D,   3);
 ASSERT(Rhythm::E,   4);
 ASSERT(Rhythm::F,   5);
 ASSERT(Rhythm::G,   6);
+ASSERT(Rhythm::H,   7);
 
-static_assert(sizeof(__rhythms) / sizeof(__rhythms[0]) == 7, "Expected 7 rhythms to be declared");
+static_assert(sizeof(__rhythms) / sizeof(__rhythms[0]) == 8, "Expected 8 rhythms to be declared");
 
 } //
 

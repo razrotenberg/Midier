@@ -33,6 +33,7 @@ enum class Rhythm : char
     E,  //      1/16 1/16 1/16          [   *  *  *  ]
     F,  // 1/8th note triplet           [*   *   *   ]
     G,  // 1/8th note swuang triplet    [*       *   ]
+    H,  // 2-bar 1/8th note swing       [*           *       *   ]
 };
 
 struct Layer
