@@ -42,13 +42,25 @@ struct Layer
     Layer(const Triad & triad, Style style, Rhythm rhythm, char start, char tag);
 
     void play(const Beat & now); // (maybe) play the next pitch
-
+    
+    void record();
+    void playback();
+    
     char tag = -1;
 
     constexpr static auto Pitches = 5;
     constexpr static auto Moments = 4;
 
 private:
+    enum class State : char
+    {
+        Wander,
+        Record,
+        Playback,
+    };
+
+    State _state = State::Wander;
+
     Sequence<Pitch,  Layer::Pitches> _pitches;
     Sequence<Moment, Layer::Moments> _moments;
 };

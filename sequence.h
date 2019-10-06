@@ -10,10 +10,7 @@ struct Sequence
 {
     Sequence()
     {
-        for (auto & element : _elements)
-        {
-            Marker<T>::end(element);
-        }
+        revoke();
     }
 
     T & operator[] (int i)
@@ -29,6 +26,26 @@ struct Sequence
     void operator++()
     {
         _pos = (_pos + 1) % S;
+
+        if (Marker<T>::ended(this->operator*()))
+        {
+            _pos = 0;
+        }
+    }
+
+    using cond_t = bool(*)(const T &);
+
+    void revoke(cond_t cond = nullptr)
+    {
+        for (auto & element : _elements)
+        {
+            if (cond != nullptr && cond(element) == false)
+            {
+                continue;
+            }
+
+            Marker<T>::end(element);
+        }
 
         if (Marker<T>::ended(this->operator*()))
         {

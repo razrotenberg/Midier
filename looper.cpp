@@ -36,21 +36,35 @@ char Looper::start(int degree)
 {
     for (char i = 0; i < sizeof(_layers) / sizeof(Layer); ++i)
     {
-        if (_layers[i].tag != -1)
+        auto & layer = _layers[i];
+
+        if (layer.tag != -1)
         {
             continue; // this layer is used
         }
 
-        _layers[i] = Layer(
+        // we use random numbers for the tags mainly to support revoking layers 
+        // (when starting to record). we want to make sure stopping a revoked
+        // layer has no effect, and avoid the reuse of tags of revoked layers
+        const auto tag = random(0, 128); // [0, 127]
+
+        layer = Layer(
             _scale.degree(degree),
             _config.style,
             _config.rhythm,
             _beat.subdivision + 1, // it's ok to overlflow as we correct this in Layer::Layer()
-            i
+            tag
         );
 
-        return i;
+        if (_state == State::Record || _state == State::Overlay)
+        {
+            layer.record();
+        }
+
+        return tag;
     }
+
+    return -1; // there's no place for a new layer
 }
 
 void Looper::stop(char tag)
@@ -62,14 +76,53 @@ void Looper::stop(char tag)
             continue;
         }
 
-        layer.tag = -1; // mark as unused
+        if (_state == State::Record)
+        {
+            layer.playback();
+        }
+        else
+        {
+            layer.tag = -1; // mark as unused and hence stop it from being played
+        }
     }
 }
 
 void Looper::run(callback_t callback)
 {
+    auto previous = _state;
+
     while (true)
     {
+        noInterrupts(); // '_state' may be set by record() which is called via interrupts
+        if (_state == State::Record)
+        {
+            if (previous == State::Wander) // just starting to record
+            {
+                _beat.subdivision = 0; // reset the beat
+                _beat.bar = 0; // start counting bars
+
+                for (auto & layer : _layers)
+                {
+                    // we revoke all (active) layers and mark them as unused because we have
+                    // just reset the beat, so any moment of any layer is actually invalid anymore
+                    layer.tag = -1;
+                }
+            }
+
+            if (_beat.subdivision == 0 && _bars < sizeof(Moment::bars) * 8) // maximum # of bars
+            {
+                ++_bars; // increase the # of recorded bars when entering a new bar (not when exiting one)
+            }
+        }
+
+        previous = _state;
+        interrupts();
+
+        if (_beat.subdivision == 0 && callback != nullptr)
+        {
+            callback(_beat.bar);
+        }
+
         for (auto & layer : _layers)
         {
             if (layer.tag == -1)
@@ -84,11 +137,31 @@ void Looper::run(callback_t callback)
 
         ++_beat;
 
-        if (_beat.subdivision == 0 && callback != nullptr)
+        if (_beat.bar == _bars) // relevant only for 'record' mode ('_beat.bar' will be (-1) in other cases)
         {
-            callback(_beat.bar);
+            _beat.bar = 0;
         }
     }
+}
+
+void Looper::record()
+{
+    _state = State::Record;
+}
+
+void Looper::playback()
+{
+    _state = State::Playback;
+}
+
+void Looper::overlay()
+{
+    _state = State::Overlay;
+}
+
+Looper::State Looper::state() const
+{
+    return _state;
 }
 
 } // midiate

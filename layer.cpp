@@ -96,16 +96,46 @@ void Layer::play(const Beat & now)
 
     if (now.bar != -1)
     {
-        if (next.bars & (1 << now.bar) == 0)
+        const auto bit = 1L << now.bar;
+
+        static_assert(sizeof(bit) == sizeof(next.bars), "Sizes must match");
+
+        if (_state == State::Record)
         {
-            return; // the next beat should not be played in this bar
+            next.bars |= bit;
         }
+        else if (_state == State::Playback)
+        {
+            if ((next.bars & bit) == 0)
+            {
+                return; // the next moment should not be played in this bar
+            }
+        }
+        
+        // nothing to do when wandering
     }
 
     midi::play(*_pitches);
 
     ++_moments;
     ++_pitches;
+}
+
+void Layer::record()
+{
+    _state = State::Record;
+}
+
+void Layer::playback()
+{
+    _state = State::Playback;
+    
+    _moments.revoke(
+        [](const Moment & moment)
+            {
+                return moment.bars == 0; // ignore unrecorded moments
+            }
+    );
 }
 
 } // midiate
