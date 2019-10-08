@@ -19,6 +19,11 @@ struct Sequence
         return this->operator[](_pos);
     }
 
+    T * operator->()
+    {
+        return &(this->operator*());
+    }
+
     void operator++()
     {
         _pos = (_pos + 1) % S;
