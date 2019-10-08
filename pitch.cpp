@@ -3,7 +3,7 @@
 namespace midiate
 {
 
-Pitch::Pitch() : Pitch(0)
+Pitch::Pitch() : Pitch(-1)
 {}
 
 Pitch::Pitch(Note note, Accidental accidental, Octave octave) :

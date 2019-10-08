@@ -1,21 +1,14 @@
 #pragma once
 
-#include "marker.h"
-
 namespace midiate
 {
+
+template <typename T>
+bool Valid(const T&);
 
 template <typename T, char S>
 struct Sequence
 {
-    Sequence()
-    {
-        for (auto & element : _elements)
-        {
-            Marker<T>::end(element);
-        }
-    }
-
     T & operator[] (int i)
     {
         return _elements[i];
@@ -30,7 +23,7 @@ struct Sequence
     {
         _pos = (_pos + 1) % S;
 
-        if (Marker<T>::ended(this->operator*()))
+        if (Valid<T>(this->operator*()) == false)
         {
             _pos = 0;
         }

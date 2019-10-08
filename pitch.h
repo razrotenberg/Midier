@@ -2,7 +2,7 @@
 
 #include "interval.h"
 #include "note.h"
-#include "marker.h"
+#include "sequence.h"
 
 namespace midiate
 {
@@ -11,7 +11,7 @@ typedef int Octave;
 
 struct Pitch // representing a MIDI note number
 {
-    Pitch(); // value is 0
+    Pitch(); // value is (-1)
     Pitch(Note note, Accidental accidental, Octave octave);
     Pitch(int pitch);
 
@@ -26,17 +26,9 @@ bool operator==(Pitch lhs, Pitch rhs);
 bool operator!=(Pitch lhs, Pitch rhs);
 
 template<>
-struct Marker<Pitch>
+inline bool Valid<Pitch>(const Pitch & pitch)
 {
-    static void end(Pitch & pitch)
-    {
-        pitch = -1;
-    }
-
-    static bool ended(const Pitch & pitch)
-    {
-        return static_cast<int>(pitch) == -1;
-    }
-};
+    return static_cast<int>(pitch) != -1;
+}
 
 } // midiate
