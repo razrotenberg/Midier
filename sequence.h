@@ -34,6 +34,11 @@ struct Sequence
         }
     }
 
+    void reset()
+    {
+        _pos = 0;
+    }
+
 private:
     T _elements[S];
     char _pos = 0; // we can use 'char' as long as 'S' is a char as well
