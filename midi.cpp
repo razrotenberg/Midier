@@ -23,10 +23,8 @@ void play(const Pitch & pitch)
 {
     constexpr auto channel = 0;
 
-    const auto note = static_cast<int>(pitch); // the actual midi note number
-
-    send(0x90, note, 0x7F, channel); // note on on max velocity
-    send(0x80, note, 0, channel); // note off
+    send(0x90, pitch.note, 0x7F, channel); // note on on max velocity
+    send(0x80, pitch.note, 0, channel); // note off
 }
 
 } // midi

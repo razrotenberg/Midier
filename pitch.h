@@ -13,22 +13,17 @@ struct Pitch // representing a MIDI note number
 {
     Pitch(); // value is (-1)
     Pitch(Note note, Accidental accidental, Octave octave);
-    Pitch(int pitch);
-
-    explicit operator int() const; // returns the respective MIDI note number
-
-private:
-    char _pitch; // we can use 'char' because the maximum value of a MIDI note number is 127
+    Pitch(char note);
+    
+    char note; // MIDI note number
 };
 
 Pitch operator+(Pitch pitch, Interval inteval);
-bool operator==(Pitch lhs, Pitch rhs);
-bool operator!=(Pitch lhs, Pitch rhs);
 
 template<>
 inline bool Valid<Pitch>(const Pitch & pitch)
 {
-    return static_cast<int>(pitch) != -1;
+    return pitch.note != -1;
 }
 
 } // midiate
