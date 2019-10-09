@@ -38,12 +38,22 @@ enum class Rhythm : char
 
 struct Layer
 {
+    enum class State : char
+    {
+        Wander,
+        Record,
+        Playback,
+    };
+
     Layer() = default;
-    Layer(const Triad & triad, Style style, Rhythm rhythm, char start, char tag);
+    Layer(const Triad & triad, Style style, Rhythm rhythm, const Beat & now, char tag);
 
     void play(const Beat & now); // (maybe) play the next pitch
+    void reset(); // reset both '_pitches' and '_moments'
 
     char tag = -1;
+    Beat start; // the starting beat in a loop (irrelevant for wander mode)
+    State state;
 
     constexpr static auto Pitches = 5;
     constexpr static auto Moments = 4;

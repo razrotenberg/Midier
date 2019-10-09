@@ -22,4 +22,6 @@ struct Beat
     constexpr static auto Subdivisions = 96;
 };
 
+bool operator==(const Beat & lhs, const Beat & rhs);
+
 } // midiate

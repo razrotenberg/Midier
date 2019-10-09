@@ -15,4 +15,9 @@ Beat & Beat::operator++()
     return *this;
 }
 
+bool operator==(const Beat & lhs, const Beat & rhs)
+{
+    return lhs.bar == rhs.bar && lhs.subdivision == rhs.subdivision;
+}
+
 } // midiate

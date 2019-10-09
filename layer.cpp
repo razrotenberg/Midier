@@ -67,8 +67,10 @@ static_assert(sizeof(__rhythms) / sizeof(__rhythms[0]) == 8, "Expected 8 rhythms
 
 } //
 
-Layer::Layer(const Triad & triad, Style style, Rhythm rhythm, char start, char tag) :
-    tag(tag)
+Layer::Layer(const Triad & triad, Style style, Rhythm rhythm, const Beat & now, char tag) :
+    tag(tag),
+    start(now),
+    state(State::Wander)
 {
     char const * const degrees = __styles[static_cast<int>(style)];
 
@@ -81,12 +83,24 @@ Layer::Layer(const Triad & triad, Style style, Rhythm rhythm, char start, char t
 
     for (auto i = 0; portions[i] != -1; ++i)
     {
-        _moments[i].subdivision = (start + static_cast<int>(portions[i] * Beat::Subdivisions)) % Beat::Subdivisions;
+        _moments[i].subdivision = (start.subdivision + static_cast<int>(portions[i] * Beat::Subdivisions)) % Beat::Subdivisions;
     }
 }
 
 void Layer::play(const Beat & now)
 {
+    if (state == State::Playback)
+    {
+        // we want to support recording any number of moments of a layer
+        // therefore, we must skip all unrecorded moments if in playback mode
+        // a moment would have its 'bars' mask be (0) if it was not recorded
+
+        while (_moments->bars == 0)
+        {
+            ++_moments;
+        }
+    }
+
     auto & next = *_moments;
 
     if (next.subdivision != now.subdivision)
@@ -96,16 +110,35 @@ void Layer::play(const Beat & now)
 
     if (now.bar != -1)
     {
-        if (next.bars & (1 << now.bar) == 0)
+        const auto mask = 1L << now.bar;
+
+        static_assert(sizeof(mask) == sizeof(next.bars), "Sizes must match");
+
+        if (state == State::Record)
         {
-            return; // the next beat should not be played in this bar
+            next.bars |= mask;
         }
+        else if (state == State::Playback)
+        {
+            if ((next.bars & mask) == 0)
+            {
+                return; // the next beat should not be played in this bar
+            }
+        }
+        
+        // nothing to do when wandering
     }
 
     midi::play(*_pitches);
 
     ++_moments;
     ++_pitches;
+}
+
+void Layer::reset()
+{
+    _moments.reset();
+    _pitches.reset();
 }
 
 } // midiate

@@ -19,14 +19,24 @@ struct Looper
         Rhythm      rhythm;
     };
 
+    enum class State : char
+    {
+        Wander,
+        Record,
+        Playback,
+    };
+
     Looper(const Config & config);
+
+    State state()            { return _state;  } // getter
+    void  state(State state) { _state = state; } // setter
 
     void config(const Config & config); // set the configuration
 
     char start(int degree);
     void stop(char tag);
 
-    using callback_t = void(*)(int); // (-1) means we are not in a loop
+    using callback_t = void(*)(int);
 
     // start the run loop and fire 'callback' for every beginning of a bar
     void run(callback_t callback = nullptr);
@@ -36,6 +46,8 @@ private:
     Scale _scale;
     Layer _layers[16];
     Beat _beat;
+    State _state;
+    char _bars; // # of recorded bars
 };
 
 } // midiate
