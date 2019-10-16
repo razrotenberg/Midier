@@ -60,7 +60,7 @@ char Looper::start(int degree)
             tag
         );
 
-        if (_state == State::Record)
+        if (_state == State::Record || _state == State::Overlay)
         {
             layer.state = Layer::State::Record;
         }
@@ -125,7 +125,7 @@ void Looper::run(callback_t callback)
                 ++_bars; // increase the # of recorded bars when (recording and) entering a new bar
             }
 
-            if (_state == State::Record || _state == State::Playback)
+            if (_state == State::Record || _state == State::Playback || _state == State::Overlay)
             {
                 if (_beat.bar == _bars) // just passed the # of recorded bars
                 {

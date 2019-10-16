@@ -24,6 +24,7 @@ struct Looper
         Wander,
         Record,
         Playback,
+        Overlay,
     };
 
     Looper(const Config & config);
