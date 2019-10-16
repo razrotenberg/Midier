@@ -89,18 +89,6 @@ Layer::Layer(const Triad & triad, Style style, Rhythm rhythm, const Beat & now, 
 
 void Layer::play(const Beat & now)
 {
-    if (state == State::Playback)
-    {
-        // we want to support recording any number of moments of a layer
-        // therefore, we must skip all unrecorded moments if in playback mode
-        // a moment would have its 'bars' mask be (0) if it was not recorded
-
-        while (_moments->bars == 0)
-        {
-            ++_moments;
-        }
-    }
-
     auto & next = *_moments;
 
     if (next.subdivision != now.subdivision)
