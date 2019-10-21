@@ -117,6 +117,16 @@ void Looper::run(callback_t callback)
                 layer.tag = -1;
             }
         }
+        else if (_state == State::Wander && previous != State::Wander)
+        {
+            _beat.bar = -1; // stop counting bars
+            _bars = 0; // reset the # of recorded bars
+
+            for (auto & layer : _layers) // revoke all layers
+            {
+                layer.tag = -1;
+            }
+        }
 
         if (_beat.subdivision == 0)
         {
