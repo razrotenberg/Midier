@@ -8,33 +8,11 @@ namespace midiate
 
 Looper::Looper(const Config & config) :
     _config(config),
-    _scale(
-        Pitch(config.note, config.accidental, config.octave),
-        config.mode
-    ),
     _layers(),
     _beat(),
     _state(State::Wander),
     _bars(0)
 {}
-
-void Looper::config(const Config & config)
-{
-    if (_config.note != config.note             ||
-        _config.accidental != config.accidental ||
-        _config.octave != config.octave         ||
-        _config.mode != config.mode)
-    {
-        // regenerate '_scale' only if needed
-
-        _scale = Scale(
-            Pitch(config.note, config.accidental, config.octave),
-            config.mode
-        );
-    }
-
-    _config = config;
-}
 
 char Looper::start(int degree)
 {
@@ -53,7 +31,7 @@ char Looper::start(int degree)
         const auto tag = random(0, 128); // [0, 127]
 
         layer = Layer(
-            _scale.degree(degree),
+            _config.scale.degree(degree),
             _config.style,
             _config.rhythm,
             _beat,

@@ -10,13 +10,10 @@ struct Looper
 {
     struct Config
     {
-        Note        note;
-        Accidental  accidental;
-        Octave      octave;
-        Mode        mode;
-        int         bpm;
-        Style       style;
-        Rhythm      rhythm;
+        Scale  scale;
+        int    bpm;
+        Style  style;
+        Rhythm rhythm;
     };
 
     enum class State : char
@@ -32,8 +29,6 @@ struct Looper
     State state()            { return _state;  } // getter
     void  state(State state) { _state = state; } // setter
 
-    void config(const Config & config); // set the configuration
-
     char start(int degree);
     void stop(char tag);
 
@@ -43,8 +38,7 @@ struct Looper
     void run(callback_t callback = nullptr);
     
 private:
-    Config _config;
-    Scale _scale;
+    const Config & _config;
     Layer _layers[16];
     Beat _beat;
     State _state;
