@@ -7,7 +7,7 @@ Beat & Beat::operator++()
 {
     subdivision = (subdivision + 1) % Beat::Subdivisions;
 
-    if (bar != -1 && subdivision == 0)
+    if (bar != -1 && subdivision == start)
     {
         ++bar;
     }
@@ -15,7 +15,7 @@ Beat & Beat::operator++()
     return *this;
 }
 
-bool operator==(const Beat & lhs, const Beat & rhs)
+bool operator==(const Time & lhs, const Time & rhs)
 {
     return lhs.bar == rhs.bar && lhs.subdivision == rhs.subdivision;
 }

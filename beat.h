@@ -3,12 +3,10 @@
 namespace midiate
 {
 
-struct Beat
+struct Time
 {
     char bar = -1; // the bar index within a loop
-    char subdivision = 0; // can be 'char' as long as Beat::Subdivisions is less than 127
-
-    Beat & operator++();
+    char subdivision = 0; // can be 'char' as long as Time::Subdivisions is less than 127
 
     // bars are in 1/4 time signature
     // we support the following note values:
@@ -22,6 +20,13 @@ struct Beat
     constexpr static auto Subdivisions = 96;
 };
 
-bool operator==(const Beat & lhs, const Beat & rhs);
+struct Beat : public Time
+{
+    char start = -1; // the subdivision in which we started to count bars
+
+    Beat & operator++();
+};
+
+bool operator==(const Time & lhs, const Time & rhs);
 
 } // midiate

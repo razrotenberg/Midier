@@ -67,7 +67,7 @@ static_assert(sizeof(__rhythms) / sizeof(__rhythms[0]) == 8, "Expected 8 rhythms
 
 } //
 
-Layer::Layer(const Triad & triad, Style style, Rhythm rhythm, const Beat & now, char tag) :
+Layer::Layer(const Triad & triad, Style style, Rhythm rhythm, const Time & now, char tag) :
     tag(tag),
     start(now),
     state(State::Wander)
@@ -87,7 +87,7 @@ Layer::Layer(const Triad & triad, Style style, Rhythm rhythm, const Beat & now, 
     }
 }
 
-void Layer::play(const Beat & now)
+void Layer::play(const Time & now)
 {
     auto & next = *_moments;
 

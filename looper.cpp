@@ -86,18 +86,21 @@ void Looper::run(callback_t callback)
         if (_state == State::Record && previous == State::Wander) // just starting to record
         {
             _beat.bar = 0; // start counting bars
-            _beat.subdivision = 0; // reset the beat
+            _beat.start = _beat.subdivision;
 
-            for (auto & layer : _layers) // revoke all layers
+            for (auto & layer : _layers) // start recording all layers
             {
-                // we revoke all layers because we have just reset the beat
-                // and any moment of any layer is in fact invalid anymore
-                layer.tag = -1;
+                if (layer.tag == -1)
+                {
+                    continue; // this layer is not used
+                }
+
+                layer.state = Layer::State::Record;
             }
         }
         else if (_state == State::Wander && previous != State::Wander)
         {
-            _beat.bar = -1; // stop counting bars
+            _beat.bar = _beat.start = -1; // stop counting bars
             _bars = 0; // reset the # of recorded bars
 
             for (auto & layer : _layers) // revoke all layers
@@ -106,7 +109,7 @@ void Looper::run(callback_t callback)
             }
         }
 
-        if (_beat.subdivision == 0)
+        if (_beat.subdivision == _beat.start)
         {
             if (_state == State::Record && _bars < sizeof(Moment::bars) * 8) // maximum # of bars
             {
