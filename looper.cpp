@@ -25,17 +25,12 @@ char Looper::start(int degree)
             continue; // this layer is used
         }
 
-        // we use random tags to support revoking layers when starting to record
-        // we want to make sure stopping a revoked layer has no side effects such
-        // as reusing tags of revoked layers
-        const auto tag = random(0, 128); // [0, 127]
-
         layer = Layer(
             _config.scale.degree(degree),
             _config.style,
             _config.rhythm,
             _beat,
-            tag
+            i // tag
         );
 
         if (_state == State::Record || _state == State::Overlay)
@@ -43,7 +38,7 @@ char Looper::start(int degree)
             layer.state = Layer::State::Record;
         }
 
-        return tag;
+        return i;
     }
 
     return -1; // there's no place for a new layer
@@ -71,6 +66,52 @@ void Looper::stop(char tag)
         // this could happen when the button is kept being pressed even after the entire
         // recorded loop (32 bars) is over
     }
+}
+
+void Looper::undo()
+{
+    if (_state == State::Wander)
+    {
+        return; // nothing to do when wandering
+    }
+
+    // we want to stop the last recorded (or being recorded) layer
+    // we cannot tell for sure which layer was the last one to be recorded,
+    // so we assume it is the layer with the highest tag (and the highest index)
+
+    for (char i = sizeof(_layers) / sizeof(Layer); i > 0; --i)
+    {
+        auto & layer = _layers[i - 1];
+
+        if (layer.tag == -1)
+        {
+            continue;
+        }
+
+        if (layer.state == Layer::State::Record || layer.state == Layer::State::Playback)
+        {
+            layer.tag = -1;
+            break;
+        }
+    }
+
+    // now check if there is no more recorded layers
+
+    for (const auto & layer : _layers)
+    {
+        if (layer.tag == -1)
+        {
+            continue;
+        }
+
+        if (layer.state == Layer::State::Record || layer.state == Layer::State::Playback)
+        {
+            return;
+        }
+    }
+
+    // seems like there are no such layers, go back to wander mode
+    _state = State::Wander;
 }
 
 void Looper::run(callback_t callback)
@@ -107,6 +148,8 @@ void Looper::run(callback_t callback)
             {
                 layer.tag = -1;
             }
+            
+            callback(-1); // clear the bar
         }
 
         if (_beat.subdivision == _beat.start)
@@ -123,10 +166,7 @@ void Looper::run(callback_t callback)
                     _beat.bar = 0;
                 }
             
-                if (callback != nullptr)
-                {
-                    callback(_beat.bar);
-                }
+                callback(_beat.bar);
             }
         }
 

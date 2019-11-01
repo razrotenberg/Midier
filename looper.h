@@ -31,11 +31,12 @@ struct Looper
 
     char start(int degree);
     void stop(char tag);
+    void undo(); // stop the last recorded layer
 
-    using callback_t = void(*)(int);
+    using callback_t = void(*)(int); // (-1) means to stop counting bars
 
     // start the run loop and fire 'callback' for every beginning of a bar
-    void run(callback_t callback = nullptr);
+    void run(callback_t callback);
     
 private:
     const Config & _config;
