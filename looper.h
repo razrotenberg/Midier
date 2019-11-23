@@ -31,9 +31,6 @@ struct Looper
 
     Looper(const Config & config);
 
-    State state()            { return _state;  } // getter
-    void  state(State state) { _state = state; } // setter
-
     char start(char degree); // return corresponding tag of (-1) if could not play
     void stop(char tag);
     void undo(); // stop the last recorded layer
@@ -43,11 +40,12 @@ struct Looper
     // start the run loop and fire 'callback' for every beginning of a bar
     void run(callback_t callback);
     
+    State state;
+
 private:
     const Config & _config;
     Layer _layers[16];
     Beat _beat;
-    State _state;
     char _bars; // # of recorded bars
 };
 

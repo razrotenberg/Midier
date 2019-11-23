@@ -9,10 +9,10 @@ namespace midiate
 {
 
 Looper::Looper(const Config & config) :
+    state(State::Wander),
     _config(config),
     _layers(),
     _beat(),
-    _state(State::Wander),
     _bars(0)
 {}
 
@@ -35,7 +35,7 @@ char Looper::start(char degree)
             i // tag
         );
 
-        if (_state == State::Record || _state == State::Overlay)
+        if (state == State::Record || state == State::Overlay)
         {
             layer.state = Layer::State::Record;
         }
@@ -72,7 +72,7 @@ void Looper::stop(char tag)
 
 void Looper::undo()
 {
-    if (_state == State::Wander)
+    if (state == State::Wander)
     {
         return; // nothing to do when wandering
     }
@@ -113,20 +113,20 @@ void Looper::undo()
     }
 
     // seems like there are no such layers, go back to wander mode
-    _state = State::Wander;
+    state = State::Wander;
 }
 
 void Looper::run(callback_t callback)
 {
-    auto previous = _state;
+    auto previous = state;
 
     while (true)
     {
         // we disable interrupts because we don't want any user actions to interfere the main logic
-        // both '_state' and the '_layers' may be modified, and '_beat' may be accessed via interrupts
+        // both 'state' and the '_layers' may be modified, and '_beat' may be accessed via interrupts
         noInterrupts();
 
-        if (_state == State::Record && previous == State::Wander) // just starting to record
+        if (state == State::Record && previous == State::Wander) // just starting to record
         {
             _beat.bar = 0; // start counting bars
             _beat.start = _beat.subdivision;
@@ -141,7 +141,7 @@ void Looper::run(callback_t callback)
                 layer.state = Layer::State::Record;
             }
         }
-        else if (_state == State::Wander && previous != State::Wander)
+        else if (state == State::Wander && previous != State::Wander)
         {
             _beat.bar = _beat.start = -1; // stop counting bars
             _bars = 0; // reset the # of recorded bars
@@ -156,12 +156,12 @@ void Looper::run(callback_t callback)
 
         if (_beat.subdivision == _beat.start)
         {
-            if (_state == State::Record && _bars < sizeof(Moment::bars) * 8) // maximum # of bars
+            if (state == State::Record && _bars < sizeof(Moment::bars) * 8) // maximum # of bars
             {
                 ++_bars; // increase the # of recorded bars when (recording and) entering a new bar
             }
 
-            if (_state == State::Record || _state == State::Playback || _state == State::Overlay)
+            if (state == State::Record || state == State::Playback || state == State::Overlay)
             {
                 if (_beat.bar == _bars) // just passed the # of recorded bars
                 {
@@ -220,7 +220,7 @@ void Looper::run(callback_t callback)
             }
         }
 
-        previous = _state;
+        previous = state;
         
         // enable interrupts as we are done with the main logic and no need for locks anymore
         interrupts();
