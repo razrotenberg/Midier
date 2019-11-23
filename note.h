@@ -1,5 +1,7 @@
 #pragma once
 
+#include "interval.h"
+
 namespace midiate
 {
 
@@ -15,6 +17,8 @@ enum class Note : char
     G = 7,
     A = 9,
     B = 11,
+
+    // we might represent other values, in run-time, as notes as well, e.g. 'C = 12', 'G# = 20'
 };
 
 enum class Accidental : char
@@ -26,5 +30,16 @@ enum class Accidental : char
     Natural =  0,
     Sharp   = +1,
 };
+
+#define OPERATOR_ADD(type)                                                          \
+    inline Note operator+(Note note, type rhs)                                      \
+    {                                                                               \
+        return static_cast<Note>(static_cast<char>(note) + static_cast<char>(rhs)); \
+    }
+
+OPERATOR_ADD(Interval)
+OPERATOR_ADD(Accidental)
+
+#undef OPERATOR_ADD
 
 } // midiate

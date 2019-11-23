@@ -1,7 +1,5 @@
 #include "looper.h"
 #include "midi.h"
-#include "scale.h"
-#include "triad.h"
 
 #include <Arduino.h>
 
@@ -180,20 +178,15 @@ void Looper::run(callback_t callback)
             }
 
             Pitch pitch;
-            if (!layer.play(_beat, /* out */ pitch))
+            if (layer.play(_beat, /* out */ pitch))
             {
-                continue;
+                midi::play(
+                    _config.note + _config.accidental,
+                    _config.octave,
+                    _config.mode,
+                    pitch
+                );
             }
-
-            const auto quality = scale::quality(_config.mode, pitch.chord());
-
-            char number = 24; // C0
-            number += 12 * (_config.octave - 1); // go to the right octave
-            number += static_cast<char>(_config.note) + static_cast<char>(_config.accidental); // go to the root of the scale
-            number += static_cast<char>(scale::interval(_config.mode, pitch.chord())); // go to the root of the chord
-            number += static_cast<char>(triad::interval(quality, pitch.note())); // go to the note in the chord
-
-            midi::play(number);
         }
 
         ++_beat;
