@@ -1,37 +1,16 @@
 #pragma once
 
-#include "triad.h"
+#include "interval.h"
+#include "mode.h"
+#include "quality.h"
 
 namespace midiate
 {
-
-enum class Mode : char
+namespace scale
 {
-    Ionian,
-    Dorian,
-    Phrygian,
-    Lydian,
-    Mixolydian,
-    Aeolian,
-    Locrian,
-};
 
-struct Scale
-{
-    Scale(Pitch root, Mode mode);
-    
-    // all supported scales are heptatonic
+Interval interval(Mode mode, char degree);
+Quality  quality (Mode mode, char degree);
 
-    Triad I;
-    Triad II;
-    Triad III;
-    Triad IV;
-    Triad V;
-    Triad VI;
-    Triad VII;
-    Triad VIII;
-
-    const Triad & degree(int i) const;
-};
-
+} // scale
 } // midiate

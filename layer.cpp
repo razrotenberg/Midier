@@ -67,16 +67,19 @@ static_assert(sizeof(__rhythms) / sizeof(__rhythms[0]) == 8, "Expected 8 rhythms
 
 } //
 
-Layer::Layer(const Triad & triad, Style style, Rhythm rhythm, const Time & now, char tag) :
+Layer::Layer(char degree, Style style, Rhythm rhythm, const Time & now, char tag) :
     tag(tag),
     start(now),
     state(State::Wander)
 {
-    char const * const degrees = __styles[static_cast<int>(style)];
+    char const * const degrees = __styles[static_cast<int>(style)]; // note degrees
 
     for (auto i = 0; degrees[i] != -1; ++i)
     {
-        _pitches[i] = triad.degree(degrees[i]);
+        const auto chord = degree;
+        const auto note  = degrees[i];
+
+        _pitches[i] = Pitch(chord, note);
     }
 
     float const * const portions = __rhythms[static_cast<int>(rhythm)];
@@ -87,13 +90,13 @@ Layer::Layer(const Triad & triad, Style style, Rhythm rhythm, const Time & now, 
     }
 }
 
-void Layer::play(const Time & now)
+bool Layer::play(const Time & now, /* out */ Pitch & pitch)
 {
     auto & next = *_moments;
 
     if (next.subdivision != now.subdivision)
     {
-        return;
+        return false;
     }
 
     if (now.bar != -1)
@@ -110,17 +113,19 @@ void Layer::play(const Time & now)
         {
             if ((next.bars & mask) == 0)
             {
-                return; // the next beat should not be played in this bar
+                return false; // the next beat should not be played in this bar
             }
         }
         
         // nothing to do when wandering
     }
 
-    midi::play(*_pitches);
+    /* out */ pitch = *_pitches;
 
     ++_moments;
     ++_pitches;
+
+    return true;
 }
 
 void Layer::reset()

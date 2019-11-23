@@ -1,7 +1,9 @@
 #pragma once
 
-#include "scale.h"
 #include "layer.h"
+#include "mode.h"
+#include "note.h"
+#include "octave.h"
 
 namespace midiate
 {
@@ -10,10 +12,13 @@ struct Looper
 {
     struct Config
     {
-        Scale  scale;
-        int    bpm;
-        Style  style;
-        Rhythm rhythm;
+        Note       note;
+        Accidental accidental;
+        Octave     octave;
+        Mode       mode;
+        int        bpm;
+        Style      style;
+        Rhythm     rhythm;
     };
 
     enum class State : char
@@ -29,7 +34,7 @@ struct Looper
     State state()            { return _state;  } // getter
     void  state(State state) { _state = state; } // setter
 
-    char start(int degree);
+    char start(char degree); // return corresponding tag of (-1) if could not play
     void stop(char tag);
     void undo(); // stop the last recorded layer
 

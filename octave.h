@@ -2,10 +2,7 @@
 
 namespace midiate
 {
-namespace midi
-{
 
-void play(char note);
+typedef int Octave;
 
-} // midi
 } // midiate

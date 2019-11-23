@@ -1,29 +1,28 @@
 #pragma once
 
-#include "interval.h"
-#include "note.h"
 #include "sequence.h"
 
 namespace midiate
 {
 
-typedef int Octave;
-
-struct Pitch // representing a MIDI note number
+struct Pitch
 {
-    Pitch(); // value is (-1)
-    Pitch(Note note, Accidental accidental, Octave octave);
-    Pitch(char note);
+    Pitch() = default;
+    Pitch(char chord, char note); // the chord degree in the scale and the note degree in the triad
     
-    char note; // MIDI note number
-};
+    char chord() const; // the chord degree in the scale
+    char note()  const; // the note degree in the triad
 
-Pitch operator+(Pitch pitch, Interval inteval);
+private:
+    char _data = -1; // 4 msbs are the chord degree while the 4 lsbs are the note degree
+
+    friend bool Valid<Pitch>(const Pitch &);
+};
 
 template<>
 inline bool Valid<Pitch>(const Pitch & pitch)
 {
-    return pitch.note != -1;
+    return pitch._data != -1;
 }
 
 } // midiate

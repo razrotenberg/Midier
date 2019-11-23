@@ -1,27 +1,14 @@
 #pragma once
 
-#include "pitch.h"
+#include "interval.h"
+#include "quality.h"
 
 namespace midiate
 {
-
-enum class Quality : char
+namespace triad
 {
-    Major,
-    Minor,
-    Diminished,
-    Augmented,
-};
 
-struct Triad
-{
-    Triad(Pitch root, Quality quality);
+Interval interval(Quality quality, char degree);
 
-    Pitch I;
-    Pitch III;
-    Pitch V;
-
-    const Pitch & degree(int i) const;
-};
-
+} // triad
 } // midiate

@@ -19,12 +19,12 @@ void send(byte command, byte data1, byte data2, byte channel)
 
 } //
 
-void play(const Pitch & pitch)
+void play(char note)
 {
     constexpr auto channel = 0;
 
-    send(0x90, pitch.note, 0x7F, channel); // note on on max velocity
-    send(0x80, pitch.note, 0, channel); // note off
+    send(0x90, note, 0x7F, channel); // note on on max velocity
+    send(0x80, note, 0, channel); // note off
 }
 
 } // midi

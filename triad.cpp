@@ -1,19 +1,12 @@
 #include "triad.h"
 
-#include <assert.h>
-
 namespace midiate
+{
+namespace triad
 {
 
 namespace
 {
-
-struct Description
-{
-    Interval I;
-    Interval III;
-    Interval V;
-};
 
 #define ASSERT(quality, expected) static_assert(static_cast<int>(quality) == (expected), "Expected midiate::" #quality " to be equal to " #expected);
 
@@ -22,33 +15,22 @@ ASSERT(Quality::Minor,      1);
 ASSERT(Quality::Diminished, 2);
 ASSERT(Quality::Augmented,  3);
 
-static const Description __descriptions[] =
+static const Interval __intervals[][3] =
     {
-        /* Major      */ { Interval::P1, Interval::M3, Interval::P5 },
-        /* Minor      */ { Interval::P1, Interval::m3, Interval::P5 },
-        /* Diminished */ { Interval::P1, Interval::m3, Interval::d5 },
-        /* Augmented  */ { Interval::P1, Interval::M3, Interval::A5 },
+        { Interval::P1, Interval::M3, Interval::P5 }, // Major
+        { Interval::P1, Interval::m3, Interval::P5 }, // Minor
+        { Interval::P1, Interval::m3, Interval::d5 }, // Diminished
+        { Interval::P1, Interval::M3, Interval::A5 }, // Augmented
     };
 
-static_assert(sizeof(__descriptions) / sizeof(Description) == 4, "Expected 4 qualities to be declared");
+static_assert(sizeof(__intervals) / sizeof(__intervals[0]) == 4, "Expected 4 qualities to be declared");
 
 } //
 
-#define DESCRIPTION(quality) (__descriptions[static_cast<int>(quality)])
-
-Triad::Triad(Pitch root, Quality quality) :
-    I  (root + DESCRIPTION(quality).I),
-    III(root + DESCRIPTION(quality).III),
-    V  (root + DESCRIPTION(quality).V)
-{}
-
-const Pitch & Triad::degree(int i) const
+Interval interval(Quality quality, char degree)
 {
-    if      (i == 1) { return I;    }
-    else if (i == 3) { return III;  }
-    else if (i == 5) { return V;    }
-
-    assert(false);
+    return __intervals[static_cast<int>(quality)][degree >> 1]; // transforming 'degree' from {1,3,5} to {0,1,2}, respectively
 }
 
+} // triad
 } // midiate

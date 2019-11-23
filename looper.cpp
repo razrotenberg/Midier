@@ -1,5 +1,7 @@
 #include "looper.h"
 #include "midi.h"
+#include "scale.h"
+#include "triad.h"
 
 #include <Arduino.h>
 
@@ -14,7 +16,7 @@ Looper::Looper(const Config & config) :
     _bars(0)
 {}
 
-char Looper::start(int degree)
+char Looper::start(char degree)
 {
     for (char i = 0; i < sizeof(_layers) / sizeof(Layer); ++i)
     {
@@ -26,7 +28,7 @@ char Looper::start(int degree)
         }
 
         layer = Layer(
-            _config.scale.degree(degree),
+            degree,
             _config.style,
             _config.rhythm,
             _beat,
@@ -177,7 +179,21 @@ void Looper::run(callback_t callback)
                 continue; // unused layer
             }
 
-            layer.play(_beat);
+            Pitch pitch;
+            if (!layer.play(_beat, /* out */ pitch))
+            {
+                continue;
+            }
+
+            const auto quality = scale::quality(_config.mode, pitch.chord());
+
+            char number = 24; // C0
+            number += 12 * (_config.octave - 1); // go to the right octave
+            number += static_cast<char>(_config.note) + static_cast<char>(_config.accidental); // go to the root of the scale
+            number += static_cast<char>(scale::interval(_config.mode, pitch.chord())); // go to the root of the chord
+            number += static_cast<char>(triad::interval(quality, pitch.note())); // go to the note in the chord
+
+            midi::play(number);
         }
 
         ++_beat;
