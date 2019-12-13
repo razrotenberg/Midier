@@ -202,17 +202,25 @@ void Looper::run(callback_t callback)
 
         ++_beat;
 
-        // mark the record end for all the layers that have completed a full loop
-        // i.e. timeline: [start record ... play ... end record]
-        //
         for (auto & layer : _layers)
         {
-            if (layer.tag == -1) { continue; }
+            if (layer.tag == -1)
+            {
+                continue; // unused layer
+            }
 
+            // mark the record end for all the layers that have completed a full loop
+            // i.e. timeline: [start record ... play ... end record]
+            //
             if (layer.state == Layer::State::Record && _beat == layer.record.start)
             {
                 layer.record.end = _beat;
                 layer.state = Layer::State::Playback;
+            }
+
+            if ((_beat - layer.start).subdivisions == 0)
+            {
+                layer.counter = (layer.counter + 1) % Layer::Period; // the layer was played another bar
             }
         }
 

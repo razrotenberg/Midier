@@ -16,8 +16,12 @@ namespace
     [](int index) -> Degree                                             \
     {                                                                   \
         constexpr Degree __notes[] = { __VA_ARGS__ };                   \
+        constexpr int __count = sizeof(__notes) / sizeof(__notes[0]);   \
                                                                         \
-        return __notes[index % (sizeof(__notes) / sizeof(__notes[0]))]; \
+        static_assert(Layer::Period % __count == 0,                     \
+            "Invalid # of style notes");                                \
+                                                                        \
+        return __notes[index % __count];                                \
     }
 
 using style_t = Degree(*)(int);
@@ -60,18 +64,21 @@ inline unsigned integer(float x)
 }
 
 #define RHYTHM(...)                                                             \
-    [](const Time & start, const Time & now) -> int                             \
+    [](const Layer & layer, const Time & now) -> int                            \
     {                                                                           \
         constexpr float __portions[] = { __VA_ARGS__ };                         \
         constexpr int __count = sizeof(__portions) / sizeof(__portions[0]);     \
                                                                                 \
-        const auto difference = now - start;                                    \
+        static_assert(Layer::Period % __count == 0,                             \
+            "Invalid # of rhythm notes");                                       \
                                                                                 \
         unsigned length = 1; /* # of bars in the rhythm */                      \
         for (auto portion : __portions)                                         \
         {                                                                       \
-            length = max(length, (unsigned)portion + 1);                        \
+            length = max(length, integer(portion) + 1);                         \
         }                                                                       \
+                                                                                \
+        const auto difference = now - layer.start;                              \
                                                                                 \
         for (unsigned i = 0; i < __count; ++i)                                  \
         {                                                                       \
@@ -92,13 +99,13 @@ inline unsigned integer(float x)
                 continue;                                                       \
             }                                                                   \
                                                                                 \
-            return i + ((difference.bars / length) * __count);                  \
+            return i + ((layer.counter / length) * __count);                    \
         }                                                                       \
                                                                                 \
         return -1;                                                              \
     }
 
-using rhythm_t = int(*)(const Time &, const Time &);
+using rhythm_t = int(*)(const Layer &, const Time &);
 
 #define THIRD(i)    (i / 3.f)
 #define QUARTER(i)  (i / 4.f)
@@ -138,7 +145,7 @@ Layer::Layer(char tag, Degree chord, const Time & now) :
 
 bool Layer::play(const Time & now, Style style, Rhythm rhythm, /* out */ Pitch & pitch)
 {
-    const auto index = __rhythms[(int)rhythm](start, now);
+    const auto index = __rhythms[(int)rhythm](*this, now);
 
     if (index == -1)
     {
