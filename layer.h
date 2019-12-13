@@ -1,10 +1,8 @@
 #pragma once
 
-#include "beat.h"
-#include "moment.h"
+#include "time.h"
 #include "pitch.h"
 #include "rhythm.h"
-#include "sequence.h"
 #include "style.h"
 
 namespace midiate
@@ -20,21 +18,19 @@ struct Layer
     };
 
     Layer() = default;
-    Layer(char degree, Style style, Rhythm rhythm, const Time & now, char tag);
+    Layer(char tag, Degree chord, const Time & now);
 
-    bool play(const Time & now, /* out */ Pitch & pitch); // get the pitch that should be played right now, if there is any
-    void reset(); // reset both '_pitches' and '_moments'
+    bool play(const Time & now, Style style, Rhythm rhythm, /* out */ Pitch & pitch); // get the pitch that should be played right now, if there is any
+    
+    char   tag   = -1;
+    State  state = State::Wander;
+    Degree chord;
+    Time   start;
 
-    char tag = -1;
-    Time start; // the starting time in a loop (irrelevant for wander mode)
-    State state;
-
-    constexpr static auto Pitches = 5;
-    constexpr static auto Moments = 4;
-
-private:
-    Sequence<Pitch,  Layer::Pitches> _pitches;
-    Sequence<Moment, Layer::Moments> _moments;
+    struct {
+        Time start;
+        Time end;
+    } record;
 };
 
 } // midiate

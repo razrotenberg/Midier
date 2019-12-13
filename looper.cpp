@@ -25,16 +25,11 @@ char Looper::start(char degree)
             continue; // this layer is used
         }
 
-        layer = Layer(
-            degree,
-            _config.style,
-            _config.rhythm,
-            _beat,
-            i // tag
-        );
+        layer = Layer(i, degree, _beat);
 
         if (state == State::Record || state == State::Overlay)
         {
+            layer.record.start = _beat;
             layer.state = Layer::State::Record;
         }
 
@@ -59,6 +54,7 @@ void Looper::stop(char tag)
         }
         else if (layer.state == Layer::State::Record)
         {
+            layer.record.end = _beat;
             layer.state = Layer::State::Playback;
         }
 
@@ -79,7 +75,7 @@ void Looper::undo()
     // we cannot tell for sure which layer was the last one to be recorded,
     // so we assume it is the layer with the highest tag (and the highest index)
 
-    for (char i = sizeof(_layers) / sizeof(Layer); i > 0; --i)
+    for (unsigned i = sizeof(_layers) / sizeof(Layer); i > 0; --i)
     {
         auto & layer = _layers[i - 1];
 
@@ -126,8 +122,7 @@ void Looper::run(callback_t callback)
 
         if (state == State::Record && previous == State::Wander) // just starting to record
         {
-            _beat.bar = 0; // start counting bars
-            _beat.start = _beat.subdivision;
+            _recorded = _beat;
 
             for (auto & layer : _layers) // start recording all layers
             {
@@ -136,12 +131,12 @@ void Looper::run(callback_t callback)
                     continue; // this layer is not used
                 }
 
+                layer.record.start = _beat;
                 layer.state = Layer::State::Record;
             }
         }
         else if (state == State::Wander && previous != State::Wander)
         {
-            _beat.bar = _beat.start = -1; // stop counting bars
             _bars = 0; // reset the # of recorded bars
 
             for (auto & layer : _layers) // revoke all layers
@@ -152,21 +147,37 @@ void Looper::run(callback_t callback)
             callback(-1); // clear the bar
         }
 
-        if (_beat.subdivision == _beat.start)
+        if (state == State::Record || state == State::Playback || state == State::Overlay)
         {
-            if (state == State::Record && _bars < sizeof(Moment::bars) * 8) // maximum # of bars
-            {
-                ++_bars; // increase the # of recorded bars when (recording and) entering a new bar
-            }
+            const auto difference = _beat - _recorded;
 
-            if (state == State::Record || state == State::Playback || state == State::Overlay)
+            if (difference.subdivisions == 0) // another whole bar has passed since we started recording
             {
-                if (_beat.bar == _bars) // just passed the # of recorded bars
+                if (state == State::Record && _bars < Time::Bars) // still recording and haven't reached the max # of bars yet
                 {
-                    _beat.bar = 0;
+                    ++_bars; // increase the # of recorded bars when (recording and) entering a new bar
                 }
-            
-                callback(_beat.bar);
+
+                if (difference.bars == _bars) // just passed the # of recorded bars
+                {
+                    _beat.bar = _recorded.bar;
+
+                    // mark the record end for all the layers that was played before recording
+                    // i.e. timeline: [play ... start record ... end record]
+                    //
+                    for (auto & layer : _layers)
+                    {
+                        if (layer.tag == -1) { continue; }
+
+                        if (layer.state == Layer::State::Record && _beat == layer.record.start)
+                        {
+                            layer.record.end = _beat;
+                            layer.state = Layer::State::Playback;
+                        }
+                    }
+                }
+
+                callback((_beat - _recorded).bars);
             }
         }
 
@@ -178,7 +189,7 @@ void Looper::run(callback_t callback)
             }
 
             Pitch pitch;
-            if (layer.play(_beat, /* out */ pitch))
+            if (layer.play(_beat, _config.style, _config.rhythm, /* out */ pitch))
             {
                 midi::play(
                     _config.note + _config.accidental,
@@ -191,25 +202,17 @@ void Looper::run(callback_t callback)
 
         ++_beat;
 
+        // mark the record end for all the layers that have completed a full loop
+        // i.e. timeline: [start record ... play ... end record]
+        //
         for (auto & layer : _layers)
         {
-            if (layer.tag == -1)
-            {
-                continue; // unused layer
-            }
+            if (layer.tag == -1) { continue; }
 
-            if (_beat == layer.start) // the layer has completed a full loop
+            if (layer.state == Layer::State::Record && _beat == layer.record.start)
             {
-                if (layer.state == Layer::State::Record)
-                {
-                    layer.state = Layer::State::Playback; // stop recording the layer and start playing it back
-                }
-
-                if (layer.state == Layer::State::Playback) // not 'else if'
-                {
-                    // we reset the layer's pitches and moments because we want the layer to playback exactly what recorded
-                    layer.reset();
-                }
+                layer.record.end = _beat;
+                layer.state = Layer::State::Playback;
             }
         }
 
@@ -218,7 +221,7 @@ void Looper::run(callback_t callback)
         // enable interrupts as we are done with the main logic and no need for locks anymore
         interrupts();
 
-        delay(60.f / static_cast<float>(_config.bpm) * 1000.f / static_cast<float>(Beat::Subdivisions));
+        delay(60.f / static_cast<float>(_config.bpm) * 1000.f / static_cast<float>(Time::Subdivisions));
     }
 }
 

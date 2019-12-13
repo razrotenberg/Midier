@@ -5,8 +5,15 @@ namespace midiate
 
 struct Time
 {
-    char bar = -1; // the bar index within a loop
-    char subdivision = 0; // can be 'char' as long as Time::Subdivisions is less than 127
+    // the following types can be 'char' as long as Time::Bars and Time::Subdivisions are less than 127
+    char bar = 0;
+    char subdivision = 0;
+
+    void operator++();
+
+    // the # of bars in the logical loop
+    // this should be a large number to make it seem continous and infinite
+    constexpr static auto Bars = 48;
 
     // bars are in 1/4 time signature
     // we support the following note values:
@@ -18,15 +25,16 @@ struct Time
     // we use 96 in order to shorten the delay after every subdivision played
     //
     constexpr static auto Subdivisions = 96;
-};
-
-struct Beat : public Time
-{
-    char start = -1; // the subdivision in which we started to count bars
-
-    Beat & operator++();
+    
+    struct Difference
+    {
+        char bars;
+        char subdivisions;
+    };
 };
 
 bool operator==(const Time & lhs, const Time & rhs);
+bool operator<=(const Time & lhs, const Time & rhs);
+Time::Difference operator-(const Time & to, const Time & from);
 
 } // midiate

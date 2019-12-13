@@ -45,7 +45,8 @@ struct Looper
 private:
     const Config & _config;
     Layer _layers[16];
-    Beat _beat;
+    Time _beat;
+    Time _recorded;
     char _bars; // # of recorded bars
 };
 
