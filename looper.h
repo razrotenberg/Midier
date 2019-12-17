@@ -40,14 +40,14 @@ struct Looper
     // start the run loop and fire 'callback' for every beginning of a bar
     void run(callback_t callback);
     
-    State state;
+    State state = State::Wander;
 
 private:
     const Config & _config;
     Layer _layers[16];
     Time _beat;
     Time _recorded;
-    char _bars; // # of recorded bars
+    char _bars = 0; // # of recorded bars
 };
 
 } // midiate

@@ -1,4 +1,6 @@
 #include "looper.h"
+
+#include "debug.h"
 #include "midi.h"
 
 #include <Arduino.h>
@@ -7,11 +9,7 @@ namespace midiate
 {
 
 Looper::Looper(const Config & config) :
-    state(State::Wander),
-    _config(config),
-    _layers(),
-    _beat(),
-    _bars(0)
+    _config(config)
 {}
 
 char Looper::start(char degree)
@@ -27,16 +25,18 @@ char Looper::start(char degree)
 
         layer = Layer(i, degree, _beat);
 
+        TRACE_6("Starting layer ", layer, " of scale degree ", (int)degree, " at beat ", _beat);
+
         if (state == State::Record || state == State::Overlay)
         {
-            layer.record.start = _beat;
-            layer.state = Layer::State::Record;
+            layer.record(_beat);
         }
 
         return i;
     }
 
-    return -1; // there's no place for a new layer
+    TRACE_1("There's no place for a new layer");
+    return -1;
 }
 
 void Looper::stop(char tag)
@@ -50,17 +50,16 @@ void Looper::stop(char tag)
 
         if (layer.state == Layer::State::Wander)
         {
-            layer.tag = -1; // mark as unused
+            layer.revoke();
         }
         else if (layer.state == Layer::State::Record)
         {
-            layer.record.end = _beat;
-            layer.state = Layer::State::Playback;
+            layer.playback(_beat);
         }
 
         // do nothing if the layer is already in playback mode (let it keep playbacking)
         // this could happen when the button is kept being pressed even after the entire
-        // recorded loop (32 bars) is over
+        // recorded loop is over
     }
 }
 
@@ -86,7 +85,7 @@ void Looper::undo()
 
         if (layer.state == Layer::State::Record || layer.state == Layer::State::Playback)
         {
-            layer.tag = -1;
+            layer.revoke();
             break;
         }
     }
@@ -107,6 +106,8 @@ void Looper::undo()
     }
 
     // seems like there are no such layers, go back to wander mode
+    
+    TRACE_1("Going back to wandering as there are no recorded layers anymore");
     state = State::Wander;
 }
 
@@ -120,60 +121,80 @@ void Looper::run(callback_t callback)
         // both 'state' and the '_layers' may be modified, and '_beat' may be accessed via interrupts
         noInterrupts();
 
-        if (state == State::Record && previous == State::Wander) // just starting to record
+        if (state == State::Record && previous == State::Wander)
         {
+            TRACE_2("Starting to record at beat ", _beat);
+
             _recorded = _beat;
 
             for (auto & layer : _layers) // start recording all layers
             {
                 if (layer.tag == -1)
                 {
-                    continue; // this layer is not used
+                    continue; // unused layer
                 }
 
-                layer.record.start = _beat;
-                layer.state = Layer::State::Record;
+                layer.record(_beat);
             }
         }
         else if (state == State::Wander && previous != State::Wander)
         {
+            TRACE_2("Starting to wander at beat ", _beat);
+
             _bars = 0; // reset the # of recorded bars
 
             for (auto & layer : _layers) // revoke all layers
             {
-                layer.tag = -1;
+                if (layer.tag == -1)
+                {
+                    continue; // unused layer
+                }
+
+                layer.revoke();
             }
             
             callback(-1); // clear the bar
         }
+#ifdef DEBUG
+        else if (state == State::Playback && previous != State::Playback)
+        {
+            TRACE_4("Starting to playback ", (int)_bars, " recorded bars at beat ", _beat);
+        }
+        else if (state == State::Overlay && previous != State::Overlay)
+        {
+            TRACE_2("Starting to overlay at beat ", _beat);
+        }
+#endif
 
         if (state == State::Record || state == State::Playback || state == State::Overlay)
         {
             const auto difference = _beat - _recorded;
 
-            if (difference.subdivisions == 0) // another whole bar has passed since we started recording
+            if (difference.subdivisions == 0)
             {
                 if (state == State::Record && _bars < Time::Bars) // still recording and haven't reached the max # of bars yet
                 {
                     ++_bars; // increase the # of recorded bars when (recording and) entering a new bar
+                    
+                    TRACE_3("Now recording bar #", (int)_bars, " for the first time");
                 }
 
                 if (difference.bars == _bars) // just passed the # of recorded bars
                 {
+                    TRACE_4("Resetting beat from ", _beat, " to ", _recorded);
+
                     _beat.bar = _recorded.bar;
 
-                    // mark the record end for all the layers that was played before recording
-                    // i.e. timeline: [play ... start record ... end record]
-                    //
+                    // let all the layers know that the beat has changed
+
                     for (auto & layer : _layers)
                     {
-                        if (layer.tag == -1) { continue; }
-
-                        if (layer.state == Layer::State::Record && _beat == layer.record.start)
+                        if (layer.tag == -1)
                         {
-                            layer.record.end = _beat;
-                            layer.state = Layer::State::Playback;
+                            continue; // unused layer
                         }
+
+                        layer.click(_beat);
                     }
                 }
 
@@ -191,12 +212,14 @@ void Looper::run(callback_t callback)
             Pitch pitch;
             if (layer.play(_beat, _config.style, _config.rhythm, /* out */ pitch))
             {
+#ifndef DEBUG
                 midi::play(
                     _config.note + _config.accidental,
                     _config.octave,
                     _config.mode,
                     pitch
                 );
+#endif
             }
         }
 
@@ -209,19 +232,7 @@ void Looper::run(callback_t callback)
                 continue; // unused layer
             }
 
-            // mark the record end for all the layers that have completed a full loop
-            // i.e. timeline: [start record ... play ... end record]
-            //
-            if (layer.state == Layer::State::Record && _beat == layer.record.start)
-            {
-                layer.record.end = _beat;
-                layer.state = Layer::State::Playback;
-            }
-
-            if ((_beat - layer.start).subdivisions == 0)
-            {
-                layer.counter = (layer.counter + 1) % Layer::Period; // the layer was played another bar
-            }
+            layer.click(_beat);
         }
 
         previous = state;

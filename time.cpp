@@ -23,9 +23,22 @@ void Time::operator++()
     }
 }
 
+bool Time::ordered(const Time & first, const Time & second, const Time & third)
+{
+    return \
+        (first <= second && second <= third)    ||
+        (third <= first && first <= second)     ||
+        (second <= third && third <= first);
+}
+
 bool operator==(const Time & lhs, const Time & rhs)
 {
     return lhs.bar == rhs.bar && lhs.subdivision == rhs.subdivision;
+}
+
+bool operator!=(const Time & lhs, const Time & rhs)
+{
+    return !(lhs == rhs);
 }
 
 bool operator<=(const Time & lhs, const Time & rhs)

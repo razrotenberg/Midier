@@ -31,9 +31,12 @@ struct Time
         char bars;
         char subdivisions;
     };
+
+    static bool ordered(const Time & first, const Time & second, const Time & third);
 };
 
 bool operator==(const Time & lhs, const Time & rhs);
+bool operator!=(const Time & lhs, const Time & rhs);
 bool operator<=(const Time & lhs, const Time & rhs);
 Time::Difference operator-(const Time & to, const Time & from);
 
