@@ -96,7 +96,7 @@ inline unsigned integer(float x)
             /* the bar index in which the note should be played */              \
             const unsigned bar = integer(__portions[i]);                        \
                                                                                 \
-            if (difference.bars % length != bar)                                \
+            if (layer.bar % length != bar)                                      \
             {                                                                   \
                 continue;                                                       \
             }                                                                   \
