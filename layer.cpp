@@ -20,8 +20,7 @@ namespace
         constexpr Degree __notes[] = { __VA_ARGS__ };                   \
         constexpr int __count = sizeof(__notes) / sizeof(__notes[0]);   \
                                                                         \
-        static_assert(Layer::Period % __count == 0,                     \
-            "Invalid # of style notes");                                \
+        static_assert(60 % __count == 0, "Invalid # of style notes");   \
                                                                         \
         return __notes[index % __count];                                \
     }
@@ -71,8 +70,7 @@ inline unsigned integer(float x)
         constexpr float __portions[] = { __VA_ARGS__ };                         \
         constexpr int __count = sizeof(__portions) / sizeof(__portions[0]);     \
                                                                                 \
-        static_assert(Layer::Period % __count == 0,                             \
-            "Invalid # of rhythm notes");                                       \
+        static_assert(60 % __count == 0, "Invalid # of rhythm notes");          \
                                                                                 \
         unsigned length = 1; /* # of bars in the rhythm */                      \
         for (auto portion : __portions)                                         \
@@ -150,7 +148,7 @@ Layer::Layer(char tag, Degree chord, const Time & now) :
 
 void Layer::record(const Time & now)
 {
-    TRACE_6("Starting to record layer ", *this, " (bar #", (int)bar, ") at beat ", now);
+    TRACE_6("Starting to record layer ", *this, " (bar #", bar, ") at beat ", now);
 
     state = State::Record;
     loop.start = now;
@@ -199,7 +197,7 @@ void Layer::click(const Time & now)
         {
             bar = loop.bar;
             
-            TRACE_6("Resetting layer ", *this, " bar to ", (int)loop.bar, " as it is entering the recorded loop at ", now);
+            TRACE_6("Resetting layer ", *this, " bar to ", loop.bar, " as it is entering the recorded loop at ", now);
         }
 #ifdef DEBUG
         else if ((now - start).subdivisions == 0)
@@ -211,7 +209,7 @@ void Layer::click(const Time & now)
     else if ((now - start).subdivisions == 0) // using 'else' to make sure we don't change the bar exactly after being restored
     {
         bar = (bar + 1) % Layer::Period; // keep everything going as we are still continuous
-        TRACE_6("Layer ", *this, " is entering bar #", (int)bar, " at beat ", now);
+        TRACE_6("Layer ", *this, " is entering bar #", bar, " at beat ", now);
     }
 }
 
