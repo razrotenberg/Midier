@@ -1,16 +1,16 @@
 #pragma once
 
+#include "degree.h"
 #include "mode.h"
 #include "note.h"
 #include "octave.h"
-#include "pitch.h"
 
 namespace midiate
 {
 namespace midi
 {
 
-void play(Note root, Octave octave, Mode mode, const Pitch & pitch);
+void play(Note root, Octave octave, Mode mode, Degree scale, Degree chord);
 
 } // midi
 } // midiate

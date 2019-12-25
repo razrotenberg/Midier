@@ -12,7 +12,7 @@ Looper::Looper(const Config & config) :
     _config(config)
 {}
 
-char Looper::start(char degree)
+char Looper::start(Degree degree)
 {
     for (char i = 0; i < sizeof(_layers) / sizeof(Layer); ++i)
     {
@@ -25,7 +25,7 @@ char Looper::start(char degree)
 
         layer = Layer(i, degree, _beat);
 
-        TRACE_6("Starting layer ", layer, " of scale degree ", (int)degree, " at beat ", _beat);
+        TRACE_6("Starting layer ", layer, " of scale degree ", degree, " at beat ", _beat);
 
         if (state == State::Record || state == State::Overlay)
         {
@@ -106,7 +106,7 @@ void Looper::undo()
     }
 
     // seems like there are no such layers, go back to wander mode
-    
+
     TRACE_1("Going back to wandering as there are no recorded layers anymore");
     state = State::Wander;
 }
@@ -152,7 +152,7 @@ void Looper::run(callback_t callback)
 
                 layer.revoke();
             }
-            
+
             callback(-1); // clear the bar
         }
 #ifdef DEBUG
@@ -175,7 +175,7 @@ void Looper::run(callback_t callback)
                 if (state == State::Record && _bars < Time::Bars) // still recording and haven't reached the max # of bars yet
                 {
                     ++_bars; // increase the # of recorded bars when (recording and) entering a new bar
-                    
+
                     TRACE_3("Now recording bar #", (int)_bars, " for the first time");
                 }
 
@@ -209,18 +209,26 @@ void Looper::run(callback_t callback)
                 continue; // unused layer
             }
 
-            Pitch pitch;
-            if (layer.play(_beat, _config.style, _config.rhythm, /* out */ pitch))
+            if (!layer.played(_beat))
             {
-#ifndef DEBUG
-                midi::play(
-                    _config.note + _config.accidental,
-                    _config.octave,
-                    _config.mode,
-                    pitch
-                );
-#endif
+                continue;
             }
+
+            unsigned index;
+            if (!rhythm::played(_config.rhythm, layer, _beat, /* out */ index))
+            {
+                continue;
+            }
+
+#ifndef DEBUG
+            midi::play(
+                _config.note + _config.accidental,
+                _config.octave,
+                _config.mode,
+                layer.chord,
+                style::degree(_config.style, index)
+            );
+#endif
         }
 
         ++_beat;
@@ -236,7 +244,7 @@ void Looper::run(callback_t callback)
         }
 
         previous = state;
-        
+
         // enable interrupts as we are done with the main logic and no need for locks anymore
         interrupts();
 

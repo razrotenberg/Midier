@@ -1,7 +1,7 @@
 #pragma once
 
+#include "degree.h"
 #include "time.h"
-#include "pitch.h"
 #include "rhythm.h"
 #include "style.h"
 
@@ -24,9 +24,8 @@ struct Layer
     void playback(const Time & now);
     void click(const Time & now);
     void revoke();
-    
-    bool play(const Time & now, Style style, Rhythm rhythm, /* out */ Pitch & pitch); // get the pitch that should be played right now, if there is any
-    
+    bool played(const Time & now); // should the layer be played now?
+
     char tag = -1;
     State state = State::Wander;
     Degree chord;
@@ -53,23 +52,23 @@ struct Layer
     // index within the rhythm, 'b' is the bar index, 'l' is the number of bars a rhythm is spanned over, and
     // 'c' is the number of notes played in the rhythm (over 'l' bars). the following table show the values
     // of those variables every click:
-    // 
+    //
     // i: 0, 1, ... c-1, 0, 1, ... c-1, 0,  1, ... c-1, ... 0   ... 0     ... 0
     // b: 0, ?, ... ?,   l, ?, ... ?,   2l, ?, ... ?,   ... B   ... 2B    ... 4B
     // y: 0, 1, ...                                         60x ... 60x*2 ... 60x*4
-    // 
+    //
     // we are looking for 'B', and we know that, when 'b' will be equal to 'B':
     // 1) y = i + B/l * c = B/l * c (because 'i' must be 0)
     // 2) y = 60 * x
     // from (1) and (2) we get: B/l * c = 60 * x -> B = 60 * x * l / c
-    // 
+    //
     // 'B' has to be an integer, and if we choose 'x' to be equal to 'c', 'B' is guaranteed to be an integer,
     // and 'y' will have the periodity of 60 * c, which is good for us (as it's a multiplication of 60).
     // the (currently) supported values for 'l' are 1/2/3/4, and therefore we have to find a number that
     // is a multiplication of 60, 120, 180, 240, and we get 720.
-    // 
+    //
     constexpr static auto Period = 720;
-    
+
     // the index of the bar within the logical loop it's being played in
     short bar = 0; // must be of a big enough size in order to hold Layer::Period
 };

@@ -27,9 +27,9 @@ static_assert(sizeof(__intervals) / sizeof(__intervals[0]) == 4, "Expected 4 qua
 
 } //
 
-Interval interval(Quality quality, char degree)
+Interval interval(Quality quality, Degree degree)
 {
-    return __intervals[static_cast<int>(quality)][degree >> 1]; // transforming 'degree' from {1,3,5} to {0,1,2}, respectively
+    return __intervals[(unsigned)quality][degree >> 1]; // transforming 'degree' from {1,3,5} to {0,1,2}, respectively
 }
 
 } // triad

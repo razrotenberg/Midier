@@ -23,13 +23,13 @@ void send(byte command, byte data1, byte data2)
 
 } //
 
-void play(Note root, Octave octave, Mode mode, const Pitch & pitch)
+void play(Note root, Octave octave, Mode mode, Degree scale, Degree chord)
 {
     const auto note = root
-        + scale::interval(mode, pitch.chord())
+        + scale::interval(mode, scale)
         + triad::interval(
-            scale::quality(mode, pitch.chord()),
-            pitch.note());
+            scale::quality(mode, scale),
+            chord);
 
     const auto number = 24 + (12 * (octave - 1)) + static_cast<char>(note);
 

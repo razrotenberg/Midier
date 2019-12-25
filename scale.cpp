@@ -37,14 +37,14 @@ static_assert(sizeof(__qualities) / sizeof(__qualities[0]) == 7, "Expected 7 qua
 
 } //
 
-Interval interval(Mode mode, char degree)
+Interval interval(Mode mode, Degree degree)
 {
-    return __intervals[static_cast<int>(mode)][degree - 1];
+    return __intervals[(unsigned)mode][degree - 1];
 }
 
-Quality quality(Mode mode, char degree)
+Quality quality(Mode mode, Degree degree)
 {
-    return __qualities[((static_cast<int>(degree) - 1) + static_cast<int>(mode)) % (sizeof(__qualities) / sizeof(__qualities[0]))];
+    return __qualities[(degree - 1 + (unsigned)mode) % (sizeof(__qualities) / sizeof(__qualities[0]))];
 }
 
 } // scale

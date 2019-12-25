@@ -5,14 +5,30 @@ namespace midiate
 
 enum class Rhythm : char
 {
-    A,  // 1/16 1/16 1/16 1/16          [*  *  *  *  ]
-    B,  // 1/16 1/16 1/8                [*  *  *     ]
-    C,  // 1/8       1/16 1/16          [*     *  *  ]
-    D,  // 1/16 1/8       1/16          [*  *     *  ]
-    E,  //      1/16 1/16 1/16          [   *  *  *  ]
-    F,  // 1/8th note triplet           [*   *   *   ]
-    G,  // 1/8th note swuang triplet    [*       *   ]
-    H,  // 2-bar 1/8th note swing       [*      (*)  ]
+    _0,
+    _1,
+    _2,
+    _3,
+    _4,
+    _5,
+    _6,
+    _7,
+    _8,
+    _9,
+    _10,
+
+    // last element to indicate the # of actual elements
+    Count,
 };
+
+struct Layer;
+struct Time;
+
+namespace rhythm
+{
+
+bool played(Rhythm rhythm, const Layer & layer, const Time & now, /* out */ unsigned & index);
+
+} // rhythm
 
 } // midiate

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "degree.h"
 #include "layer.h"
 #include "mode.h"
 #include "note.h"
@@ -31,7 +32,7 @@ struct Looper
 
     Looper(const Config & config);
 
-    char start(char degree); // return corresponding tag of (-1) if could not play
+    char start(Degree degree); // return corresponding tag of (-1) if could not play
     void stop(char tag);
     void undo(); // stop the last recorded layer
 
@@ -39,7 +40,7 @@ struct Looper
 
     // start the run loop and fire 'callback' for every beginning of a bar
     void run(callback_t callback);
-    
+
     State state = State::Wander;
 
 private:
