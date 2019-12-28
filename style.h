@@ -36,6 +36,10 @@ namespace style
 
 Degree degree(Style style, unsigned index);
 
+using Name = char[12];
+
+void name(Style style, /* out */ Name & name);
+
 } // style
 
 } // midiate
