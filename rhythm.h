@@ -27,6 +27,9 @@ struct Time;
 namespace rhythm
 {
 
+using Description = char[15]; // '[' + 12 + ']' + '\0'
+
+void description(Rhythm rhythm, /* out */ Description & desc);
 bool played(Rhythm rhythm, const Layer & layer, const Time & now, /* out */ unsigned & index);
 
 } // rhythm

@@ -5,6 +5,7 @@
 #include "time.h"
 
 #include <Arduino.h>
+#include <avr/pgmspace.h>
 
 namespace midiate
 {
@@ -25,6 +26,39 @@ inline unsigned integer(float x)
 }
 
 } //
+
+namespace descriptions
+{
+
+const Description PROGMEM _0  = "[*           ]";
+const Description PROGMEM _1  = "[*     *     ]";
+const Description PROGMEM _2  = "[*  *  *  *  ]";
+const Description PROGMEM _3  = "[*  *  *     ]";
+const Description PROGMEM _4  = "[*     *  *  ]";
+const Description PROGMEM _5  = "[*  *     *  ]";
+const Description PROGMEM _6  = "[   *  *  *  ]";
+const Description PROGMEM _7  = "[*   *   *   ]";
+const Description PROGMEM _8  = "[*       *   ]";
+const Description PROGMEM _9  = "[*      (*)  ]";
+const Description PROGMEM _10 = "[* * * * * * ]";
+
+char const * const all[] PROGMEM = {
+    _0,
+    _1,
+    _2,
+    _3,
+    _4,
+    _5,
+    _6,
+    _7,
+    _8,
+    _9,
+    _10,
+};
+
+static_assert(sizeof(all) / sizeof(all[0]) == (unsigned)Rhythm::Count, "Unexxpected number of descriptions declared");
+
+} // descriptions
 
 namespace rhythmers
 {
@@ -99,6 +133,14 @@ const rhythmer_t all[] =
 static_assert(sizeof(all) / sizeof(all[0]) == (unsigned)Rhythm::Count, "Unexxpected number of rhythms declared");
 
 } // rhythmers
+
+void description(Rhythm rhythm, /* out */ Description & desc)
+{
+    strcpy_P(
+        /* out */ desc,
+        (char const *)pgm_read_ptr(&(descriptions::all[(unsigned)rhythm]))
+    );
+}
 
 bool played(Rhythm rhythm, const Layer & layer, const Time & now, /* out */ unsigned & index)
 {
