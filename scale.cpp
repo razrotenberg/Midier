@@ -31,7 +31,7 @@ static const Interval __intervals[][8] =
 
 static_assert(sizeof(__intervals) / sizeof(__intervals[0]) == 7, "Expected 7 modes to be declared");
 
-static const Quality __qualities[] = { Quality::Major, Quality::Minor, Quality::Minor, Quality::Major, Quality::Major, Quality::Minor, Quality::Diminished };
+static const Quality __qualities[] = { Quality::maj7, Quality::m7, Quality::m7, Quality::maj7, Quality::dom7, Quality::m7, Quality::m7b5 };
 
 static_assert(sizeof(__qualities) / sizeof(__qualities[0]) == 7, "Expected 7 qualities to be declared");
 

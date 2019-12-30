@@ -5,10 +5,12 @@ namespace midiate
 
 enum class Quality : char
 {
-    Major,
-    Minor,
-    Diminished,
-    Augmented,
+    // qualities of 7th chords
+
+    m7b5,
+    m7,
+    dom7,
+    maj7,
 };
 
 } // midiate
