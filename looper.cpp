@@ -220,13 +220,27 @@ void Looper::run(callback_t callback)
                 continue;
             }
 
+            char steps = _config.steps;
+
+            if (_config.looped)
+            {
+                steps = (steps * 2) - 2;
+            }
+
+            index %= steps;
+
+            if (index >= _config.steps)
+            {
+                index = _config.steps - (index - _config.steps + 1) - 1; // the respective mirrored index
+            }
+
 #ifndef DEBUG
             midi::play(
                 _config.note + _config.accidental,
                 _config.octave,
                 _config.mode,
                 layer.chord,
-                style::degree(_config.style, index)
+                style::degree(_config.steps, _config.perm, index)
             );
 #endif
         }

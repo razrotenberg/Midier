@@ -101,7 +101,7 @@ bool generic(const float portions[], unsigned count, const Layer & layer, const 
         const float __portions[] = { __VA_ARGS__ };                                 \
         const unsigned __count = sizeof(__portions) / sizeof(__portions[0]);        \
                                                                                     \
-        static_assert(60 % __count == 0, "Invalid # of rhythm notes");              \
+        static_assert(120 % __count == 0, "Invalid # of rhythm notes");             \
                                                                                     \
         return generic(__portions, __count, layer, now, /* out */ index);           \
     }

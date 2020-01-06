@@ -24,4 +24,9 @@ enum class Interval : char
     P8 = 12,
 };
 
+inline Interval operator+(Interval lhs, Interval rhs)
+{
+    return (Interval)((char)lhs + (char)rhs);
+}
+
 } // midiate

@@ -5,6 +5,8 @@
 #include "mode.h"
 #include "note.h"
 #include "octave.h"
+#include "rhythm.h"
+#include "style.h"
 
 namespace midiate
 {
@@ -18,8 +20,10 @@ struct Looper
         Octave     octave;
         Mode       mode;
         int        bpm;
-        Style      style;
         Rhythm     rhythm;
+        char       steps;
+        unsigned   perm;
+        bool       looped;
     };
 
     enum class State : char

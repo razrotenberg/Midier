@@ -29,7 +29,15 @@ static_assert(sizeof(__intervals) / sizeof(__intervals[0]) == 4, "Expected 4 qua
 
 Interval interval(Quality quality, Degree degree)
 {
-    return __intervals[(unsigned)quality][degree >> 1]; // transforming 'degree' from {1,3,5,7} to {0,1,2,3}, respectively
+    Interval octaver = Interval::P1;
+
+    if (degree > 7)
+    {
+        degree -= 7;
+        octaver = Interval::P8;
+    }
+
+    return octaver + __intervals[(unsigned)quality][degree >> 1]; // transforming 'degree' from {1,3,5,7} to {0,1,2,3}, respectively
 }
 
 } // triad

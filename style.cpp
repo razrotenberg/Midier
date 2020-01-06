@@ -1,6 +1,6 @@
 #include "style.h"
 
-#include <avr/pgmspace.h>
+#include <Arduino.h>
 
 namespace midiate
 {
@@ -10,80 +10,101 @@ namespace style
 namespace
 {
 
-#define STYLER(...)                                                         \
-    [](unsigned index) -> Degree                                            \
-    {                                                                       \
-        constexpr Degree __notes[] = { __VA_ARGS__ };                       \
-        constexpr unsigned __count = sizeof(__notes) / sizeof(__notes[0]);  \
-                                                                            \
-        static_assert(60 % __count == 0, "Invalid # of style notes");       \
-                                                                            \
-        return __notes[index % __count];                                    \
+inline unsigned __factorial(unsigned x)
+{
+    if      (x == 0) { return 1;   }
+    else if (x == 1) { return 1;   }
+    else if (x == 2) { return 2;   }
+    else if (x == 3) { return 6;   }
+    else if (x == 4) { return 24;  }
+    else if (x == 5) { return 120; }
+    else if (x == 6) { return 720; }
+}
+
+// the algorithm used for permutation generation is based on algorithm 2.16 in the book
+// "Combinatorial Algorithms: Generation, Enumeration, and Search" by Donald L. Kreher, Douglas R. Stinson
+// the algorithm can be seen (Jan 2020) at https://cw.fel.cvut.cz/old/_media/courses/be4m33pal/lesson05_pp52_57.pdf
+// book references:
+//   1) https://www.amazon.com/Combinatorial-Algorithms-Enumeration-Mathematics-Applications/dp/084933988X
+//   2) https://www.crcpress.com/Combinatorial-Algorithms-Generation-Enumeration-and-Search/Kreher-Stinson/p/book/9780367400156
+//
+void __algorithm(unsigned n, unsigned r, /* out */ unsigned * pi)
+{
+    pi[n-1] = 0;
+
+    for (unsigned j = 1; j < n; ++j)
+    {
+        const unsigned d = (r % __factorial(j + 1)) / __factorial(j);
+
+        r -= (d * __factorial(j));
+        pi[n-j-1] = d;
+
+        for (unsigned i = n-j; i < n; ++i)
+        {
+            if (pi[i] >= d)
+            {
+                ++pi[i];
+            }
+        }
     }
 
-using styler_t = Degree(*)(unsigned);
+    // the algorithm has generated a permutation of indexes between [0,n]
+    // let's now convert those indexes into chord degrees
 
-const styler_t __stylers[] =
+    for (unsigned i = 0; i < n; ++i)
     {
-        STYLER(1, 3, 5),
-        STYLER(5, 3, 1),
-        STYLER(1, 3, 5, 3),
-        STYLER(5, 3, 1, 3),
-        STYLER(1, 3, 5, 3, 1),
-        STYLER(5, 3, 1, 3, 5),
-        STYLER(1, 5, 3),
-        STYLER(3, 1, 5),
-        STYLER(1, 5, 3, 5),
-        STYLER(1, 3, 1, 5),
-        STYLER(1, 3, 1, 5, 1, 3),
-        STYLER(5, 3, 5, 1, 5, 3),
-    };
+        pi[i] = pi[i] << 1; // {0,1,2,3,..,n} -> {0,2,4,6,..,2n}
 
-static_assert(sizeof(__stylers) / sizeof(__stylers[0]) == (unsigned)Style::Count, "Unexpected number of styles declared");
-
-const Name PROGMEM __up = "Up";
-const Name PROGMEM __down = "Down";
-const Name PROGMEM __up_down = "Up Down";
-const Name PROGMEM __down_up = "Down Up";
-const Name PROGMEM __up_and_down = "Up and Down";
-const Name PROGMEM __down_and_up = "Down and Up";
-const Name PROGMEM __converge = "Converge";
-const Name PROGMEM __diverge = "Diverge";
-const Name PROGMEM __pinky_up = "Pinky Up";
-const Name PROGMEM __thumb_up = "Thumb Up";
-const Name PROGMEM __1_3_1_5_1_3 = "";
-const Name PROGMEM __5_3_5_1_5_3 = "";
-
-char const * const __names[] PROGMEM = {
-    __up,
-    __down,
-    __up_down,
-    __down_up,
-    __up_and_down,
-    __down_and_up,
-    __converge,
-    __diverge,
-    __pinky_up,
-    __thumb_up,
-    __1_3_1_5_1_3,
-    __5_3_5_1_5_3,
-};
-
-static_assert(sizeof(__names) / sizeof(__names[0]) == (unsigned)Style::Count, "Unexpected number of names declared");
+        if (pi[i] < 7)
+        {
+            ++pi[i]; // {0,2,4,6} -> {1,3,5,7}
+        }
+        else
+        {
+            // keep {8,10,12,..} the same as they represent {1,3,5,..}
+            // but an octave higher (can be retrieved by "x-7")
+        }
+    }
+}
 
 } //
 
-Degree degree(Style style, unsigned index)
+Degree degree(unsigned n, unsigned r, unsigned index)
 {
-    return __stylers[(unsigned)style](index);
+    unsigned pi[n];
+
+    __algorithm(n, r, /* out */ pi);
+
+    return pi[index];
 }
 
-void name(Style style, /* out */ Name & name)
+unsigned count(unsigned n)
 {
-    strcpy_P(
-        /* out */ name,
-        (char const *)pgm_read_ptr(&(__names[(unsigned)style]))
-    );
+    return __factorial(n);
+}
+
+void description(unsigned n, unsigned r, /* out */ Description & desc)
+{
+    unsigned pi[n];
+
+    __algorithm(n, r, /* out */ pi);
+
+    char * pos = desc;
+
+    for (unsigned i = 0; i < n; ++i)
+    {
+        if (i > 0)
+        {
+            *pos++ = ' ';
+        }
+
+        itoa(pi[i], pos++, 10); // places '\0'
+
+        if (pi[i] >= 10) // 2 digits
+        {
+            ++pos;
+        }
+    }
 }
 
 } // style
