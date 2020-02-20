@@ -2,30 +2,12 @@
 
 #include "degree.h"
 #include "layer.h"
-#include "mode.h"
-#include "note.h"
-#include "octave.h"
-#include "rhythm.h"
-#include "style.h"
 
 namespace midiate
 {
 
 struct Looper
 {
-    struct Config
-    {
-        Note       note;
-        Accidental accidental;
-        Octave     octave;
-        Mode       mode;
-        int        bpm;
-        Rhythm     rhythm;
-        char       steps;
-        unsigned   perm;
-        bool       looped;
-    };
-
     enum class State : char
     {
         Wander,
@@ -33,8 +15,6 @@ struct Looper
         Playback,
         Overlay,
     };
-
-    Looper(const Config & config);
 
     char start(Degree degree); // return corresponding tag of (-1) if could not play
     void stop(char tag);
@@ -46,13 +26,12 @@ struct Looper
     void run(callback_t callback);
 
     State state = State::Wander;
-
-private:
-    const Config & _config;
-    Layer _layers[16];
-    Time _beat;
-    Time _recorded;
-    char _bars = 0; // # of recorded bars
+    Layer::Config config;
+    unsigned bpm = 60;
+    Layer layers[16];
+    Time beat;
+    Time recorded;
+    char bars = 0; // # of recorded bars
 };
 
 } // midiate

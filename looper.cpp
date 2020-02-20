@@ -2,34 +2,31 @@
 
 #include "debug.h"
 #include "midi.h"
+#include "style.h"
 
 #include <Arduino.h>
 
 namespace midiate
 {
 
-Looper::Looper(const Config & config) :
-    _config(config)
-{}
-
 char Looper::start(Degree degree)
 {
-    for (char i = 0; i < sizeof(_layers) / sizeof(Layer); ++i)
+    for (char i = 0; i < sizeof(layers) / sizeof(Layer); ++i)
     {
-        auto & layer = _layers[i];
+        auto & layer = layers[i];
 
         if (layer.tag != -1)
         {
             continue; // this layer is used
         }
 
-        layer = Layer(i, degree, _beat);
+        layer = Layer(i, degree, beat);
 
-        TRACE_6("Starting layer ", layer, " of scale degree ", degree, " at beat ", _beat);
+        TRACE_6("Starting layer ", layer, " of scale degree ", degree, " at beat ", beat);
 
         if (state == State::Record || state == State::Overlay)
         {
-            layer.record(_beat);
+            layer.record(beat);
         }
 
         return i;
@@ -41,7 +38,7 @@ char Looper::start(Degree degree)
 
 void Looper::stop(char tag)
 {
-    for (auto & layer : _layers)
+    for (auto & layer : layers)
     {
         if (layer.tag != tag)
         {
@@ -54,7 +51,7 @@ void Looper::stop(char tag)
         }
         else if (layer.state == Layer::State::Record)
         {
-            layer.playback(_beat);
+            layer.playback(beat);
         }
 
         // do nothing if the layer is already in playback mode (let it keep playbacking)
@@ -74,9 +71,9 @@ void Looper::undo()
     // we cannot tell for sure which layer was the last one to be recorded,
     // so we assume it is the layer with the highest tag (and the highest index)
 
-    for (unsigned i = sizeof(_layers) / sizeof(Layer); i > 0; --i)
+    for (unsigned i = sizeof(layers) / sizeof(Layer); i > 0; --i)
     {
-        auto & layer = _layers[i - 1];
+        auto & layer = layers[i - 1];
 
         if (layer.tag == -1)
         {
@@ -92,7 +89,7 @@ void Looper::undo()
 
     // now check if there is no more recorded layers
 
-    for (const auto & layer : _layers)
+    for (const auto & layer : layers)
     {
         if (layer.tag == -1)
         {
@@ -118,32 +115,32 @@ void Looper::run(callback_t callback)
     while (true)
     {
         // we disable interrupts because we don't want any user actions to interfere the main logic
-        // both 'state' and the '_layers' may be modified, and '_beat' may be accessed via interrupts
+        // both 'state' and the 'layers' may be modified, and 'beat' may be accessed via interrupts
         noInterrupts();
 
         if (state == State::Record && previous == State::Wander)
         {
-            TRACE_2("Starting to record at beat ", _beat);
+            TRACE_2("Starting to record at beat ", beat);
 
-            _recorded = _beat;
+            recorded = beat;
 
-            for (auto & layer : _layers) // start recording all layers
+            for (auto & layer : layers) // start recording all layers
             {
                 if (layer.tag == -1)
                 {
                     continue; // unused layer
                 }
 
-                layer.record(_beat);
+                layer.record(beat);
             }
         }
         else if (state == State::Wander && previous != State::Wander)
         {
-            TRACE_2("Starting to wander at beat ", _beat);
+            TRACE_2("Starting to wander at beat ", beat);
 
-            _bars = 0; // reset the # of recorded bars
+            bars = 0; // reset the # of recorded bars
 
-            for (auto & layer : _layers) // revoke all layers
+            for (auto & layer : layers) // revoke all layers
             {
                 if (layer.tag == -1)
                 {
@@ -158,103 +155,105 @@ void Looper::run(callback_t callback)
 #ifdef DEBUG
         else if (state == State::Playback && previous != State::Playback)
         {
-            TRACE_4("Starting to playback ", (int)_bars, " recorded bars at beat ", _beat);
+            TRACE_4("Starting to playback ", (int)bars, " recorded bars at beat ", beat);
         }
         else if (state == State::Overlay && previous != State::Overlay)
         {
-            TRACE_2("Starting to overlay at beat ", _beat);
+            TRACE_2("Starting to overlay at beat ", beat);
         }
 #endif
 
         if (state == State::Record || state == State::Playback || state == State::Overlay)
         {
-            const auto difference = _beat - _recorded;
+            const auto difference = beat - recorded;
 
             if (difference.subdivisions == 0)
             {
-                if (state == State::Record && _bars < Time::Bars) // still recording and haven't reached the max # of bars yet
+                if (state == State::Record && bars < Time::Bars) // still recording and haven't reached the max # of bars yet
                 {
-                    ++_bars; // increase the # of recorded bars when (recording and) entering a new bar
+                    ++bars; // increase the # of recorded bars when (recording and) entering a new bar
 
-                    TRACE_3("Now recording bar #", (int)_bars, " for the first time");
+                    TRACE_3("Now recording bar #", (int)bars, " for the first time");
                 }
 
-                if (difference.bars == _bars) // just passed the # of recorded bars
+                if (difference.bars == bars) // just passed the # of recorded bars
                 {
-                    TRACE_4("Resetting beat from ", _beat, " to ", _recorded);
+                    TRACE_4("Resetting beat from ", beat, " to ", recorded);
 
-                    _beat.bar = _recorded.bar;
+                    beat.bar = recorded.bar;
 
                     // let all the layers know that the beat has changed
 
-                    for (auto & layer : _layers)
+                    for (auto & layer : layers)
                     {
                         if (layer.tag == -1)
                         {
                             continue; // unused layer
                         }
 
-                        layer.click(_beat);
+                        layer.click(beat);
                     }
                 }
 
-                callback((_beat - _recorded).bars);
+                callback((beat - recorded).bars);
             }
         }
 
-        for (auto & layer : _layers)
+        for (auto & layer : layers)
         {
             if (layer.tag == -1)
             {
                 continue; // unused layer
             }
 
-            if (!layer.played(_beat))
+            if (!layer.played(beat))
             {
                 continue;
             }
+
+            const auto & config = layer.configured == Layer::Configured::Static ? layer.config : this->config;
 
             unsigned index;
-            if (!rhythm::played(_config.rhythm, layer, _beat, /* out */ index))
+            if (!rhythm::played(config.rhythm, layer, beat, /* out */ index))
             {
                 continue;
             }
 
-            char steps = _config.steps;
+            char steps = config.style.steps;
 
-            if (_config.looped)
+            if (config.style.looped)
             {
                 steps = (steps * 2) - 2;
             }
 
             index %= steps;
 
-            if (index >= _config.steps)
+            if (index >= config.style.steps)
             {
-                index = _config.steps - (index - _config.steps + 1) - 1; // the respective mirrored index
+                index = config.style.steps - (index - config.style.steps + 1) - 1; // the respective mirrored index
             }
 
 #ifndef DEBUG
             midi::play(
-                _config.note + _config.accidental,
-                _config.octave,
-                _config.mode,
+                config.note + config.accidental,
+                config.octave,
+                config.mode,
                 layer.chord,
-                style::degree(_config.steps, _config.perm, index)
+                style::degree(config.style.steps, config.style.perm, index)
             );
 #endif
         }
 
-        ++_beat;
+        ++beat;
 
-        for (auto & layer : _layers)
+        for (auto & layer : layers)
         {
             if (layer.tag == -1)
             {
                 continue; // unused layer
             }
 
-            layer.click(_beat);
+            layer.click(beat);
         }
 
         previous = state;
@@ -262,7 +261,7 @@ void Looper::run(callback_t callback)
         // enable interrupts as we are done with the main logic and no need for locks anymore
         interrupts();
 
-        delay(60.f / static_cast<float>(_config.bpm) * 1000.f / static_cast<float>(Time::Subdivisions));
+        delay(60.f / static_cast<float>(bpm) * 1000.f / static_cast<float>(Time::Subdivisions));
     }
 }
 

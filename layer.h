@@ -1,6 +1,10 @@
 #pragma once
 
 #include "degree.h"
+#include "mode.h"
+#include "note.h"
+#include "octave.h"
+#include "rhythm.h"
 #include "time.h"
 
 namespace midiate
@@ -8,6 +12,28 @@ namespace midiate
 
 struct Layer
 {
+    struct Config
+    {
+        Note       note       = Note::C;
+        Accidental accidental = Accidental::Natural;
+        Octave     octave     = 3;
+        Mode       mode       = Mode::Ionian;
+        Rhythm     rhythm     = Rhythm::_7;
+
+        struct
+        {
+            char     steps  = 3;
+            unsigned perm   = 0;
+            bool     looped = false;
+        } style;
+    };
+
+    enum class Configured
+    {
+        Static,
+        Dynamic,
+    };
+
     enum class State : char
     {
         Wander,
@@ -34,6 +60,9 @@ struct Layer
         Time end;
         short bar; // the bar index in which we recorded
     } loop;
+
+    Config config; // used only if statically configured
+    Configured configured = Configured::Dynamic;
 
     // Layer::Period is the number represents the periodity of the bar index. the bar index is incremented
     // every time a full bar has passed since the layer was first started. for finite layers, the bar index
