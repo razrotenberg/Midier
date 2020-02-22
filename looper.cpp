@@ -152,7 +152,6 @@ void Looper::run(callback_t callback)
 
             callback(-1); // clear the bar
         }
-#ifdef DEBUG
         else if (state == State::Playback && previous != State::Playback)
         {
             TRACE_4("Starting to playback ", (int)bars, " recorded bars at beat ", beat);
@@ -160,8 +159,20 @@ void Looper::run(callback_t callback)
         else if (state == State::Overlay && previous != State::Overlay)
         {
             TRACE_2("Starting to overlay at beat ", beat);
+
+            for (auto & layer : layers) // start recording all layers that are in wander mode
+            {
+                if (layer.tag == -1)
+                {
+                    continue; // unused layer
+                }
+
+                if (layer.state == Layer::State::Wander)
+                {
+                    layer.record(beat);
+                }
+            }
         }
-#endif
 
         if (state == State::Record || state == State::Playback || state == State::Overlay)
         {
