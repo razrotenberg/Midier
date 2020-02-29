@@ -18,7 +18,7 @@ struct Looper
 
     char start(Degree degree); // return corresponding tag of (-1) if could not play
     void stop(char tag);
-    void undo(); // stop the last recorded layer
+    void revoke(char tag = -1); // (-1) means the last recorded layer
 
     using callback_t = void(*)(int); // (-1) means to stop counting bars
 

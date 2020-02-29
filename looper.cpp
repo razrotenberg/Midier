@@ -60,30 +60,44 @@ void Looper::stop(char tag)
     }
 }
 
-void Looper::undo()
+void Looper::revoke(char tag)
 {
     if (state == State::Wander)
     {
         return; // nothing to do when wandering
     }
 
-    // we want to stop the last recorded (or being recorded) layer
-    // we cannot tell for sure which layer was the last one to be recorded,
-    // so we assume it is the layer with the highest tag (and the highest index)
-
-    for (unsigned i = sizeof(layers) / sizeof(Layer); i > 0; --i)
+    if (tag == -1)
     {
-        auto & layer = layers[i - 1];
+        // we want to revoke the last recorded (or being recorded) layer
+        // we cannot tell for sure which layer was the last one to be recorded,
+        // so we assume it is the layer with the highest tag (and the highest index)
 
-        if (layer.tag == -1)
+        for (unsigned i = sizeof(layers) / sizeof(Layer); i > 0; --i)
         {
-            continue;
+            auto & layer = layers[i - 1];
+
+            if (layer.tag == -1)
+            {
+                continue;
+            }
+
+            if (layer.state == Layer::State::Record || layer.state == Layer::State::Playback)
+            {
+                layer.revoke();
+                break;
+            }
         }
-
-        if (layer.state == Layer::State::Record || layer.state == Layer::State::Playback)
+    }
+    else
+    {
+        for (auto & layer : layers)
         {
-            layer.revoke();
-            break;
+            if (layer.tag == tag)
+            {
+                layer.revoke();
+                break;
+            }
         }
     }
 
