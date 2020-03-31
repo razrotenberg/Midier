@@ -42,7 +42,6 @@ struct Looper
     unsigned bpm = 60;
     Assist assist = Assist::No;
     Layer layers[16];
-    Time beat = { .bar = 0, .subdivision = 0 };
     Time recorded;
     Time started; // first note ever played
     char bars = 0; // # of recorded bars

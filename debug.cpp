@@ -37,7 +37,7 @@ void print(const Time & time)
 {
     print((int)time.bar);
     print('.');
-    
+
     if (time.subdivision < 10)
     {
         print('0');
@@ -64,8 +64,9 @@ void prefix(const char file[], int line, const char function[])
         ++pos;
     }
 
-    PRINT(millis());
-    PRINT(": ");
+    PRINT("[");
+    PRINT(Time::now);
+    PRINT("] ");
     PRINT(file);
     PRINT(':');
     PRINT(line);

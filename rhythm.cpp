@@ -63,7 +63,7 @@ static_assert(sizeof(all) / sizeof(all[0]) == (unsigned)Rhythm::Count, "Unexxpec
 namespace rhythmers
 {
 
-bool generic(const float portions[], unsigned count, const Layer & layer, const Time & now, /* out */ unsigned & index)
+bool generic(const float portions[], unsigned count, const Layer & layer, /* out */ unsigned & index)
 {
     unsigned length = 1; // # of bars in the rhythm
     for (unsigned i = 0; i < count; ++i)
@@ -71,7 +71,7 @@ bool generic(const float portions[], unsigned count, const Layer & layer, const 
         length = max(length, integer(portions[i]) + 1);
     }
 
-    const auto difference = now - layer.start;
+    const auto difference = Time::now - layer.start;
 
     for (unsigned i = 0; i < count; ++i)
     {
@@ -87,7 +87,7 @@ bool generic(const float portions[], unsigned count, const Layer & layer, const 
 
         /* out */ index = i + ((layer.bar / length) * count);
 
-        TRACE_6("Playing note #", index, " of layer ", layer, " at beat ", now);
+        TRACE_4("Playing note #", index, " of layer ", layer);
 
         return true;
     }
@@ -95,15 +95,15 @@ bool generic(const float portions[], unsigned count, const Layer & layer, const 
     return false;
 }
 
-#define RHYTHMER(...)                                                               \
-    [](const Layer & layer, const Time & now, /* out */ unsigned & index) -> bool   \
-    {                                                                               \
-        const float __portions[] = { __VA_ARGS__ };                                 \
-        const unsigned __count = sizeof(__portions) / sizeof(__portions[0]);        \
-                                                                                    \
-        static_assert(120 % __count == 0, "Invalid # of rhythm notes");             \
-                                                                                    \
-        return generic(__portions, __count, layer, now, /* out */ index);           \
+#define RHYTHMER(...)                                                           \
+    [](const Layer & layer, /* out */ unsigned & index) -> bool                 \
+    {                                                                           \
+        const float __portions[] = { __VA_ARGS__ };                             \
+        const unsigned __count = sizeof(__portions) / sizeof(__portions[0]);    \
+                                                                                \
+        static_assert(120 % __count == 0, "Invalid # of rhythm notes");         \
+                                                                                \
+        return generic(__portions, __count, layer, /* out */ index);            \
     }
 
 #define _1_1(i) (i / 1.f)
@@ -112,7 +112,7 @@ bool generic(const float portions[], unsigned count, const Layer & layer, const 
 #define _1_4(i) (i / 4.f)
 #define _1_6(i) (i / 6.f)
 
-using rhythmer_t = bool(*)(const Layer &, const Time &, /* out */ unsigned &);
+using rhythmer_t = bool(*)(const Layer &, /* out */ unsigned &);
 
 const rhythmer_t all[] =
     {
@@ -142,9 +142,9 @@ void description(Rhythm rhythm, /* out */ Description & desc)
     );
 }
 
-bool played(Rhythm rhythm, const Layer & layer, const Time & now, /* out */ unsigned & index)
+bool played(Rhythm rhythm, const Layer & layer, /* out */ unsigned & index)
 {
-    return rhythmers::all[(unsigned)rhythm](layer, now, /* out */ index);
+    return rhythmers::all[(unsigned)rhythm](layer, /* out */ index);
 }
 
 } // rhythm

@@ -34,6 +34,8 @@ struct Time
         char bars;
         char subdivisions;
     };
+
+    static Time now;
 };
 
 bool operator==(const Time & lhs, const Time & rhs);

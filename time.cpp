@@ -3,6 +3,8 @@
 namespace midiate
 {
 
+Time Time::now = { .bar = 0, .subdivision = 0 };
+
 namespace
 {
 

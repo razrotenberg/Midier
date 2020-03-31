@@ -20,12 +20,12 @@ char Looper::start(Degree degree)
             continue; // this layer is used
         }
 
-        auto start = beat;
+        auto start = Time::now;
 
         if (started.bar == -1)
         {
-            TRACE_2("First layer starting at beat ", beat);
-            started = beat;
+            TRACE_1("First layer starting");
+            started = Time::now;
         }
         else if (assist != Assist::No)
         {
@@ -38,11 +38,11 @@ char Looper::start(Degree degree)
             }
         }
 
-        layer = Layer(i, degree, beat, start);
+        layer = Layer(i, degree, start);
 
         if (state == State::Record || state == State::Overlay)
         {
-            layer.record(beat);
+            layer.record();
         }
 
         return i;
@@ -67,7 +67,7 @@ void Looper::stop(char tag)
         }
         else if (layer.state == Layer::State::Record)
         {
-            layer.playback(beat);
+            layer.playback();
         }
 
         // do nothing if the layer is already in playback mode (let it keep playbacking)
@@ -170,9 +170,9 @@ void Looper::run(callback_t callback)
 
         if (state == State::Record && previous == State::Wander)
         {
-            TRACE_2("Starting to record at beat ", beat);
+            TRACE_1("Starting to record");
 
-            recorded = beat;
+            recorded = Time::now;
 
             for (auto & layer : layers) // start recording all layers
             {
@@ -181,12 +181,12 @@ void Looper::run(callback_t callback)
                     continue; // unused layer
                 }
 
-                layer.record(beat);
+                layer.record();
             }
         }
         else if (state == State::Wander && previous != State::Wander)
         {
-            TRACE_2("Starting to wander at beat ", beat);
+            TRACE_1("Starting to wander");
 
             bars = 0; // reset the # of recorded bars
 
@@ -204,11 +204,11 @@ void Looper::run(callback_t callback)
         }
         else if (state == State::Playback && previous != State::Playback)
         {
-            TRACE_4("Starting to playback ", (int)bars, " recorded bars at beat ", beat);
+            TRACE_3("Starting to playback ", (int)bars, " recorded bars");
         }
         else if (state == State::Overlay && previous != State::Overlay)
         {
-            TRACE_2("Starting to overlay at beat ", beat);
+            TRACE_1("Starting to overlay");
 
             for (auto & layer : layers) // start recording all layers that are in wander mode
             {
@@ -219,14 +219,14 @@ void Looper::run(callback_t callback)
 
                 if (layer.state == Layer::State::Wander)
                 {
-                    layer.record(beat);
+                    layer.record();
                 }
             }
         }
 
         if (state == State::Record || state == State::Playback || state == State::Overlay)
         {
-            const auto difference = beat - recorded;
+            const auto difference = Time::now - recorded;
 
             if (difference.subdivisions == 0)
             {
@@ -234,14 +234,14 @@ void Looper::run(callback_t callback)
                 {
                     ++bars; // increase the # of recorded bars when (recording and) entering a new bar
 
-                    TRACE_3("Now recording bar #", (int)bars, " for the first time");
+                    TRACE_3("Recording bar #", (int)bars, " for the first time");
                 }
 
                 if (difference.bars == bars) // just passed the # of recorded bars
                 {
-                    TRACE_4("Resetting beat from ", beat, " to ", recorded);
+                    TRACE_2("Resetting beat to ", recorded);
 
-                    beat.bar = recorded.bar;
+                    Time::now = recorded;
 
                     // let all the layers know that the beat has changed
 
@@ -252,11 +252,11 @@ void Looper::run(callback_t callback)
                             continue; // unused layer
                         }
 
-                        layer.click(beat);
+                        layer.click();
                     }
                 }
 
-                callback((beat - recorded).bars);
+                callback((Time::now - recorded).bars);
             }
         }
 
@@ -267,7 +267,7 @@ void Looper::run(callback_t callback)
                 continue; // unused layer
             }
 
-            if (!layer.played(beat))
+            if (!layer.played())
             {
                 continue;
             }
@@ -275,7 +275,7 @@ void Looper::run(callback_t callback)
             const auto & config = layer.configured == Layer::Configured::Static ? layer.config : this->config;
 
             unsigned index;
-            if (!rhythm::played(config.rhythm, layer, beat, /* out */ index))
+            if (!rhythm::played(config.rhythm, layer, /* out */ index))
             {
                 continue;
             }
@@ -305,7 +305,7 @@ void Looper::run(callback_t callback)
 #endif
         }
 
-        ++beat;
+        ++Time::now;
 
         for (auto & layer : layers)
         {
@@ -314,7 +314,7 @@ void Looper::run(callback_t callback)
                 continue; // unused layer
             }
 
-            layer.click(beat);
+            layer.click();
         }
 
         previous = state;

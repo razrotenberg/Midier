@@ -43,13 +43,13 @@ struct Layer
     };
 
     Layer() = default;
-    Layer(char tag, Degree chord, const Time & now, const Time & start);
+    Layer(char tag, Degree chord, const Time & start);
 
-    void record(const Time & now);
-    void playback(const Time & now);
-    void click(const Time & now);
+    void record();
+    void playback();
+    void click();
     void revoke();
-    bool played(const Time & now); // should the layer be played now?
+    bool played(); // should the layer be played now?
 
     char tag = -1;
     State state;
