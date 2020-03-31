@@ -20,9 +20,25 @@ char Looper::start(Degree degree)
             continue; // this layer is used
         }
 
-        layer = Layer(i, degree, beat);
+        auto start = beat;
 
-        TRACE_6("Starting layer ", layer, " of scale degree ", degree, " at beat ", beat);
+        if (started.bar == -1)
+        {
+            TRACE_2("First layer starting at beat ", beat);
+            started = beat;
+        }
+        else if (assist != Assist::No)
+        {
+            const auto jumps = (unsigned)assist;
+            const auto round = Time::Subdivisions / jumps;
+
+            while (((start - started).subdivisions % round) != 0)
+            {
+                ++start;
+            }
+        }
+
+        layer = Layer(i, degree, beat, start);
 
         if (state == State::Record || state == State::Overlay)
         {
@@ -45,7 +61,7 @@ void Looper::stop(char tag)
             continue;
         }
 
-        if (layer.state == Layer::State::Wander)
+        if (layer.state == Layer::State::Wait || layer.state == Layer::State::Wander)
         {
             layer.revoke();
         }
@@ -131,6 +147,26 @@ void Looper::run(callback_t callback)
         // we disable interrupts because we don't want any user actions to interfere the main logic
         // both 'state' and the 'layers' may be modified, and 'beat' may be accessed via interrupts
         noInterrupts();
+
+        if (started.bar != -1) // check if we should reset 'started'
+        {
+            bool reset = true;
+
+            for (auto & layer : layers)
+            {
+                if (layer.tag != -1)
+                {
+                    reset = false; // don't reset if there exists any valid layer
+                    break;
+                }
+            }
+
+            if (reset)
+            {
+                TRACE_1("Reseting start beat as no more layers are being played");
+                started.bar = -1;
+            }
+        }
 
         if (state == State::Record && previous == State::Wander)
         {

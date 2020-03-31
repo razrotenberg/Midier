@@ -16,6 +16,18 @@ struct Looper
         Overlay,
     };
 
+    enum class Assist : char
+    {
+        No,
+
+        // numbers represeting the # of subdivisions to round
+        _12 = 12,
+        _8 = 8,
+        _6 = 6,
+        _4 = 4,
+        _3 = 3,
+    };
+
     char start(Degree degree); // return corresponding tag of (-1) if could not play
     void stop(char tag);
     void revoke(char tag = -1); // (-1) means the last recorded layer
@@ -28,9 +40,11 @@ struct Looper
     State state = State::Wander;
     Layer::Config config;
     unsigned bpm = 60;
+    Assist assist = Assist::No;
     Layer layers[16];
-    Time beat;
+    Time beat = { .bar = 0, .subdivision = 0 };
     Time recorded;
+    Time started; // first note ever played
     char bars = 0; // # of recorded bars
 };
 

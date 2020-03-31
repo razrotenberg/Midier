@@ -5,8 +5,11 @@ namespace midiate
 
 struct Time
 {
+    Time() = default;
+    Time(char bar, char subdivision);
+
     // the following types can be 'char' as long as Time::Bars and Time::Subdivisions are less than 127
-    char bar = 0;
+    char bar = -1;
     char subdivision = 0;
 
     void operator++();
@@ -25,14 +28,12 @@ struct Time
     // we use 96 in order to shorten the delay after every subdivision played
     //
     constexpr static auto Subdivisions = 96;
-    
+
     struct Difference
     {
         char bars;
         char subdivisions;
     };
-
-    static bool ordered(const Time & first, const Time & second, const Time & third);
 };
 
 bool operator==(const Time & lhs, const Time & rhs);

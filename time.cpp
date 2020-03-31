@@ -13,6 +13,11 @@ inline char mod(char i, char n) // positive mod operator
 
 } //
 
+Time::Time(char bar, char subdivision) :
+    bar(bar),
+    subdivision(subdivision)
+{}
+
 void Time::operator++()
 {
     subdivision = (subdivision + 1) % Time::Subdivisions;
@@ -21,14 +26,6 @@ void Time::operator++()
     {
         bar = (bar + 1) % Time::Bars;
     }
-}
-
-bool Time::ordered(const Time & first, const Time & second, const Time & third)
-{
-    return \
-        (first <= second && second <= third)    ||
-        (third <= first && first <= second)     ||
-        (second <= third && third <= first);
 }
 
 bool operator==(const Time & lhs, const Time & rhs)

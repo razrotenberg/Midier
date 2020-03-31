@@ -36,13 +36,14 @@ struct Layer
 
     enum class State : char
     {
+        Wait,
         Wander,
         Record,
         Playback,
     };
 
     Layer() = default;
-    Layer(char tag, Degree chord, const Time & now);
+    Layer(char tag, Degree chord, const Time & now, const Time & start);
 
     void record(const Time & now);
     void playback(const Time & now);
@@ -51,14 +52,14 @@ struct Layer
     bool played(const Time & now); // should the layer be played now?
 
     char tag = -1;
-    State state = State::Wander;
+    State state;
     Degree chord;
     Time start;
 
     struct {
         Time start;
         Time end;
-        short bar; // the bar index in which we recorded
+        short bar = -1; // the bar index in which we recorded
     } loop;
 
     Config config; // used only if statically configured
