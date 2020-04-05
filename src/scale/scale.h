@@ -1,9 +1,9 @@
 #pragma once
 
-#include "degree.h"
-#include "interval.h"
-#include "mode.h"
-#include "quality.h"
+#include "../degree/degree.h"
+#include "../interval/interval.h"
+#include "../mode/mode.h"
+#include "../quality/quality.h"
 
 namespace midiate
 {

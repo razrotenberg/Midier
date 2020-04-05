@@ -1,9 +1,9 @@
 #pragma once
 
-#include "degree.h"
-#include "mode.h"
-#include "note.h"
-#include "octave.h"
+#include "../degree/degree.h"
+#include "../mode/mode.h"
+#include "../note/note.h"
+#include "../octave/octave.h"
 
 namespace midiate
 {

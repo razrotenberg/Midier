@@ -1,8 +1,8 @@
 #include "rhythm.h"
 
-#include "debug.h"
-#include "layer.h"
-#include "time.h"
+#include "../debug/debug.h"
+#include "../layer/layer.h"
+#include "../time/time.h"
 
 #include <Arduino.h>
 #include <avr/pgmspace.h>

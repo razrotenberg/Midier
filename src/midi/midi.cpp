@@ -1,6 +1,7 @@
 #include "midi.h"
-#include "scale.h"
-#include "triad.h"
+
+#include "../scale/scale.h"
+#include "../triad/triad.h"
 
 #include <Arduino.h>
 

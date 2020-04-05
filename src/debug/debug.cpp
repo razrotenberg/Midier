@@ -2,8 +2,8 @@
 
 #ifdef DEBUG
 
-#include "layer.h"
-#include "time.h"
+#include "../layer/layer.h"
+#include "../time/time.h"
 
 #include <Arduino.h>
 

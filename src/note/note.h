@@ -1,6 +1,6 @@
 #pragma once
 
-#include "interval.h"
+#include "../interval/interval.h"
 
 namespace midiate
 {

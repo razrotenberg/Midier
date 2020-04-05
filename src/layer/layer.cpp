@@ -1,6 +1,6 @@
 #include "layer.h"
 
-#include "debug.h"
+#include "../debug/debug.h"
 
 namespace midiate
 {

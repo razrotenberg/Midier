@@ -1,7 +1,7 @@
 #pragma once
 
-#include "degree.h"
-#include "layer.h"
+#include "../degree/degree.h"
+#include "../layer/layer.h"
 
 namespace midiate
 {

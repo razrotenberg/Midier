@@ -1,6 +1,6 @@
 #pragma once
 
-#include "degree.h"
+#include "../degree/degree.h"
 
 namespace midiate
 {

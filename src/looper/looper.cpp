@@ -1,8 +1,8 @@
 #include "looper.h"
 
-#include "debug.h"
-#include "midi.h"
-#include "style.h"
+#include "../debug/debug.h"
+#include "../midi/midi.h"
+#include "../style/style.h"
 
 #include <Arduino.h>
 
