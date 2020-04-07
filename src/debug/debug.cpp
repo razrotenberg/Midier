@@ -7,7 +7,7 @@
 
 #include <Arduino.h>
 
-namespace midiate
+namespace midier
 {
 namespace debug
 {
@@ -31,7 +31,7 @@ void println(long x)            { Serial.println(x); }
 void println(unsigned long x)   { Serial.println(x); }
 void println()                  { Serial.println();  }
 
-// midiate specific
+// midier specific
 
 void print(const Time & time)
 {
@@ -76,6 +76,6 @@ void prefix(const char file[], int line, const char function[])
 }
 
 } // debug
-} // midiate
+} // midier
 
 #endif

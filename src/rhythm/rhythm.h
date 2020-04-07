@@ -1,6 +1,6 @@
 #pragma once
 
-namespace midiate
+namespace midier
 {
 
 enum class Rhythm : char
@@ -34,4 +34,4 @@ bool played(Rhythm rhythm, const Layer & layer, /* out */ unsigned & index);
 
 } // rhythm
 
-} // midiate
+} // midier

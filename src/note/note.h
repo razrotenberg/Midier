@@ -2,7 +2,7 @@
 
 #include "../interval/interval.h"
 
-namespace midiate
+namespace midier
 {
 
 enum class Note : char
@@ -42,4 +42,4 @@ OPERATOR_ADD(Accidental)
 
 #undef OPERATOR_ADD
 
-} // midiate
+} // midier

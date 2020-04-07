@@ -1,6 +1,6 @@
 #pragma once
 
-namespace midiate
+namespace midier
 {
 
 enum class Mode : char
@@ -26,4 +26,4 @@ void name(Mode mode, /* out */ Name & name);
 
 } // mode
 
-} // midiate
+} // midier

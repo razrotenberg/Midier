@@ -5,7 +5,7 @@
 
 #include <Arduino.h>
 
-namespace midiate
+namespace midier
 {
 namespace midi
 {
@@ -39,4 +39,4 @@ void play(Note root, Octave octave, Mode mode, Degree scale, Degree chord)
 }
 
 } // midi
-} // midiate
+} // midier

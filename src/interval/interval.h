@@ -1,6 +1,6 @@
 #pragma once
 
-namespace midiate
+namespace midier
 {
 
 enum class Interval : char
@@ -29,4 +29,4 @@ inline Interval operator+(Interval lhs, Interval rhs)
     return (Interval)((char)lhs + (char)rhs);
 }
 
-} // midiate
+} // midier

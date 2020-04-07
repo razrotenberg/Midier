@@ -2,7 +2,7 @@
 
 #include <Arduino.h>
 
-namespace midiate
+namespace midier
 {
 namespace style
 {
@@ -108,4 +108,4 @@ void description(unsigned n, unsigned r, /* out */ Description & desc)
 }
 
 } // style
-} // midiate
+} // midier

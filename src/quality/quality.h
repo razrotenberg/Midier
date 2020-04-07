@@ -1,6 +1,6 @@
 #pragma once
 
-namespace midiate
+namespace midier
 {
 
 enum class Quality : char
@@ -13,4 +13,4 @@ enum class Quality : char
     maj7,
 };
 
-} // midiate
+} // midier

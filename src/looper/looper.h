@@ -3,7 +3,7 @@
 #include "../degree/degree.h"
 #include "../layer/layer.h"
 
-namespace midiate
+namespace midier
 {
 
 struct Looper
@@ -47,4 +47,4 @@ struct Looper
     char bars = 0; // # of recorded bars
 };
 
-} // midiate
+} // midier

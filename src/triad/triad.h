@@ -4,7 +4,7 @@
 #include "../interval/interval.h"
 #include "../quality/quality.h"
 
-namespace midiate
+namespace midier
 {
 namespace triad
 {
@@ -12,4 +12,4 @@ namespace triad
 Interval interval(Quality quality, Degree degree);
 
 } // triad
-} // midiate
+} // midier

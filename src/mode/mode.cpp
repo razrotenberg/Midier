@@ -2,7 +2,7 @@
 
 #include <avr/pgmspace.h>
 
-namespace midiate
+namespace midier
 {
 namespace mode
 {
@@ -41,4 +41,4 @@ void name(Mode mode, /* out */ Name & name)
 }
 
 } // mode
-} // midiate
+} // midier

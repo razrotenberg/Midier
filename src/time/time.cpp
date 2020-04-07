@@ -1,6 +1,6 @@
 #include "time.h"
 
-namespace midiate
+namespace midier
 {
 
 Time Time::now = { .bar = 0, .subdivision = 0 };
@@ -70,4 +70,4 @@ Time::Difference operator-(const Time & to, const Time & from)
     };
 }
 
-} // midiate
+} // midier

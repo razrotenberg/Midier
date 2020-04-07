@@ -1,6 +1,6 @@
 #pragma once
 
-namespace midiate
+namespace midier
 {
 
 struct Time
@@ -43,4 +43,4 @@ bool operator!=(const Time & lhs, const Time & rhs);
 bool operator<=(const Time & lhs, const Time & rhs);
 Time::Difference operator-(const Time & to, const Time & from);
 
-} // midiate
+} // midier

@@ -7,7 +7,7 @@
 #include "../rhythm/rhythm.h"
 #include "../time/time.h"
 
-namespace midiate
+namespace midier
 {
 
 struct Layer
@@ -101,4 +101,4 @@ struct Layer
     short bar = 0; // must be of a big enough size in order to hold Layer::Period
 };
 
-} // midiate
+} // midier

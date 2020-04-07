@@ -1,8 +1,8 @@
 #pragma once
 
-namespace midiate
+namespace midier
 {
 
 using Degree = unsigned char;
 
-} // midiate
+} // midier

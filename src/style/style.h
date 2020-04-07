@@ -2,7 +2,7 @@
 
 #include "../degree/degree.h"
 
-namespace midiate
+namespace midier
 {
 namespace style
 {
@@ -14,4 +14,4 @@ using Description = char[13]; // 12 + '\0'
 void description(unsigned n, unsigned r, /* out */ Description & desc);
 
 } // style
-} // midiate
+} // midier

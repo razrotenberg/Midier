@@ -1,8 +1,8 @@
 #pragma once
 
-namespace midiate
+namespace midier
 {
 
 typedef int Octave;
 
-} // midiate
+} // midier

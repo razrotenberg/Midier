@@ -7,7 +7,7 @@
 #include <Arduino.h>
 #include <avr/pgmspace.h>
 
-namespace midiate
+namespace midier
 {
 namespace rhythm
 {
@@ -148,4 +148,4 @@ bool played(Rhythm rhythm, const Layer & layer, /* out */ unsigned & index)
 }
 
 } // rhythm
-} // midiate
+} // midier

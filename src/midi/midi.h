@@ -5,7 +5,7 @@
 #include "../note/note.h"
 #include "../octave/octave.h"
 
-namespace midiate
+namespace midier
 {
 namespace midi
 {
@@ -13,4 +13,4 @@ namespace midi
 void play(Note root, Octave octave, Mode mode, Degree scale, Degree chord);
 
 } // midi
-} // midiate
+} // midier

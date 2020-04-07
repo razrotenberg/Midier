@@ -4,7 +4,7 @@
 
 #ifdef DEBUG
 
-namespace midiate
+namespace midier
 {
 
 struct Layer;
@@ -32,7 +32,7 @@ void println(long);
 void println(unsigned long);
 void println();
 
-// midiate specific
+// midier specific
 
 void print(const Time &);
 void print(const Layer &);
@@ -40,7 +40,7 @@ void print(const Layer &);
 void prefix(const char file[], int line, const char function[]);
 
 } // debug
-} // midiate
+} // midier
 
 #define PRINT(x)        debug::print(x)
 #define PRINTLN(x)      debug::println(x)

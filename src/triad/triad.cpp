@@ -1,6 +1,6 @@
 #include "triad.h"
 
-namespace midiate
+namespace midier
 {
 namespace triad
 {
@@ -8,7 +8,7 @@ namespace triad
 namespace
 {
 
-#define ASSERT(quality, expected) static_assert(static_cast<int>(quality) == (expected), "Expected midiate::" #quality " to be equal to " #expected);
+#define ASSERT(quality, expected) static_assert(static_cast<int>(quality) == (expected), "Expected midier::" #quality " to be equal to " #expected);
 
 ASSERT(Quality::m7b5,   0);
 ASSERT(Quality::m7,     1);
@@ -41,4 +41,4 @@ Interval interval(Quality quality, Degree degree)
 }
 
 } // triad
-} // midiate
+} // midier

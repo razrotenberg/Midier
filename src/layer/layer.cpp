@@ -2,7 +2,7 @@
 
 #include "../debug/debug.h"
 
-namespace midiate
+namespace midier
 {
 
 Layer::Layer(char tag, Degree chord, const Time & start) :
@@ -142,4 +142,4 @@ bool Layer::played()
     return true;
 }
 
-} // midiate
+} // midier

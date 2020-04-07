@@ -1,6 +1,6 @@
 #include "scale.h"
 
-namespace midiate
+namespace midier
 {
 namespace scale
 {
@@ -8,7 +8,7 @@ namespace scale
 namespace
 {
 
-#define ASSERT(mode, expected) static_assert(static_cast<int>(mode) == (expected), "Expected midiate::" #mode " to be equal to " #expected);
+#define ASSERT(mode, expected) static_assert(static_cast<int>(mode) == (expected), "Expected midier::" #mode " to be equal to " #expected);
 
 ASSERT(Mode::Ionian,     0);
 ASSERT(Mode::Dorian,     1);
@@ -48,4 +48,4 @@ Quality quality(Mode mode, Degree degree)
 }
 
 } // scale
-} // midiate
+} // midier

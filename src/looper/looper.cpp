@@ -6,7 +6,7 @@
 
 #include <Arduino.h>
 
-namespace midiate
+namespace midier
 {
 
 char Looper::start(Degree degree)
@@ -326,4 +326,4 @@ void Looper::run(callback_t callback)
     }
 }
 
-} // midiate
+} // midier
