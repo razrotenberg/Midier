@@ -31,15 +31,14 @@ enum class Accidental : char
     Sharp   = +1,
 };
 
-#define OPERATOR_ADD(type)                                                          \
-    inline Note operator+(Note note, type rhs)                                      \
-    {                                                                               \
-        return static_cast<Note>(static_cast<char>(note) + static_cast<char>(rhs)); \
-    }
+inline Note operator+(Note note, Interval interval)
+{
+    return (Note)((char)note + (char)interval);
+}
 
-OPERATOR_ADD(Interval)
-OPERATOR_ADD(Accidental)
-
-#undef OPERATOR_ADD
+inline Note operator+(Note note, Accidental accidental)
+{
+    return (Note)((char)note + (char)accidental);
+}
 
 } // midier
