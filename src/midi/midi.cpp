@@ -24,6 +24,19 @@ void send(byte command, byte data1, byte data2)
 
 } //
 
+void play(Note note)
+{
+    play(note, 3);
+}
+
+void play(Note note, Octave octave)
+{
+    const auto number = 24 + (12 * (octave - 1)) + (char)note;
+
+    send(0x90, number, 0x7F); // note on on max velocity
+    send(0x80, number, 0); // note off
+}
+
 void play(Note root, Octave octave, Mode mode, Degree scale, Degree chord)
 {
     const auto note = root
@@ -32,10 +45,7 @@ void play(Note root, Octave octave, Mode mode, Degree scale, Degree chord)
             scale::quality(mode, scale),
             chord);
 
-    const auto number = 24 + (12 * (octave - 1)) + static_cast<char>(note);
-
-    send(0x90, number, 0x7F); // note on on max velocity
-    send(0x80, number, 0); // note off
+    play(note, octave);
 }
 
 } // midi

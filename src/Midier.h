@@ -2,6 +2,7 @@
 #include "interval/interval.h"
 #include "layer/layer.h"
 #include "looper/looper.h"
+#include "midi/midi.h"
 #include "mode/mode.h"
 #include "note/note.h"
 #include "octave/octave.h"
