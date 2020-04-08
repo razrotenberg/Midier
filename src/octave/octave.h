@@ -3,6 +3,6 @@
 namespace midier
 {
 
-typedef int Octave;
+typedef unsigned char Octave;
 
 } // midier
