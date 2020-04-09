@@ -21,12 +21,8 @@ struct Looper
     {
         No,
 
-        // numbers represeting the # of subdivisions to round
-        _12 = 12,
-        _8 = 8,
-        _6 = 6,
-        _4 = 4,
-        _3 = 3,
+        Half = 2,
+        Full = 1,
     };
 
     char start(Degree degree); // return corresponding tag of (-1) if could not play

@@ -31,6 +31,7 @@ using Description = char[15]; // '[' + 12 + ']' + '\0'
 
 void description(Rhythm rhythm, /* out */ Description & desc);
 bool played(Rhythm rhythm, const Layer & layer, /* out */ unsigned & index);
+int base(Rhythm rhythm);
 
 } // rhythm
 

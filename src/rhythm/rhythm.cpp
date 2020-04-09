@@ -132,6 +132,8 @@ const rhythmer_t all[] =
 
 static_assert(sizeof(all) / sizeof(all[0]) == (unsigned)Rhythm::Count, "Unexxpected number of rhythms declared");
 
+const int bases[] = { 4, 4, 4, 4, 4, 4, 4, 3, 3, 3, 3 };
+
 } // rhythmers
 
 void description(Rhythm rhythm, /* out */ Description & desc)
@@ -145,6 +147,15 @@ void description(Rhythm rhythm, /* out */ Description & desc)
 bool played(Rhythm rhythm, const Layer & layer, /* out */ unsigned & index)
 {
     return rhythmers::all[(unsigned)rhythm](layer, /* out */ index);
+}
+
+int base(Rhythm rhythm)
+{
+    // const int __bases[] = { (int)4, (int)4, (int)4, (int)4, (int)4, (int)4, (int)4, (int)3, (int)3, (int)3, (int)3 };
+
+    static_assert(sizeof(rhythmers::bases) / sizeof(rhythmers::bases[0]) == (unsigned)Rhythm::Count, "NOT GOOD");
+
+    return rhythmers::bases[(unsigned)rhythm];
 }
 
 } // rhythm

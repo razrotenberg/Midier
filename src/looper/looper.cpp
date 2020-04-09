@@ -29,7 +29,8 @@ char Looper::start(Degree degree)
         }
         else if (assist != Assist::No)
         {
-            const auto jumps = (unsigned)assist;
+            const auto base = rhythm::base(config.rhythm);
+            const auto jumps = base * (unsigned)assist;
             const auto round = Time::Subdivisions / jumps;
 
             while (((start - started).subdivisions % round) != 0)
