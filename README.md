@@ -88,3 +88,18 @@ This is done transparently using C++ `operator+()`. For example:
 ```
 Note a_sharp = Note::A + Accidental::Sharp; // this will result in 10 (A#)
 ```
+
+### Quality
+
+An `enum class` that represents a chord quality.
+
+*Midier* supports two types of chord qualities:
+- Triads (3 notes)
+- Seventh chords (4 notes)
+
+Currently, qualities in *Midier* are used only to retrieve the interval of a chord degree using `triad::interval()`.
+
+Every triad (3-note) quality has a matching seventh-chord (4-note) quality with the first three notes (chord degrees 1, 3, and 5) in common.
+Therefore, in order to support both 7-th chords (4 notes) and triads (3 notes) qualities, we define triad qualities as an alias to a matching seventh-chord quality.
+
+There's no need at the moment to be able to distinguish between 3-note qualities and their matching 4-note qualities by having different enum values.
