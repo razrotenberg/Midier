@@ -45,3 +45,46 @@ As said, *Midier* only sends MIDI commands. This means that there needs to be so
 If you are connecting your Arduino to a device that has a MIDI-in plug, such as a synthesizer, the device will generate sound from the MIDI commands.
 If you are connecting your Arduino to a computer, you should use a software to convert these MIDI commands into sound.
 Many DAW software can do that. For example: Ableton, Cubase, Logic Pro, GarageBand, Pro Tools, and many more.
+
+## Classes
+
+### Interval
+
+An `enum class` that represents a musical interval.
+
+The `enum` values are the corresponding number of semitones.
+In runtime, we might pass `Interval` values that are not declared in the header file. e.g: 13 (*m9*), 19 (*P12*).
+
+`Interval`s can be added and results in another `Interval`.
+Adding `Intervals` is done transparently using C++ `operator+()`. For example:
+```
+Interval p5 = Interval::m3 + Interval::M3; // this will result in 7 (Interval::P5)
+```
+
+### Note
+
+An `enum class` that represents a musical note.
+
+The `enum` values are the corresponding number of semitones from the note 'C'.
+This is to easily convert a note to its respective MIDI note number.
+
+In runtime, we might pass `Note` values that are not declared in the header file. e.g: 12 (*C*), 20 (*G#*).
+
+Adding `Note` with an `Interval` results in a `Note`.
+This is done transparently using C++ `operator+()`. For example:
+```
+Note g = Note::C + Interval::P5; // this will result in 7 (Note::G)
+```
+
+### Accidental
+
+An `enum class` that represents an accidental that can be applied to a note.
+Supported accidentals are flat (♭), natural (♮), and sharp (♯).
+
+The `enum` values are the corresponding number of semitones to raise or lower the note with.
+
+Adding `Note` with an `Accidental` results in a `Note`.
+This is done transparently using C++ `operator+()`. For example:
+```
+Note a_sharp = Note::A + Accidental::Sharp; // this will result in 10 (A#)
+```
