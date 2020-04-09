@@ -11,6 +11,7 @@ struct Looper
     enum class State : char
     {
         Wander,
+        Prerecord,
         Record,
         Playback,
         Overlay,

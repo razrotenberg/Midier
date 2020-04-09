@@ -45,6 +45,15 @@ char Looper::start(Degree degree)
             layer.record();
         }
 
+        // we were in pre-record state and the first layer was just played
+        // changing the state to `Record` will cause to actually start recording at
+        // the next click of `run()` and will record this newly inserted layer as well
+        if (state == State::Prerecord)
+        {
+            TRACE_1("Will record after prerecord");
+            state = State::Record;
+        }
+
         return i;
     }
 
@@ -168,7 +177,7 @@ void Looper::run(callback_t callback)
             }
         }
 
-        if (state == State::Record && previous == State::Wander)
+        if (state == State::Record && previous != State::Record)
         {
             TRACE_1("Starting to record");
 
