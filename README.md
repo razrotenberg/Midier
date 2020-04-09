@@ -46,6 +46,16 @@ If you are connecting your Arduino to a device that has a MIDI-in plug, such as 
 If you are connecting your Arduino to a computer, you should use a software to convert these MIDI commands into sound.
 Many DAW software can do that. For example: Ableton, Cubase, Logic Pro, GarageBand, Pro Tools, and many more.
 
+## Debugging
+
+Debug mode is supported in *Midier*.
+
+In debug mode, the library writes debug traces to the serial connection. These traces are visible in the Arduino Serial Monitor.
+
+MIDI notes are not being played in debug mode.
+
+To enable debug mode, uncomment line #3 in [debug.h](src/debug/debug.h). This declares a preprocessor macro called `DEBUG` which is respected in the macros `TRACE_*()`.
+
 ## Classes
 
 ### Interval
