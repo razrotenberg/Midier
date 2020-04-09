@@ -157,7 +157,7 @@ void Looper::run(callback_t callback)
         // both 'state' and the 'layers' may be modified, and 'beat' may be accessed via interrupts
         noInterrupts();
 
-        if (started.bar != -1) // check if we should reset 'started'
+        if (started.bar != -1 && started.subdivision == Time::now.subdivision) // check if we should reset 'started'
         {
             bool reset = true;
 
