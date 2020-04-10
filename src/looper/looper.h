@@ -39,7 +39,6 @@ struct Looper
     void run(callback_t callback);
 
     State state = State::Wander;
-    Layer::Config config;
     unsigned bpm = 60;
     Assist assist = Assist::No;
     Layer layers[16];

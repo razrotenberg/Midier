@@ -1,6 +1,9 @@
 #include "layer.h"
 
 #include "../debug/debug.h"
+#include "../scale/scale.h"
+#include "../style/style.h"
+#include "../triad/triad.h"
 
 namespace midier
 {
@@ -76,6 +79,27 @@ void Layer::click()
     }
     else
     {
+        if (played.subdivisions != -1)
+        {
+            // a note is being played
+            // we need to check if it's time to stop it
+
+            // what's the rate of the rhythm?
+            const auto rate = rhythm::rate(configured == Configured::Static ? config.rhythm : Config::global().rhythm);
+
+            // how many units of such rate exist in a bar (1/4)?
+            const auto count = (unsigned)rate;
+
+            // how many subdivisions exist between every two units?
+            const auto subdivisions = (unsigned)(Time::Subdivisions / count);
+
+            if (++played.subdivisions >= subdivisions)
+            {
+                midi::off(played.number);
+                played.subdivisions = -1;
+            }
+        }
+
         if (state == State::Record && Time::now == loop.start)
         {
             // the layer was recorded throughout the entire record loop
@@ -98,7 +122,7 @@ void Layer::click()
             }
         }
 
-        if (bar == -1) // we are in playback mode and out of the loop
+        if (state == State::Playback && bar == -1) // we are in playback mode and out of the loop
         {
             if (Time::now == loop.start) // re-entering the recorded loop
             {
@@ -123,23 +147,71 @@ void Layer::click()
 
 void Layer::revoke()
 {
-    TRACE_2(F("Revoking "), *this);
+    TRACE_2(F("Revoking layer "), *this);
+
+    if (played.subdivisions != -1)
+    {
+        TRACE_2(F("A note is still being played for revoked layer "), *this);
+        midi::off(played.number); // stop the note that is still being played by this layer
+    }
+
     tag = -1;
 }
 
-bool Layer::played()
+void Layer::play()
 {
     if (state == State::Wait)
     {
-        return false; // not started yet
+        return; // not started yet
     }
 
-    if (bar == -1) // we are in playback mode and out of the loop
+    if (state == State::Playback && bar == -1)
     {
-        return false;
+        return; // in playback mode and out of loop
     }
 
-    return true;
+    const auto & config = configured == Configured::Static ? this->config : Config::global();
+
+    unsigned index;
+    if (!rhythm::played(config.rhythm, *this, /* out */ index))
+    {
+        return; // not playing right now rhythmically
+    }
+
+    char steps = config.style.steps;
+
+    if (config.style.looped)
+    {
+        steps = (steps * 2) - 2;
+    }
+
+    index %= steps;
+
+    if (index >= config.style.steps)
+    {
+        index = config.style.steps - (index - config.style.steps + 1) - 1; // the respective mirrored index
+    }
+
+    const auto note = config.note + config.accidental
+        + scale::interval(config.mode, chord)
+        + triad::interval(
+            scale::quality(config.mode, chord),
+            style::degree(config.style.steps, config.style.perm, index));
+
+    if (played.subdivisions != -1)
+    {
+        TRACE_2(F("A note is still being played for layer "), *this);
+
+        // at most one note can be played at a time by every layer
+        // if there still is a note being played because of this layer, we
+        // stop playing it right before starting to play the new note
+        midi::off(played.number);
+    }
+
+    played.subdivisions = 0; // start counting the number of clicks the note is playing
+    played.number = midi::number(note, config.octave);
+
+    midi::on(played.number);
 }
 
 } // midier

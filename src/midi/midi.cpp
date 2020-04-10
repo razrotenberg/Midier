@@ -1,7 +1,6 @@
 #include "midi.h"
 
-#include "../scale/scale.h"
-#include "../triad/triad.h"
+#include "../debug/debug.h"
 
 #include <Arduino.h>
 
@@ -17,35 +16,44 @@ void send(byte command, byte data1, byte data2)
 {
     constexpr auto channel = 0;
 
+#ifndef DEBUG
     Serial.write((command & 0xF0) | (channel & 0x0F));
     Serial.write(data1 & 0x7F);
     Serial.write(data2 & 0x7F);
+#else
+    // TRACE_4(F("Sending MIDI command NOTE-"), command == 0x90 ? F("ON") : F("OFF"), " #", (int)data1);
+#endif
 }
 
 } //
 
-void play(Note note)
+Number number(Note note, Octave octave)
 {
-    play(note, 3);
+    return 24 + (12 * (octave - 1)) + (char)note;
 }
 
-void play(Note note, Octave octave)
+void on(Number number)
 {
-    const auto number = 24 + (12 * (octave - 1)) + (char)note;
-
-    send(0x90, number, 0x7F); // note on on max velocity
-    send(0x80, number, 0); // note off
+    send(0x90, number, 0x7F); // max velocity
 }
 
-void play(Note root, Octave octave, Mode mode, Degree scale, Degree chord)
+void off(Number number)
 {
-    const auto note = root
-        + scale::interval(mode, scale)
-        + triad::interval(
-            scale::quality(mode, scale),
-            chord);
+    send(0x80, number, 0);
+}
 
-    play(note, octave);
+void play(Note note, unsigned duration)
+{
+    play(note, 3, duration); // playing notes in octave 3 by default
+}
+
+void play(Note note, Octave octave, unsigned duration)
+{
+    const auto no = number(note, octave);
+
+    on(no);
+    delay(duration);
+    off(no);
 }
 
 } // midi

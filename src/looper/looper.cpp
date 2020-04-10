@@ -1,8 +1,6 @@
 #include "looper.h"
 
 #include "../debug/debug.h"
-#include "../midi/midi.h"
-#include "../style/style.h"
 
 #include <Arduino.h>
 
@@ -276,42 +274,7 @@ void Looper::run(callback_t callback)
                 continue; // unused layer
             }
 
-            if (!layer.played())
-            {
-                continue;
-            }
-
-            const auto & config = layer.configured == Layer::Configured::Static ? layer.config : this->config;
-
-            unsigned index;
-            if (!rhythm::played(config.rhythm, layer, /* out */ index))
-            {
-                continue;
-            }
-
-            char steps = config.style.steps;
-
-            if (config.style.looped)
-            {
-                steps = (steps * 2) - 2;
-            }
-
-            index %= steps;
-
-            if (index >= config.style.steps)
-            {
-                index = config.style.steps - (index - config.style.steps + 1) - 1; // the respective mirrored index
-            }
-
-#ifndef DEBUG
-            midi::play(
-                config.note + config.accidental,
-                config.octave,
-                config.mode,
-                layer.chord,
-                style::degree(config.style.steps, config.style.perm, index)
-            );
-#endif
+            layer.play();
         }
 
         ++Time::now;

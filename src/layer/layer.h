@@ -1,7 +1,9 @@
 #pragma once
 
+#include "../config/config.h"
 #include "../degree/degree.h"
 #include "../mode/mode.h"
+#include "../midi/midi.h"
 #include "../note/note.h"
 #include "../octave/octave.h"
 #include "../rhythm/rhythm.h"
@@ -12,23 +14,7 @@ namespace midier
 
 struct Layer
 {
-    struct Config
-    {
-        Note       note       = Note::C;
-        Accidental accidental = Accidental::Natural;
-        Octave     octave     = 3;
-        Mode       mode       = Mode::Ionian;
-        Rhythm     rhythm     = Rhythm::_7;
-
-        struct
-        {
-            char     steps  = 3;
-            unsigned perm   = 0;
-            bool     looped = false;
-        } style;
-    };
-
-    enum class Configured
+    enum class Configured : char
     {
         Static,
         Dynamic,
@@ -49,7 +35,7 @@ struct Layer
     void playback();
     void click();
     void revoke();
-    bool played(); // should the layer be played now?
+    void play();
 
     char tag = -1;
     State state;
@@ -64,6 +50,14 @@ struct Layer
 
     Config config; // used only if statically configured
     Configured configured = Configured::Dynamic;
+
+    struct {
+        // information about the last MIDI note number that was played
+        // at most one MIDI note is played at every moment by a layer
+        // this means that we support gate values of no more than 100% (legato)
+        char subdivisions = -1; // how many subdivisions the note has been playing for
+        midi::Number number;
+    } played;
 
     // Layer::Period is the number represents the periodity of the bar index. the bar index is incremented
     // every time a full bar has passed since the layer was first started. for finite layers, the bar index

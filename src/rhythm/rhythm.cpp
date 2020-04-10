@@ -75,6 +75,11 @@ struct Rhythmer
         );
     }
 
+    Rate rate() const
+    {
+        return (Rate)pgm_read_byte(&(this->_rate));
+    }
+
     unsigned count() const
     {
         return (unsigned)pgm_read_byte(&(this->_count));
@@ -87,25 +92,26 @@ struct Rhythmer
 
     // members should not be accessed directly as they hold addresses to PROGMEM
     const char * _description;
+    Rate _rate;
     unsigned char _count;
     const float * _portions;
 };
 
-#define RHYTHMER(__i) { descriptions:: __i, (sizeof(portions:: __i) / sizeof(portions:: __i[0])), portions::__i }
+#define RHYTHMER(__i, __rate) { descriptions:: __i, __rate, (sizeof(portions:: __i) / sizeof(portions:: __i[0])), portions::__i }
 
 const Rhythmer __rhythmers[] PROGMEM =
     {
-        RHYTHMER(_0),
-        RHYTHMER(_1),
-        RHYTHMER(_2),
-        RHYTHMER(_3),
-        RHYTHMER(_4),
-        RHYTHMER(_5),
-        RHYTHMER(_6),
-        RHYTHMER(_7),
-        RHYTHMER(_8),
-        RHYTHMER(_9),
-        RHYTHMER(_10),
+        RHYTHMER(_0,  Rate::_1_4),
+        RHYTHMER(_1,  Rate::_1_8),
+        RHYTHMER(_2,  Rate::_1_16),
+        RHYTHMER(_3,  Rate::_1_16),
+        RHYTHMER(_4,  Rate::_1_16),
+        RHYTHMER(_5,  Rate::_1_16),
+        RHYTHMER(_6,  Rate::_1_16),
+        RHYTHMER(_7,  Rate::_1_8_triplet),
+        RHYTHMER(_8,  Rate::_1_8_triplet),
+        RHYTHMER(_9,  Rate::_1_8_triplet),
+        RHYTHMER(_10, Rate::_1_16_triplet),
     };
 
 static_assert(sizeof(__rhythmers) / sizeof(__rhythmers[0]) == (unsigned)Rhythm::Count, "Unexpected number of rhythmers declared");
@@ -153,6 +159,11 @@ bool played(Rhythm rhythm, const Layer & layer, /* out */ unsigned & index)
     }
 
     return false;
+}
+
+Rate rate(Rhythm rhythm)
+{
+    return __rhythmers[(unsigned)rhythm].rate();
 }
 
 } // rhythm
