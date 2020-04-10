@@ -63,7 +63,7 @@ char Looper::start(Degree degree)
     return -1;
 }
 
-void Looper::stop(char tag)
+void Looper::stop(Layer::Tag tag)
 {
     Layer * const layer = layers.find(tag);
 
@@ -84,7 +84,7 @@ void Looper::stop(char tag)
     }
 }
 
-void Looper::revoke(char tag)
+void Looper::revoke(Layer::Tag tag)
 {
     if (state == State::Wander)
     {

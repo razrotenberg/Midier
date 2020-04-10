@@ -33,8 +33,8 @@ struct Looper
 
     // layer modifiers
     char start(Degree degree); // return corresponding tag of (-1) if could not play
-    void stop(char tag);
-    void revoke(char tag = -1); // (-1) means the last recorded layer
+    void stop(Layer::Tag tag);
+    void revoke(Layer::Tag tag = -1); // (-1) means the last recorded layer
 
     enum class Bar : char
     {

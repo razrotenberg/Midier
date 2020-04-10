@@ -53,7 +53,7 @@ bool ILayers::idle() const
     return used() == 0;
 }
 
-Layer * ILayers::find(char tag)
+Layer * ILayers::find(Layer::Tag tag)
 {
     for (auto & layer : *this)
     {

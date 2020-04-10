@@ -28,8 +28,10 @@ struct Layer
         Playback,
     };
 
+    using Tag = char;
+
     Layer() = default;
-    Layer(char tag, Degree chord, const Time & start);
+    Layer(Tag tag, Degree chord, const Time & start);
 
     void record();
     void playback();
@@ -37,7 +39,7 @@ struct Layer
     void revoke();
     void play();
 
-    char tag = -1;
+    Tag tag = -1;
     State state;
     Degree chord;
     Time start;

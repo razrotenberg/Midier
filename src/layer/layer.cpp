@@ -8,7 +8,7 @@
 namespace midier
 {
 
-Layer::Layer(char tag, Degree chord, const Time & start) :
+Layer::Layer(Tag tag, Degree chord, const Time & start) :
     tag(tag),
     chord(chord),
     start(start)
