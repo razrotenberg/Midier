@@ -1,7 +1,6 @@
 #pragma once
 
-#include "../degree/degree.h"
-#include "../layer/layer.h"
+#include "../layers/layers.h"
 
 namespace midier
 {
@@ -29,22 +28,37 @@ struct Looper
         _3 = 3,
     };
 
+    // creation
+    Looper(Layer layers[], unsigned count);
+
+    // layer modifiers
     char start(Degree degree); // return corresponding tag of (-1) if could not play
     void stop(char tag);
     void revoke(char tag = -1); // (-1) means the last recorded layer
 
-    using callback_t = void(*)(int); // (-1) means to stop counting bars
+    enum class Bar : char
+    {
+        None = -1,
+        Same = 0,
 
-    // start the run loop and fire 'callback' for every beginning of a bar
-    void run(callback_t callback);
+        // bar index
+    };
+
+    // runs all the logic of the looper layers once
+    Bar click();
 
     State state = State::Wander;
-    unsigned bpm = 60;
     Assist assist = Assist::No;
-    Layer layers[16];
-    Time recorded;
-    Time started; // first note ever played
-    char bars = 0; // # of recorded bars
+    Layers layers;
+
+private:
+    struct {
+        Time when; // when we started to record
+        char bars; // # of recorded bars
+    } _record;
+
+    Time _started; // first note ever played
+    State _previous = state;
 };
 
 } // midier

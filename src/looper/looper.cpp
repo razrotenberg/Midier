@@ -7,9 +7,13 @@
 namespace midier
 {
 
+Looper::Looper(Layer layers[], unsigned count) :
+    layers(layers, count)
+{}
+
 char Looper::start(Degree degree)
 {
-    for (char i = 0; i < sizeof(layers) / sizeof(Layer); ++i)
+    for (char i = 0; i < layers.count(); ++i)
     {
         auto & layer = layers[i];
 
@@ -20,17 +24,17 @@ char Looper::start(Degree degree)
 
         auto start = Time::now;
 
-        if (started.bar == -1)
+        if (_started.bar == -1)
         {
             TRACE_1(F("First layer starting"));
-            started = Time::now;
+            _started = Time::now;
         }
         else if (assist != Assist::No)
         {
             const auto jumps = (unsigned)assist;
             const auto round = Time::Subdivisions / jumps;
 
-            while (((start - started).subdivisions % round) != 0)
+            while (((start - _started).subdivisions % round) != 0)
             {
                 ++start;
             }
@@ -61,20 +65,17 @@ char Looper::start(Degree degree)
 
 void Looper::stop(char tag)
 {
-    for (auto & layer : layers)
-    {
-        if (layer.tag != tag)
-        {
-            continue;
-        }
+    Layer * const layer = layers.find(tag);
 
-        if (layer.state == Layer::State::Wait || layer.state == Layer::State::Wander)
+    if (layer != nullptr)
+    {
+        if (layer->state == Layer::State::Wait || layer->state == Layer::State::Wander)
         {
-            layer.revoke();
+            layer->revoke();
         }
-        else if (layer.state == Layer::State::Record)
+        else if (layer->state == Layer::State::Record)
         {
-            layer.playback();
+            layer->playback();
         }
 
         // do nothing if the layer is already in playback mode (let it keep playbacking)
@@ -96,7 +97,7 @@ void Looper::revoke(char tag)
         // we cannot tell for sure which layer was the last one to be recorded,
         // so we assume it is the layer with the highest tag (and the highest index)
 
-        for (unsigned i = sizeof(layers) / sizeof(Layer); i > 0; --i)
+        for (unsigned i = layers.count(); i > 0; --i)
         {
             auto & layer = layers[i - 1];
 
@@ -114,188 +115,116 @@ void Looper::revoke(char tag)
     }
     else
     {
-        for (auto & layer : layers)
+        Layer * const layer = layers.find(tag);
+
+        if (layer != nullptr)
         {
-            if (layer.tag == tag)
-            {
-                layer.revoke();
-                break;
-            }
+            layer->revoke();
         }
     }
 
-    // now check if there is no more recorded layers
+    // check if there is no more recorded layers and go back to wandering if so
 
-    for (const auto & layer : layers)
+    if (layers.none([](const Layer & layer) { return layer.state == Layer::State::Record || layer.state == Layer::State::Playback; }))
     {
-        if (layer.tag == -1)
-        {
-            continue;
-        }
-
-        if (layer.state == Layer::State::Record || layer.state == Layer::State::Playback)
-        {
-            return;
-        }
+        TRACE_1(F("Going back to wandering as there are no recorded layers anymore"));
+        state = State::Wander;
     }
-
-    // seems like there are no such layers, go back to wander mode
-
-    TRACE_1(F("Going back to wandering as there are no recorded layers anymore"));
-    state = State::Wander;
 }
 
-void Looper::run(callback_t callback)
+Looper::Bar Looper::click()
 {
-    auto previous = state;
+    Bar bar = Bar::Same;
 
-    while (true)
+    if (_started.bar != -1) // should we reset 'started'?
     {
-        // we disable interrupts because we don't want any user actions to interfere the main logic
-        // both 'state' and the 'layers' may be modified, and 'beat' may be accessed via interrupts
-        noInterrupts();
-
-        if (started.bar != -1 && started.subdivision == Time::now.subdivision) // check if we should reset 'started'
+        if (_started.subdivision == Time::now.subdivision && layers.idle())
         {
-            bool reset = true;
-
-            for (auto & layer : layers)
-            {
-                if (layer.tag != -1)
-                {
-                    reset = false; // don't reset if there exists any valid layer
-                    break;
-                }
-            }
-
-            if (reset)
-            {
-                TRACE_1(F("Reseting start beat as no more layers are being played"));
-                started.bar = -1;
-            }
+            TRACE_1(F("Reseting start beat as no more layers are being played"));
+            _started.bar = -1;
         }
+    }
 
-        if (state == State::Record && previous != State::Record)
+    if (state != _previous) // the state has changed since the last click
+    {
+        if (state == State::Prerecord)
+        {
+            TRACE_1(F("Marked for pre-record"));
+        }
+        else if (state == State::Record)
         {
             TRACE_1(F("Starting to record"));
 
-            recorded = Time::now;
+            _record.when = Time::now;
+            _record.bars = 1; // we count recorded bars from the time the start
 
-            for (auto & layer : layers) // start recording all layers
-            {
-                if (layer.tag == -1)
-                {
-                    continue; // unused layer
-                }
+            layers.record();
 
-                layer.record();
-            }
+            bar = (Bar)1;
         }
-        else if (state == State::Wander && previous != State::Wander)
+        else if (state == State::Wander)
         {
             TRACE_1(F("Starting to wander"));
 
-            bars = 0; // reset the # of recorded bars
+            layers.revoke();
 
-            for (auto & layer : layers) // revoke all layers
-            {
-                if (layer.tag == -1)
-                {
-                    continue; // unused layer
-                }
-
-                layer.revoke();
-            }
-
-            callback(-1); // clear the bar
+            bar = Bar::None;
         }
-        else if (state == State::Playback && previous != State::Playback)
+        else if (state == State::Playback)
         {
-            TRACE_3(F("Starting to playback "), (int)bars, F(" recorded bars"));
+            TRACE_3(F("Starting to playback "), (int)_record.bars, F(" recorded bars"));
         }
-        else if (state == State::Overlay && previous != State::Overlay)
+        else if (state == State::Overlay)
         {
             TRACE_1(F("Starting to overlay"));
 
-            for (auto & layer : layers) // start recording all layers that are in wander mode
-            {
-                if (layer.tag == -1)
+            layers.eval([](Layer & layer)
                 {
-                    continue; // unused layer
-                }
-
-                if (layer.state == Layer::State::Wander)
-                {
-                    layer.record();
-                }
-            }
-        }
-
-        if (state == State::Record || state == State::Playback || state == State::Overlay)
-        {
-            const auto difference = Time::now - recorded;
-
-            if (difference.subdivisions == 0)
-            {
-                if (state == State::Record && bars < Time::Bars) // still recording and haven't reached the max # of bars yet
-                {
-                    ++bars; // increase the # of recorded bars when (recording and) entering a new bar
-
-                    TRACE_3(F("Recording bar #"), (int)bars, F(" for the first time"));
-                }
-
-                if (difference.bars == bars) // just passed the # of recorded bars
-                {
-                    TRACE_2(F("Resetting beat to "), recorded);
-
-                    Time::now = recorded;
-
-                    // let all the layers know that the beat has changed
-
-                    for (auto & layer : layers)
+                    if (layer.state == Layer::State::Wander)
                     {
-                        if (layer.tag == -1)
-                        {
-                            continue; // unused layer
-                        }
-
-                        layer.click();
+                        layer.record();
                     }
-                }
-
-                callback((Time::now - recorded).bars);
-            }
+                });
         }
 
-        for (auto & layer : layers)
-        {
-            if (layer.tag == -1)
-            {
-                continue; // unused layer
-            }
-
-            layer.play();
-        }
-
-        ++Time::now;
-
-        for (auto & layer : layers)
-        {
-            if (layer.tag == -1)
-            {
-                continue; // unused layer
-            }
-
-            layer.click();
-        }
-
-        previous = state;
-
-        // enable interrupts as we are done with the main logic and no need for locks anymore
-        interrupts();
-
-        delay(60.f / static_cast<float>(bpm) * 1000.f / static_cast<float>(Time::Subdivisions));
+        _previous = state; // save the state after we finished comparing it
     }
+
+    // after handling state changes and stuff, it's time to play all the layers
+    layers.play();
+
+    // after playing all the layers, we advance the global time
+    ++Time::now;
+
+    // now we check if we are recording another bar, or if we reached the end of the recorded loop
+    if (state == State::Record || state == State::Playback || state == State::Overlay)
+    {
+        const auto difference = Time::now - _record.when;
+
+        if (difference.subdivisions == 0) // a number of loops (>0) has exactly passed since we started recording
+        {
+            if (state == State::Record && _record.bars < Time::Bars) // still recording and haven't reached the max # of bars yet
+            {
+                ++_record.bars; // the newly entered bar will be fully recorded as well
+            }
+
+            if (difference.bars == _record.bars) // just passed the # of recorded bars
+            {
+                TRACE_2(F("Resetting beat to "), _record.when);
+
+                Time::now = _record.when;
+            }
+
+            bar = (Bar)((Time::now - _record.when).bars + 1);
+        }
+    }
+
+    // now, after advancing the global time, and maybe even resetting it entirely,
+    // click all the layers know exactly once and let them realize what time is it
+    layers.click();
+
+    // let the client know if the bar has changed
+    return bar;
 }
 
 } // midier
