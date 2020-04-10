@@ -50,11 +50,11 @@ Many DAW software can do that. For example: Ableton, Cubase, Logic Pro, GarageBa
 
 Debug mode is supported in *Midier*.
 
-In debug mode, the library writes debug traces to the serial connection. These traces are visible in the Arduino Serial Monitor.
-
-MIDI notes are not being played in debug mode.
+In debug mode, the library writes debug traces to the serial connection and MIDI notes are not being played. These traces are visible in the Arduino Serial Monitor.
 
 To enable debug mode, uncomment line #3 in [debug.h](src/debug/debug.h). This declares a preprocessor macro called `DEBUG` which is respected in the macros `TRACE_*()`.
+
+Strings should pass to `TRACE_*()` macros wrapped with the macro `F()` (e.g. `TRACE_1(F("Hello, world"))`) to place the strings in the program memory (flash) instead of in the RAM.
 
 ## Classes
 

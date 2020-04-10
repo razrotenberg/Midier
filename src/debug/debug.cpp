@@ -5,8 +5,6 @@
 #include "../layer/layer.h"
 #include "../time/time.h"
 
-#include <Arduino.h>
-
 namespace midier
 {
 namespace debug
@@ -14,22 +12,24 @@ namespace debug
 
 // Arduino Serial.print(...) methods
 
-void print(const char x[])  { Serial.print(x); }
-void print(char x)          { Serial.print(x); }
-void print(unsigned char x) { Serial.print(x); }
-void print(int x)           { Serial.print(x); }
-void print(unsigned int x)  { Serial.print(x); }
-void print(long x)          { Serial.print(x); }
-void print(unsigned long x) { Serial.print(x); }
+void print(const char x[])                  { Serial.print(x); }
+void print(char x)                          { Serial.print(x); }
+void print(unsigned char x)                 { Serial.print(x); }
+void print(int x)                           { Serial.print(x); }
+void print(unsigned int x)                  { Serial.print(x); }
+void print(long x)                          { Serial.print(x); }
+void print(unsigned long x)                 { Serial.print(x); }
+void print(const __FlashStringHelper * x)   { Serial.print(x); }
 
-void println(const char x[])    { Serial.println(x); }
-void println(char x)            { Serial.println(x); }
-void println(unsigned char x)   { Serial.println(x); }
-void println(int x)             { Serial.println(x); }
-void println(unsigned int x)    { Serial.println(x); }
-void println(long x)            { Serial.println(x); }
-void println(unsigned long x)   { Serial.println(x); }
-void println()                  { Serial.println();  }
+void println(const char x[])                { Serial.println(x); }
+void println(char x)                        { Serial.println(x); }
+void println(unsigned char x)               { Serial.println(x); }
+void println(int x)                         { Serial.println(x); }
+void println(unsigned int x)                { Serial.println(x); }
+void println(long x)                        { Serial.println(x); }
+void println(unsigned long x)               { Serial.println(x); }
+void println(const __FlashStringHelper * x) { Serial.println(x); }
+void println()                              { Serial.println();  }
 
 // midier specific
 
@@ -51,17 +51,12 @@ void print(const Layer & layer)
     print((int)layer.tag);
 }
 
-void prefix(const char file[], int line, const char function[])
+void prefix(const __FlashStringHelper * file, int line, const char function[])
 {
-    const char * pos = file;
-    while (*pos != '\0')
+    char const * const pos = strrchr_P((char const *)file, '/');
+    if (pos != nullptr)
     {
-        if (*pos == '/')
-        {
-            file = pos + 1;
-        }
-
-        ++pos;
+        file = (const __FlashStringHelper *)(pos + 1);
     }
 
     PRINT("[");

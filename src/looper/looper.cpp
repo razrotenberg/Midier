@@ -24,7 +24,7 @@ char Looper::start(Degree degree)
 
         if (started.bar == -1)
         {
-            TRACE_1("First layer starting");
+            TRACE_1(F("First layer starting"));
             started = Time::now;
         }
         else if (assist != Assist::No)
@@ -50,14 +50,14 @@ char Looper::start(Degree degree)
         // the next click of `run()` and will record this newly inserted layer as well
         if (state == State::Prerecord)
         {
-            TRACE_1("Will record after prerecord");
+            TRACE_1(F("Will record after prerecord"));
             state = State::Record;
         }
 
         return i;
     }
 
-    TRACE_1("There's no place for a new layer");
+    TRACE_1(F("There's no place for a new layer"));
     return -1;
 }
 
@@ -143,7 +143,7 @@ void Looper::revoke(char tag)
 
     // seems like there are no such layers, go back to wander mode
 
-    TRACE_1("Going back to wandering as there are no recorded layers anymore");
+    TRACE_1(F("Going back to wandering as there are no recorded layers anymore"));
     state = State::Wander;
 }
 
@@ -172,14 +172,14 @@ void Looper::run(callback_t callback)
 
             if (reset)
             {
-                TRACE_1("Reseting start beat as no more layers are being played");
+                TRACE_1(F("Reseting start beat as no more layers are being played"));
                 started.bar = -1;
             }
         }
 
         if (state == State::Record && previous != State::Record)
         {
-            TRACE_1("Starting to record");
+            TRACE_1(F("Starting to record"));
 
             recorded = Time::now;
 
@@ -195,7 +195,7 @@ void Looper::run(callback_t callback)
         }
         else if (state == State::Wander && previous != State::Wander)
         {
-            TRACE_1("Starting to wander");
+            TRACE_1(F("Starting to wander"));
 
             bars = 0; // reset the # of recorded bars
 
@@ -213,11 +213,11 @@ void Looper::run(callback_t callback)
         }
         else if (state == State::Playback && previous != State::Playback)
         {
-            TRACE_3("Starting to playback ", (int)bars, " recorded bars");
+            TRACE_3(F("Starting to playback "), (int)bars, F(" recorded bars"));
         }
         else if (state == State::Overlay && previous != State::Overlay)
         {
-            TRACE_1("Starting to overlay");
+            TRACE_1(F("Starting to overlay"));
 
             for (auto & layer : layers) // start recording all layers that are in wander mode
             {
@@ -243,12 +243,12 @@ void Looper::run(callback_t callback)
                 {
                     ++bars; // increase the # of recorded bars when (recording and) entering a new bar
 
-                    TRACE_3("Recording bar #", (int)bars, " for the first time");
+                    TRACE_3(F("Recording bar #"), (int)bars, F(" for the first time"));
                 }
 
                 if (difference.bars == bars) // just passed the # of recorded bars
                 {
-                    TRACE_2("Resetting beat to ", recorded);
+                    TRACE_2(F("Resetting beat to "), recorded);
 
                     Time::now = recorded;
 

@@ -4,6 +4,8 @@
 
 #ifdef DEBUG
 
+#include <Arduino.h>
+
 namespace midier
 {
 
@@ -22,6 +24,7 @@ void print(int);
 void print(unsigned int);
 void print(long);
 void print(unsigned long);
+void print(const __FlashStringHelper *);
 
 void println(const char[]);
 void println(char);
@@ -30,6 +33,7 @@ void println(int);
 void println(unsigned int);
 void println(long);
 void println(unsigned long);
+void println(const __FlashStringHelper *);
 void println();
 
 // midier specific
@@ -37,14 +41,14 @@ void println();
 void print(const Time &);
 void print(const Layer &);
 
-void prefix(const char file[], int line, const char function[]);
+void prefix(const __FlashStringHelper * file, int line, const char function[]);
 
 } // debug
 } // midier
 
 #define PRINT(x)        debug::print(x)
 #define PRINTLN(x)      debug::println(x)
-#define TRACE_START()   debug::prefix(__FILE__, __LINE__, __FUNCTION__)
+#define TRACE_START()   debug::prefix(F(__FILE__), __LINE__, __FUNCTION__)
 #define TRACE_END() PRINTLN()
 
 #define TRACE_1(x1)                         TRACE_START(); PRINT(x1);                                                                               TRACE_END()

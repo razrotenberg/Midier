@@ -12,12 +12,12 @@ Layer::Layer(char tag, Degree chord, const Time & start) :
 {
     if (start == Time::now)
     {
-        TRACE_4("Starting layer ", *this, " of scale degree ", chord);
+        TRACE_4(F("Starting layer "), *this, F(" of scale degree "), chord);
         state = State::Wander;
     }
     else
     {
-        TRACE_6("Adding layer ", *this, " of scale degree ", chord, " to start at future beat ", start);
+        TRACE_6(F("Adding layer "), *this, F(" of scale degree "), chord, F(" to start at future beat "), start);
         state = State::Wait;
     }
 }
@@ -26,12 +26,12 @@ void Layer::record()
 {
     if (state == State::Wait)
     {
-        TRACE_3("Non-started layer ", *this, " is marked for recording");
+        TRACE_3(F("Non-started layer "), *this, F(" is marked for recording"));
         loop.bar = 0; // this should indicate `click()` to start recording when layer will be started
     }
     else
     {
-        TRACE_4("Starting to record layer ", *this, " at bar #", bar);
+        TRACE_4(F("Starting to record layer "), *this, F(" at bar #"), bar);
         state = State::Record;
         loop.start = Time::now;
         loop.bar = bar;
@@ -45,12 +45,12 @@ void Layer::playback()
         // if the layer was to complete a full loop, it would have been set to playback
         // state by `click()` and this very method would not have been called
 
-        TRACE_3("Layer ", *this, " was stopped before started to record");
+        TRACE_3(F("Layer "), *this, F(" was stopped before started to record"));
         revoke();
     }
     else
     {
-        TRACE_2("Stopping to record finite layer ", *this);
+        TRACE_2(F("Stopping to record finite layer "), *this);
 
         state = State::Playback;
         loop.end = Time::now;
@@ -64,12 +64,12 @@ void Layer::click()
     {
         if (Time::now == start)
         {
-            TRACE_2("Starting layer ", *this);
+            TRACE_2(F("Starting layer "), *this);
             state = State::Wander;
 
             if (loop.bar == 0) // the layer was marked for recording upon starting
             {
-                TRACE_2("Immediately recording layer ", *this);
+                TRACE_2(F("Immediately recording layer "), *this);
                 record();
             }
         }
@@ -83,7 +83,7 @@ void Layer::click()
             state = State::Playback;
             loop.end = Time::now;
 
-            TRACE_3("Layer ", *this, " is infinite");
+            TRACE_3(F("Layer "), *this, F(" is infinite"));
         }
 
         if (state == State::Playback && Time::now == loop.end)
@@ -104,26 +104,26 @@ void Layer::click()
             {
                 bar = loop.bar;
 
-                TRACE_4("Layer ", *this, " entering recorded loop with bar ", loop.bar);
+                TRACE_4(F("Layer "), *this, F(" entering recorded loop with bar "), loop.bar);
             }
 #ifdef DEBUG
             else if ((Time::now - start).subdivisions == 0)
             {
-                TRACE_3("Layer ", *this, " is out of loop");
+                TRACE_3(F("Layer "), *this, F(" is out of loop"));
             }
 #endif
         }
         else if ((Time::now - start).subdivisions == 0) // using 'else' to make sure we don't change the bar exactly after being restored
         {
             bar = (bar + 1) % Layer::Period; // keep everything going as we are still continuous
-            TRACE_4("Layer ", *this, " is entering bar #", bar);
+            TRACE_4(F("Layer "), *this, F(" is entering bar #"), bar);
         }
     }
 }
 
 void Layer::revoke()
 {
-    TRACE_2("Revoking layer ", *this);
+    TRACE_2(F("Revoking "), *this);
     tag = -1;
 }
 

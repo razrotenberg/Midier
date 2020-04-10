@@ -87,7 +87,7 @@ bool generic(const float portions[], unsigned count, const Layer & layer, /* out
 
         /* out */ index = i + ((layer.bar / length) * count);
 
-        TRACE_4("Playing note #", index, " of layer ", layer);
+        TRACE_4(F("Playing note #"), index, F(" of layer "), layer);
 
         return true;
     }
@@ -130,7 +130,7 @@ const rhythmer_t all[] =
             _1_6(0), _1_6(1), _1_6(2), _1_6(3), _1_6(4), _1_6(5)),
     };
 
-static_assert(sizeof(all) / sizeof(all[0]) == (unsigned)Rhythm::Count, "Unexxpected number of rhythms declared");
+static_assert(sizeof(all) / sizeof(all[0]) == (unsigned)Rhythm::Count, "Unexpected number of rhythmers declared");
 
 } // rhythmers
 
