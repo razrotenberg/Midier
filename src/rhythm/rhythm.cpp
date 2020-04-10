@@ -5,7 +5,6 @@
 #include "../time/time.h"
 
 #include <Arduino.h>
-#include <avr/pgmspace.h>
 
 namespace midier
 {

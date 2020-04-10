@@ -1,6 +1,6 @@
 #include "mode.h"
 
-#include <avr/pgmspace.h>
+#include <Arduino.h>
 
 namespace midier
 {
