@@ -7,8 +7,8 @@
 namespace midier
 {
 
-Looper::Looper(Layer layers[], unsigned count) :
-    layers(layers, count)
+Looper::Looper(ILayers layers) :
+    layers(layers)
 {}
 
 char Looper::start(Degree degree)
