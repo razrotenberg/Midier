@@ -24,6 +24,7 @@ void print(int);
 void print(unsigned int);
 void print(long);
 void print(unsigned long);
+void print(float);
 void print(const __FlashStringHelper *);
 
 void println(const char[]);
@@ -33,6 +34,7 @@ void println(int);
 void println(unsigned int);
 void println(long);
 void println(unsigned long);
+void println(float);
 void println(const __FlashStringHelper *);
 void println();
 

@@ -19,6 +19,7 @@ void print(int x)                           { Serial.print(x); }
 void print(unsigned int x)                  { Serial.print(x); }
 void print(long x)                          { Serial.print(x); }
 void print(unsigned long x)                 { Serial.print(x); }
+void print(float x)                         { Serial.print(x); }
 void print(const __FlashStringHelper * x)   { Serial.print(x); }
 
 void println(const char x[])                { Serial.println(x); }
@@ -28,6 +29,7 @@ void println(int x)                         { Serial.println(x); }
 void println(unsigned int x)                { Serial.println(x); }
 void println(long x)                        { Serial.println(x); }
 void println(unsigned long x)               { Serial.println(x); }
+void println(float x)                       { Serial.println(x); }
 void println(const __FlashStringHelper * x) { Serial.println(x); }
 void println()                              { Serial.println();  }
 
