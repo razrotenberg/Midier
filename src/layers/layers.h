@@ -5,22 +5,22 @@
 namespace midier
 {
 
-struct Layers
+struct ILayers
 {
     struct Iterator
     {
-        Iterator(Layers & layers, unsigned index);
+        Iterator(ILayers & layers, unsigned index);
 
         Layer & operator *();
         void    operator++();
         bool    operator!=(const Iterator & other);
 
     private:
-        Layers & _layers;
+        ILayers & _layers;
         unsigned _index;
     };
 
-    Layers(Layer layers[], unsigned count);
+    ILayers(Layer layers[], unsigned count);
 
     // queries
     unsigned count() const;
@@ -51,6 +51,17 @@ struct Layers
 private:
     Layer * _layers;
     unsigned _count;
+};
+
+// same as `ILayers` but hold the data as well
+// clients should use this class to declare their layers
+template <unsigned N>
+struct Layers : ILayers
+{
+    Layers() : ILayers(_layers, N)
+    {}
+
+    private: Layer _layers[N];
 };
 
 } // midier

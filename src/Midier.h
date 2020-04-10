@@ -1,6 +1,7 @@
 #include "degree/degree.h"
 #include "interval/interval.h"
 #include "layer/layer.h"
+#include "layers/layers.h"
 #include "looper/looper.h"
 #include "midi/midi.h"
 #include "mode/mode.h"

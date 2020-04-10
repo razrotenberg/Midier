@@ -3,41 +3,41 @@
 namespace midier
 {
 
-Layers::Iterator::Iterator(Layers & layers, unsigned index) :
+ILayers::Iterator::Iterator(ILayers & layers, unsigned index) :
     _layers(layers),
     _index(index)
 {}
 
-Layer & Layers::Iterator::operator*()
+Layer & ILayers::Iterator::operator*()
 {
     return _layers[_index];
 }
 
-void Layers::Iterator::operator++()
+void ILayers::Iterator::operator++()
 {
     ++_index;
 }
 
-bool Layers::Iterator::operator!=(const Iterator & other)
+bool ILayers::Iterator::operator!=(const Iterator & other)
 {
     return _index != other._index;
 }
 
-Layers::Layers(Layer layers[], unsigned count) :
+ILayers::ILayers(Layer layers[], unsigned count) :
     _layers(layers),
     _count(count)
 {}
 
-unsigned Layers::count() const
+unsigned ILayers::count() const
 {
     return _count;
 }
 
-unsigned Layers::used() const
+unsigned ILayers::used() const
 {
     unsigned count = 0;
 
-    for (auto & layer : (Layers &)*this)
+    for (auto & layer : (ILayers &)*this)
     {
         if (layer.tag != -1)
         {
@@ -48,12 +48,12 @@ unsigned Layers::used() const
     return count;
 }
 
-bool Layers::idle() const
+bool ILayers::idle() const
 {
     return used() == 0;
 }
 
-Layer * Layers::find(char tag)
+Layer * ILayers::find(char tag)
 {
     for (auto & layer : *this)
     {
@@ -66,22 +66,22 @@ Layer * Layers::find(char tag)
     return nullptr;
 }
 
-Layer & Layers::operator[](unsigned index)
+Layer & ILayers::operator[](unsigned index)
 {
     return _layers[index];
 }
 
-Layers::Iterator Layers::begin()
+ILayers::Iterator ILayers::begin()
 {
     return Iterator(*this, 0);
 }
 
-Layers::Iterator Layers::end()
+ILayers::Iterator ILayers::end()
 {
     return Iterator(*this, count());
 }
 
-void Layers::eval(void(*callback)(Layer &))
+void ILayers::eval(void(*callback)(Layer &))
 {
     for (auto & layer : *this)
     {
@@ -94,7 +94,7 @@ void Layers::eval(void(*callback)(Layer &))
     }
 }
 
-bool Layers::any(bool(*predicate)(const Layer &))
+bool ILayers::any(bool(*predicate)(const Layer &))
 {
     for (const auto & layer : *this)
     {
@@ -112,27 +112,27 @@ bool Layers::any(bool(*predicate)(const Layer &))
     return false;
 }
 
-bool Layers::none(bool(*predicate)(const Layer &))
+bool ILayers::none(bool(*predicate)(const Layer &))
 {
     return !any(predicate);
 }
 
-void Layers::record()
+void ILayers::record()
 {
     eval([](Layer & layer) { layer.record(); });
 }
 
-void Layers::click()
+void ILayers::click()
 {
     eval([](Layer & layer) { layer.click(); });
 }
 
-void Layers::revoke()
+void ILayers::revoke()
 {
     eval([](Layer & layer) { layer.revoke(); });
 }
 
-void Layers::play()
+void ILayers::play()
 {
     eval([](Layer & layer) { layer.play(); });
 }

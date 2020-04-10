@@ -29,7 +29,7 @@ struct Looper
     };
 
     // creation
-    Looper(Layer layers[], unsigned count);
+    Looper(ILayers layers);
 
     // layer modifiers
     char start(Degree degree); // return corresponding tag of (-1) if could not play
@@ -49,7 +49,7 @@ struct Looper
 
     State state = State::Wander;
     Assist assist = Assist::No;
-    Layers layers;
+    ILayers layers;
 
 private:
     struct {
