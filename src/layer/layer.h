@@ -14,12 +14,6 @@ namespace midier
 
 struct Layer
 {
-    enum class Configured : char
-    {
-        Static,
-        Dynamic,
-    };
-
     enum class State : char
     {
         Wait,
@@ -50,8 +44,28 @@ struct Layer
         short bar = -1; // the bar index in which we recorded
     } loop;
 
-    Config config; // used only if statically configured
-    Configured configured = Configured::Dynamic;
+    struct Config
+    {
+        // even though each layer may have its own configuraion, we want to support sharing configuraion among layers
+        // therefore, every layer has to have a `Config` member within it, so it could hold a specific configuraion
+        // if detached from the common one. in addition, the layer holds a view to the current configuration, which
+        // could point to its own configuraion or to a common configuraion
+
+        // getters
+        inline const midier::Config & data() { return _data; }
+        inline       midier::Config * view() { return _view; }
+
+        // operators
+        inline midier::Config * operator->()                { return _view; }
+        inline void operator=(const midier::Config & other) { _view = &(_data = other); }
+        inline void operator=(midier::Config * other)       { _view = other; };
+
+    private:
+        midier::Config _data;
+        midier::Config * _view = &_data; // by default, the layer is statically configured
+    };
+
+    Config config;
 
     struct {
         // information about the last MIDI note number that was played

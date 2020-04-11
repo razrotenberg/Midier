@@ -42,6 +42,12 @@ char Looper::start(Degree degree)
 
         layer = Layer(i, degree, start);
 
+        if (layers.config != nullptr)
+        {
+            // all layers share common configuration by default
+            layer.config = layers.config;
+        }
+
         if (state == State::Record || state == State::Overlay)
         {
             layer.record();

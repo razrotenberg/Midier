@@ -23,7 +23,8 @@ bool ILayers::Iterator::operator!=(const Iterator & other)
     return _index != other._index;
 }
 
-ILayers::ILayers(Layer layers[], unsigned count) :
+ILayers::ILayers(Layer layers[], unsigned count, Config * config) :
+    config(config),
     _layers(layers),
     _count(count)
 {}

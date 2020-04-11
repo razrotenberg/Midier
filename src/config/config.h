@@ -22,8 +22,6 @@ struct Config
         unsigned perm   = 0;
         bool     looped = false;
     } style;
-
-    static Config & global();
 };
 
 } // midier
