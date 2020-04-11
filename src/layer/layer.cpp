@@ -85,7 +85,7 @@ void Layer::click()
             // we need to check if it's time to stop it
 
             // what's the rate of the rhythm?
-            const auto rate = rhythm::rate(config->rhythm);
+            const auto rate = rhythm::rate(config->rhythm());
 
             // how many units of such rate exist in a bar (1/4)?
             const auto count = (unsigned)rate;
@@ -171,30 +171,30 @@ void Layer::play()
     }
 
     unsigned index;
-    if (!rhythm::played(config->rhythm, *this, /* out */ index))
+    if (!rhythm::played(config->rhythm(), *this, /* out */ index))
     {
         return; // not playing right now rhythmically
     }
 
-    char steps = config->style.steps;
+    char steps = config->style.steps();
 
-    if (config->style.looped)
+    if (config->style.looped())
     {
         steps = (steps * 2) - 2;
     }
 
     index %= steps;
 
-    if (index >= config->style.steps)
+    if (index >= config->style.steps())
     {
-        index = config->style.steps - (index - config->style.steps + 1) - 1; // the respective mirrored index
+        index = config->style.steps() - (index - config->style.steps() + 1) - 1; // the respective mirrored index
     }
 
-    const auto note = config->note + config->accidental
-        + scale::interval(config->mode, chord)
+    const auto note = config->note() + config->accidental()
+        + scale::interval(config->mode(), chord)
         + triad::interval(
-            scale::quality(config->mode, chord),
-            style::degree(config->style.steps, config->style.perm, index));
+            scale::quality(config->mode(), chord),
+            style::degree(config->style.steps(), config->style.perm(), index));
 
     if (played.subdivisions != -1)
     {
@@ -207,7 +207,7 @@ void Layer::play()
     }
 
     played.subdivisions = 0; // start counting the number of clicks the note is playing
-    played.number = midi::number(note, config->octave);
+    played.number = midi::number(note, config->octave());
 
     midi::on(played.number);
 }
