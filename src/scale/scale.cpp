@@ -19,13 +19,13 @@ ASSERT(Mode::Locrian,    6);
 
 Interval interval(Mode mode, Degree degree)
 {
-    static Interval const PROGMEM __ionian     [] = { Interval::P1, Interval::M2, Interval::M3, Interval::P4, Interval::P5, Interval::M6, Interval::M7, Interval::P8 };
-    static Interval const PROGMEM __dorian     [] = { Interval::P1, Interval::M2, Interval::m3, Interval::P4, Interval::P5, Interval::M6, Interval::m7, Interval::P8 };
-    static Interval const PROGMEM __phrygian   [] = { Interval::P1, Interval::m2, Interval::m3, Interval::P4, Interval::P5, Interval::m6, Interval::m7, Interval::P8 };
-    static Interval const PROGMEM __lydian     [] = { Interval::P1, Interval::M2, Interval::M3, Interval::A4, Interval::P5, Interval::M6, Interval::M7, Interval::P8 };
-    static Interval const PROGMEM __mixolydian [] = { Interval::P1, Interval::M2, Interval::M3, Interval::P4, Interval::P5, Interval::M6, Interval::m7, Interval::P8 };
-    static Interval const PROGMEM __aeolian    [] = { Interval::P1, Interval::M2, Interval::m3, Interval::P4, Interval::P5, Interval::m6, Interval::m7, Interval::P8 };
-    static Interval const PROGMEM __locrian    [] = { Interval::P1, Interval::m2, Interval::m3, Interval::P4, Interval::d5, Interval::m6, Interval::m7, Interval::P8 };
+    static Interval const PROGMEM __ionian     [] = { Interval::P1, Interval::M2, Interval::M3, Interval::P4, Interval::P5, Interval::M6, Interval::M7 };
+    static Interval const PROGMEM __dorian     [] = { Interval::P1, Interval::M2, Interval::m3, Interval::P4, Interval::P5, Interval::M6, Interval::m7 };
+    static Interval const PROGMEM __phrygian   [] = { Interval::P1, Interval::m2, Interval::m3, Interval::P4, Interval::P5, Interval::m6, Interval::m7 };
+    static Interval const PROGMEM __lydian     [] = { Interval::P1, Interval::M2, Interval::M3, Interval::A4, Interval::P5, Interval::M6, Interval::M7 };
+    static Interval const PROGMEM __mixolydian [] = { Interval::P1, Interval::M2, Interval::M3, Interval::P4, Interval::P5, Interval::M6, Interval::m7 };
+    static Interval const PROGMEM __aeolian    [] = { Interval::P1, Interval::M2, Interval::m3, Interval::P4, Interval::P5, Interval::m6, Interval::m7 };
+    static Interval const PROGMEM __locrian    [] = { Interval::P1, Interval::m2, Interval::m3, Interval::P4, Interval::d5, Interval::m6, Interval::m7 };
 
     static Interval const * const __all[] PROGMEM =
         {
@@ -39,9 +39,17 @@ Interval interval(Mode mode, Degree degree)
         };
 
     static_assert(sizeof(__all) / sizeof(__all[0]) == (unsigned)Mode::Count, "Unexpected number of modes declared");
-    static_assert(sizeof(Interval) == 1, "Unexpected size of 'Interval'");
+    static_assert(sizeof(Interval) == sizeof(byte), "Unexpected size of 'Interval'");
 
-    return (Interval)pgm_read_byte(pgm_read_ptr(__all + (unsigned)mode) + (degree - 1));
+    Interval octaver = Interval::P1;
+
+    while (degree > 7)
+    {
+        degree -= 7;
+        octaver = octaver + Interval::P8;
+    }
+
+    return octaver + (Interval)pgm_read_byte(pgm_read_ptr(__all + (unsigned)mode) + (degree - 1));
 }
 
 Quality quality(Mode mode, Degree degree)
@@ -51,7 +59,7 @@ Quality quality(Mode mode, Degree degree)
     constexpr auto __count = sizeof(__qualities) / sizeof(__qualities[0]);
 
     static_assert(__count == 7, "Expected 7 qualities to be declared");
-    static_assert(sizeof(Quality) == 1, "Unexpected size of 'Quality'");
+    static_assert(sizeof(Quality) == sizeof(byte), "Unexpected size of 'Quality'");
 
     return (Quality)pgm_read_byte(__qualities + ((degree - 1 + (unsigned)mode) % __count));
 }
