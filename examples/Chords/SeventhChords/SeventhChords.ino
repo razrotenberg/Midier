@@ -73,6 +73,6 @@ void playNote(midier::Note note)
     // play the note
     midier::midi::play(note);
 
-    // sleep for a short
+    // sleep for a short time
     delay(400);
 }
