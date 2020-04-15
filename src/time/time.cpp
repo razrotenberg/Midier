@@ -30,6 +30,11 @@ void Time::operator++()
     }
 }
 
+unsigned Time::Difference::total() const
+{
+    return (unsigned)bars * Time::Subdivisions + (unsigned)subdivisions;
+}
+
 bool operator==(const Time & lhs, const Time & rhs)
 {
     return lhs.bar == rhs.bar && lhs.subdivision == rhs.subdivision;

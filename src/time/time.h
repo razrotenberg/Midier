@@ -33,6 +33,8 @@ struct Time
     {
         char bars;
         char subdivisions;
+
+        unsigned total() const; // total number of subdivisions
     };
 
     static Time now;

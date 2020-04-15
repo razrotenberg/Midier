@@ -7,6 +7,7 @@
 #include "mode/mode.h"
 #include "note/note.h"
 #include "octave/octave.h"
+#include "player/player.h"
 #include "quality/quality.h"
 #include "rhythm/rhythm.h"
 #include "scale/scale.h"
