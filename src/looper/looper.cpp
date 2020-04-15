@@ -162,11 +162,9 @@ Looper::Bar Looper::click()
             TRACE_1(F("Starting to record"));
 
             _record.when = Time::now;
-            _record.bars = 1; // we count recorded bars from the time the start
+            _record.bars = 0; // reset the number of bars recorded
 
             layers.record();
-
-            bar = (Bar)1;
         }
         else if (state == State::Wander)
         {
@@ -196,32 +194,47 @@ Looper::Bar Looper::click()
         _previous = state; // save the state after we finished comparing it
     }
 
+    if (state == State::Record)
+    {
+        if (_record.when.subdivision == Time::now.subdivision)
+        {
+            ++_record.bars; // we count recorded bars from the time they start
+            TRACE_3(F("Recording bar #"), (int)_record.bars, F(" for the first time"));
+        }
+    }
+
     // after handling state changes and stuff, it's time to play all the layers
     layers.play();
 
     // after playing all the layers, we advance the global time
     ++Time::now;
 
-    // now we check if we are recording another bar, or if we reached the end of the recorded loop
     if (state == State::Record || state == State::Playback || state == State::Overlay)
     {
         const auto difference = Time::now - _record.when;
 
-        if (difference.subdivisions == 0) // a number of loops (>0) has exactly passed since we started recording
+        if (difference.subdivisions == 0)
         {
-            if (state == State::Record && _record.bars < Time::Bars) // still recording and haven't reached the max # of bars yet
+            if (state == State::Record)
             {
-                ++_record.bars; // the newly entered bar will be fully recorded as well
+                if (_record.bars == Time::Bars)
+                {
+                    TRACE_3(F("Recorded maximum of "), (int)_record.bars, F(" bars"));
+                    state = State::Overlay;
+                }
             }
-
-            if (difference.bars == _record.bars) // just passed the # of recorded bars
+            else // playback or overlay
             {
-                TRACE_2(F("Resetting beat to "), _record.when);
-
-                Time::now = _record.when;
+                if (difference.bars == _record.bars) // just passed the # of recorded bars
+                {
+                    TRACE_2(F("Resetting beat to "), _record.when);
+                    Time::now = _record.when;
+                }
             }
-
-            bar = (Bar)((Time::now - _record.when).bars + 1);
+        }
+        else if (difference.subdivisions == 1)
+        {
+            bar = (Bar)(difference.bars + 1);
         }
     }
 
