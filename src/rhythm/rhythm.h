@@ -34,7 +34,6 @@ enum class Rhythm : char
 };
 
 struct Layer;
-struct Time;
 
 namespace rhythm
 {
