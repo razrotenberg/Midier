@@ -51,6 +51,13 @@ struct Layer
         // if detached from the common one. in addition, the layer holds a view to the current configuration, which
         // could point to its own configuraion or to a common configuraion
 
+        Config(); // by default, the layer is statically configured
+        Config(Config &&);
+        Config & operator=(Config &&);
+
+        Config(const Config &) = delete;
+        Config& operator=(const Config &) = delete;
+
         // getters
         inline const midier::Config & data() { return _data; }
         inline       midier::Config * view() { return _view; }
@@ -62,7 +69,7 @@ struct Layer
 
     private:
         midier::Config _data;
-        midier::Config * _view = &_data; // by default, the layer is statically configured
+        midier::Config * _view;
     };
 
     Config config;

@@ -8,6 +8,32 @@
 namespace midier
 {
 
+Layer::Config::Config() :
+    _data(),
+    _view(&_data)
+{}
+
+Layer::Config::Config(Config && config)
+{
+    *this = (Config &&)config;
+}
+
+Layer::Config & Layer::Config::operator=(Config && other)
+{
+    _data = other._data;
+
+    if (other._view == &other._data)
+    {
+        _view = &_data;
+    }
+    else
+    {
+        _view = other._view;
+    }
+
+    return *this;
+}
+
 Layer::Layer(Tag tag, Degree chord, const Time & start) :
     tag(tag),
     chord(chord),
