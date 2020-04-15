@@ -28,14 +28,6 @@ struct Looper
         _3 = 3,
     };
 
-    // creation
-    Looper(ILayers layers);
-
-    // layer modifiers
-    char start(Degree degree); // return corresponding tag of (-1) if could not play
-    void stop(Layer::Tag tag);
-    void revoke(Layer::Tag tag = -1); // (-1) means the last recorded layer
-
     enum class Bar : char
     {
         None = -1,
@@ -43,6 +35,22 @@ struct Looper
 
         // bar index
     };
+
+    // creation
+    Looper(ILayers layers);
+
+    // start and stop layers
+    Layer::Tag start(Degree degree); // return corresponding tag or (-1) if could not play
+    void stop(Layer::Tag tag);
+
+    // revoke a recorded layer
+    // passing (-1) as `tag` means to revoke the last recorded layer
+    // doing nothing if wandering
+    void revoke(Layer::Tag tag = -1);
+
+    // state changes
+    void record(); // toggle between record/playback/overlay modes
+    void wander(); // go back to wandering
 
     // runs all the logic of the looper layers once
     Bar click();

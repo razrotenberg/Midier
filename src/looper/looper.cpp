@@ -94,6 +94,7 @@ void Looper::revoke(Layer::Tag tag)
 {
     if (state == State::Wander)
     {
+        TRACE_1(F("Not revoking any layer as we are wandering"));
         return; // nothing to do when wandering
     }
 
@@ -138,6 +139,34 @@ void Looper::revoke(Layer::Tag tag)
     }
 }
 
+void Looper::record()
+{
+    if (state == State::Wander)
+    {
+        // we want to set the state to `Prerecord` if there are no layers at the moment,
+        // so we will start recording when the first layer will be played
+        // we want to start recording immediately if there's a layer playing at the moment
+        state = layers.idle() ? State::Prerecord : State::Record;
+    }
+    else if (state == State::Prerecord)
+    {
+        state = State::Wander;
+    }
+    else if (state == State::Record || state == State::Overlay)
+    {
+        state = State::Playback;
+    }
+    else if (state == State::Playback)
+    {
+        state = State::Overlay;
+    }
+}
+
+void Looper::wander()
+{
+    state = State::Wander;
+}
+
 Looper::Bar Looper::click()
 {
     Bar bar = Bar::Same;
@@ -172,7 +201,10 @@ Looper::Bar Looper::click()
 
             layers.revoke();
 
-            bar = Bar::None;
+            if (_previous != State::Prerecord)
+            {
+                bar = Bar::None;
+            }
         }
         else if (state == State::Playback)
         {
