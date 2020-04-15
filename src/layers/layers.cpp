@@ -133,9 +133,4 @@ void ILayers::revoke()
     eval([](Layer & layer) { layer.revoke(); });
 }
 
-void ILayers::play()
-{
-    eval([](Layer & layer) { layer.play(); });
-}
-
 } // midier

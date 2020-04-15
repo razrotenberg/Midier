@@ -27,11 +27,13 @@ struct Layer
     Layer() = default;
     Layer(Tag tag, Degree chord, const Time & start);
 
+    // state changes
     void record();
     void playback();
-    void click();
     void revoke();
-    void play();
+
+    // runs all the logic of this layer once
+    void click();
 
     Tag tag = -1;
     State state;
@@ -39,6 +41,7 @@ struct Layer
     Time start;
 
     struct {
+        // the layer is played at `start` and is not played at `end`; [start,end)
         Time start;
         Time end;
         short bar = -1; // the bar index in which we recorded
@@ -115,7 +118,7 @@ struct Layer
     constexpr static auto Period = 1440;
 
     // the index of the bar within the logical loop it's being played in
-    short bar = 0; // must be of a big enough size in order to hold Layer::Period
+    short bar = -1; // must be of a big enough size in order to hold Layer::Period
 };
 
 } // midier

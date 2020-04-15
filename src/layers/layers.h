@@ -46,7 +46,6 @@ struct ILayers
     void record();
     void click();
     void revoke();
-    void play();
 
     // common configuration (optional)
     Config * config;

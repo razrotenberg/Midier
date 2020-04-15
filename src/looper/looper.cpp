@@ -194,21 +194,6 @@ Looper::Bar Looper::click()
         _previous = state; // save the state after we finished comparing it
     }
 
-    if (state == State::Record)
-    {
-        if (_record.when.subdivision == Time::now.subdivision)
-        {
-            ++_record.bars; // we count recorded bars from the time they start
-            TRACE_3(F("Recording bar #"), (int)_record.bars, F(" for the first time"));
-        }
-    }
-
-    // after handling state changes and stuff, it's time to play all the layers
-    layers.play();
-
-    // after playing all the layers, we advance the global time
-    ++Time::now;
-
     if (state == State::Record || state == State::Playback || state == State::Overlay)
     {
         const auto difference = Time::now - _record.when;
@@ -217,30 +202,36 @@ Looper::Bar Looper::click()
         {
             if (state == State::Record)
             {
-                if (_record.bars == Time::Bars)
+                if (_record.bars < Time::Bars)
+                {
+                    ++_record.bars; // we count recorded bars from the time they start
+                    TRACE_3(F("Recording bar #"), (int)_record.bars, F(" for the first time"));
+                }
+                else
                 {
                     TRACE_3(F("Recorded maximum of "), (int)_record.bars, F(" bars"));
-                    state = State::Overlay;
+                    _previous = state = State::Overlay; // setting `_previous` also for it to not count as a state change
                 }
             }
             else // playback or overlay
             {
                 if (difference.bars == _record.bars) // just passed the # of recorded bars
                 {
-                    TRACE_2(F("Resetting beat to "), _record.when);
+                    TRACE_5(F("Resetting beat to "), _record.when, F(" after "), (int)difference.bars, F(" bars"));
                     Time::now = _record.when;
                 }
             }
-        }
-        else if (difference.subdivisions == 1)
-        {
-            bar = (Bar)(difference.bars + 1);
+
+            // using `Time::now` and not `difference` to support the cases when we reset the beat
+            bar = (Bar)((Time::now - _record.when).bars + 1);
         }
     }
 
-    // now, after advancing the global time, and maybe even resetting it entirely,
-    // click all the layers know exactly once and let them realize what time is it
+    // let all layers click
     layers.click();
+
+    // after playing all the layers, we advance the global time
+    ++Time::now;
 
     // let the client know if the bar has changed
     return bar;
