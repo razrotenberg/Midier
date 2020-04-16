@@ -1,4 +1,4 @@
-#include "looper.h"
+#include "sequencer.h"
 
 #include "../debug/debug.h"
 
@@ -7,12 +7,12 @@
 namespace midier
 {
 
-Looper::Looper(ILayers layers, unsigned char bpm) :
+Sequencer::Sequencer(ILayers layers, unsigned char bpm) :
     layers(layers),
     bpm(bpm)
 {}
 
-Layer::Tag Looper::start(Degree degree)
+Layer::Tag Sequencer::start(Degree degree)
 {
     for (char i = 0; i < layers.count(); ++i)
     {
@@ -70,7 +70,7 @@ Layer::Tag Looper::start(Degree degree)
     return -1;
 }
 
-void Looper::stop(Layer::Tag tag)
+void Sequencer::stop(Layer::Tag tag)
 {
     Layer * const layer = layers.find(tag);
 
@@ -91,7 +91,7 @@ void Looper::stop(Layer::Tag tag)
     }
 }
 
-void Looper::revoke(Layer::Tag tag)
+void Sequencer::revoke(Layer::Tag tag)
 {
     if (state == State::Wander)
     {
@@ -140,7 +140,7 @@ void Looper::revoke(Layer::Tag tag)
     }
 }
 
-void Looper::record()
+void Sequencer::record()
 {
     if (state == State::Wander)
     {
@@ -163,12 +163,12 @@ void Looper::record()
     }
 }
 
-void Looper::wander()
+void Sequencer::wander()
 {
     state = State::Wander;
 }
 
-Looper::Bar Looper::click(Run run)
+Sequencer::Bar Sequencer::click(Run run)
 {
     const auto bps = (float)bpm / 60.f; // beats per second
     const auto mspb = 1000.f / bps; // ms per beat
@@ -297,7 +297,7 @@ Looper::Bar Looper::click(Run run)
     return bar;
 }
 
-void Looper::run(const Time::Duration & duration)
+void Sequencer::run(const Time::Duration & duration)
 {
     unsigned subdivisions = duration.total();
 

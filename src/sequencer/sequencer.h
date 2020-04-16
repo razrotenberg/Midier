@@ -5,7 +5,7 @@
 namespace midier
 {
 
-struct Looper
+struct Sequencer
 {
     enum class State : char
     {
@@ -43,7 +43,7 @@ struct Looper
     };
 
     // creation
-    Looper(ILayers layers, unsigned char bpm = 60);
+    Sequencer(ILayers layers, unsigned char bpm = 60);
 
     // start and stop layers
     Layer::Tag start(Degree degree); // return corresponding tag or (-1) if could not play
