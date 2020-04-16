@@ -32,9 +32,9 @@ Number number(Note note, Octave octave)
     return 24 + (12 * (octave - 1)) + (char)note;
 }
 
-void on(Number number)
+void on(Number number, unsigned velocity)
 {
-    send(0x90, number, 0x7F); // max velocity
+    send(0x90, number, velocity);
 }
 
 void off(Number number)
