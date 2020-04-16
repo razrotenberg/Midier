@@ -7,11 +7,12 @@
 namespace midier
 {
 
-Looper::Looper(ILayers layers) :
-    layers(layers)
+Looper::Looper(ILayers layers, unsigned char bpm) :
+    layers(layers),
+    bpm(bpm)
 {}
 
-char Looper::start(Degree degree)
+Layer::Tag Looper::start(Degree degree)
 {
     for (char i = 0; i < layers.count(); ++i)
     {
@@ -167,8 +168,35 @@ void Looper::wander()
     state = State::Wander;
 }
 
-Looper::Bar Looper::click()
+Looper::Bar Looper::click(Run run)
 {
+    const auto bps = (float)bpm / 60.f; // beats per second
+    const auto mspb = 1000.f / bps; // ms per beat
+    const auto mspc = mspb / (float)midier::Time::Subdivisions; // ms per click
+
+    if (_clicked == -1)
+    {
+        // this is the very first click so no need to wait
+    }
+    else
+    {
+        if (run == Run::Sync)
+        {
+            while (millis() - _clicked < mspc); // wait until enough time has passed
+        }
+        else if (run == Run::Async)
+        {
+            if (millis() - _clicked < mspc)
+            {
+                return Bar::Same; // we don't actually click yet
+            }
+        }
+    }
+
+    _clicked = millis(); // reset the time of the last click to now
+
+    // only now we are actually starting to click
+
     Bar bar = Bar::Same;
 
     if (_started.bar != -1) // should we reset 'started'?
@@ -267,6 +295,16 @@ Looper::Bar Looper::click()
 
     // let the client know if the bar has changed
     return bar;
+}
+
+void Looper::run(const Time::Duration & duration)
+{
+    unsigned subdivisions = duration.total();
+
+    while (subdivisions-- > 0)
+    {
+        click(Run::Sync);
+    }
 }
 
 } // midier

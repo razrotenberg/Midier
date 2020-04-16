@@ -37,6 +37,8 @@ struct Time
         unsigned total() const; // total number of subdivisions
     };
 
+    using Duration = Difference;
+
     static Time now;
 };
 
