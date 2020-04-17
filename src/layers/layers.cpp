@@ -53,19 +53,6 @@ bool ILayers::idle() const
     return used() == 0;
 }
 
-Layer * ILayers::find(Layer::Tag tag)
-{
-    for (auto & layer : *this)
-    {
-        if (layer.tag == tag)
-        {
-            return &layer;
-        }
-    }
-
-    return nullptr;
-}
-
 Layer & ILayers::operator[](unsigned index)
 {
     return _layers[index];

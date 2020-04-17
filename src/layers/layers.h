@@ -28,7 +28,6 @@ struct ILayers
     bool idle() const; // if no layers are used
 
     // getters
-    Layer * find(Layer::Tag tag); // returns `nullptr` if there's no layer with this tag
     Layer & operator[](unsigned index);
 
     // iterate
