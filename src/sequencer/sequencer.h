@@ -7,15 +7,6 @@ namespace midier
 
 struct Sequencer
 {
-    enum class State : char
-    {
-        Wander,
-        Prerecord,
-        Record,
-        Playback,
-        Overlay,
-    };
-
     enum class Assist : char
     {
         No,
@@ -54,6 +45,10 @@ struct Sequencer
     // creation
     Sequencer(ILayers layers, unsigned char bpm = 60);
 
+    // queries
+    bool recording() const;
+    bool looping() const;
+
     // start and stop layers
     Handle start(Degree degree);
     void stop(Handle handle);
@@ -90,12 +85,20 @@ struct Sequencer
     void run(const Time::Duration & duration);
 
     // exposed members
-    State state = State::Wander;
     Assist assist = Assist::No;
     ILayers layers;
     unsigned char bpm;
 
 private:
+    enum class State : char
+    {
+        Wander,
+        Prerecord,
+        Record,
+        Playback,
+        Overlay,
+    };
+
     unsigned long long _clicked = -1; // timestamp of previous click
 
     struct {
@@ -104,7 +107,8 @@ private:
     } _record;
 
     Time _started; // first note ever played
-    State _previous = state;
+    State _state = State::Wander;
+    State _previous = _state;
 };
 
 } // midier

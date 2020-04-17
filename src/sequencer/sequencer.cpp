@@ -12,6 +12,16 @@ Sequencer::Sequencer(ILayers layers, unsigned char bpm) :
     bpm(bpm)
 {}
 
+bool Sequencer::recording() const
+{
+    return _state == State::Prerecord || _state == State::Record || _state == State::Overlay;
+}
+
+bool Sequencer::looping() const
+{
+    return _state == State::Record || _state == State::Playback || _state == State::Overlay;
+}
+
 Sequencer::Handle Sequencer::start(Degree degree)
 {
     Sequencer::Handle handle;
@@ -51,7 +61,7 @@ Sequencer::Handle Sequencer::start(Degree degree)
             layer.config = layers.config;
         }
 
-        if (state == State::Record || state == State::Overlay)
+        if (_state == State::Record || _state == State::Overlay)
         {
             layer.record();
         }
@@ -106,27 +116,27 @@ void Sequencer::revoke()
 
 void Sequencer::record()
 {
-    if (state == State::Wander)
+    if (_state == State::Wander)
     {
-        state = State::Prerecord;
+        _state = State::Prerecord;
     }
-    else if (state == State::Prerecord)
+    else if (_state == State::Prerecord)
     {
-        state = State::Wander;
+        _state = State::Wander;
     }
-    else if (state == State::Record || state == State::Overlay)
+    else if (_state == State::Record || _state == State::Overlay)
     {
-        state = State::Playback;
+        _state = State::Playback;
     }
-    else if (state == State::Playback)
+    else if (_state == State::Playback)
     {
-        state = State::Overlay;
+        _state = State::Overlay;
     }
 }
 
 void Sequencer::wander()
 {
-    state = State::Wander;
+    _state = State::Wander;
 }
 
 Sequencer::Bar Sequencer::click(Run run)
@@ -169,31 +179,31 @@ Sequencer::Bar Sequencer::click(Run run)
         }
     }
 
-    if (state == State::Record || state == State::Playback || state == State::Overlay) // check if should go back to wandering
+    if (looping()) // check if should go back to wandering
     {
         if (layers.all([](const Layer & layer){ return layer.state == Layer::State::Wander; }))
         {
             TRACE_1(F("Going back to wandering as there are no recorded layers anymore"));
-            state = State::Wander;
+            _state = State::Wander;
         }
     }
 
-    if (state == State::Prerecord) // check if should start recording
+    if (_state == State::Prerecord) // check if should start recording
     {
         if (layers.used() > 0) // some layer has started since we were marked for prerecording
         {
             TRACE_1(F("Will record after prerecord"));
-            state = State::Record;
+            _state = State::Record;
         }
     }
 
-    if (state != _previous) // the state has changed since the last click
+    if (_state != _previous) // the state has changed since the last click
     {
-        if (state == State::Prerecord)
+        if (_state == State::Prerecord)
         {
             TRACE_1(F("Marked for pre-record"));
         }
-        else if (state == State::Record)
+        else if (_state == State::Record)
         {
             TRACE_1(F("Starting to record"));
 
@@ -202,7 +212,7 @@ Sequencer::Bar Sequencer::click(Run run)
 
             layers.record();
         }
-        else if (state == State::Wander)
+        else if (_state == State::Wander)
         {
             TRACE_1(F("Starting to wander"));
 
@@ -213,11 +223,11 @@ Sequencer::Bar Sequencer::click(Run run)
                 bar = Bar::None;
             }
         }
-        else if (state == State::Playback)
+        else if (_state == State::Playback)
         {
             TRACE_3(F("Starting to playback "), (int)_record.bars, F(" recorded bars"));
         }
-        else if (state == State::Overlay)
+        else if (_state == State::Overlay)
         {
             TRACE_1(F("Starting to overlay"));
 
@@ -230,16 +240,16 @@ Sequencer::Bar Sequencer::click(Run run)
                 });
         }
 
-        _previous = state; // save the state after we finished comparing it
+        _previous = _state; // save the state after we finished comparing it
     }
 
-    if (state == State::Record || state == State::Playback || state == State::Overlay)
+    if (looping())
     {
         const auto difference = Time::now - _record.when;
 
         if (difference.subdivisions == 0)
         {
-            if (state == State::Record)
+            if (_state == State::Record)
             {
                 if (_record.bars < Time::Bars)
                 {
@@ -249,7 +259,7 @@ Sequencer::Bar Sequencer::click(Run run)
                 else
                 {
                     TRACE_3(F("Recorded maximum of "), (int)_record.bars, F(" bars"));
-                    _previous = state = State::Overlay; // setting `_previous` also for it to not count as a state change
+                    _previous = _state = State::Overlay; // setting `_previous` also for it to not count as a state change
                 }
             }
             else // playback or overlay
