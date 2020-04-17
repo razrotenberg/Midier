@@ -142,16 +142,26 @@ Config::Viewed::Viewed(Config::Viewed && config)
 
 Config::Viewed & Config::Viewed::operator=(Config::Viewed && other)
 {
-    if (other._view == &other._data) // static
+    if (other.inner())
     {
         *this = other.data();
     }
-    else // dynamic
+    else
     {
         *this = other.view();
     }
 
     return *this;
+}
+
+bool Config::Viewed::inner() const
+{
+    return _view == &_data;
+}
+
+bool Config::Viewed::outer() const
+{
+    return !inner();
 }
 
 const Config::Packed & Config::Viewed::data()

@@ -7,9 +7,10 @@
 namespace midier
 {
 
-Sequencer::Sequencer(ILayers layers, unsigned char bpm) :
+Sequencer::Sequencer(ILayers layers, unsigned char bpm, const Config & config) :
     layers(layers),
-    bpm(bpm)
+    bpm(bpm),
+    config(config)
 {}
 
 bool Sequencer::recording() const
@@ -55,11 +56,8 @@ Sequencer::Handle Sequencer::start(Degree degree)
 
         layer = Layer(i, degree, start);
 
-        if (layers.config != nullptr)
-        {
-            // all layers share common configuration by default
-            layer.config = layers.config;
-        }
+        // all layers share common configuration by default
+        layer.config = &config;
 
         if (_state == State::Record || _state == State::Overlay)
         {

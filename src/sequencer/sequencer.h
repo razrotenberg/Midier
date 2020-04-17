@@ -43,7 +43,7 @@ struct Sequencer
     };
 
     // creation
-    Sequencer(ILayers layers, unsigned char bpm = 60);
+    Sequencer(ILayers layers, unsigned char bpm = 60, const Config & config = { /* default configuration */ });
 
     // queries
     bool recording() const;
@@ -92,6 +92,7 @@ struct Sequencer
     Assist assist = Assist::No;
     ILayers layers;
     unsigned char bpm;
+    Config::Packed config; // common layer configuration
 
 private:
     enum class State : char

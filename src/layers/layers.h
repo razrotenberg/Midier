@@ -20,7 +20,7 @@ struct ILayers
         unsigned _index;
     };
 
-    ILayers(Layer layers[], unsigned count, Config::Packed * config = nullptr);
+    ILayers(Layer layers[], unsigned count);
 
     // queries
     unsigned count() const;
@@ -48,9 +48,6 @@ struct ILayers
     void click();
     void revoke();
 
-    // common configuration (optional)
-    Config::Packed * config;
-
 private:
     Layer * _layers;
     unsigned _count;
@@ -61,7 +58,7 @@ private:
 template <unsigned N>
 struct Layers : ILayers
 {
-    Layers(Config::Packed * config = nullptr) : ILayers(_layers, N, config)
+    Layers() : ILayers(_layers, N)
     {}
 
     private: Layer _layers[N];

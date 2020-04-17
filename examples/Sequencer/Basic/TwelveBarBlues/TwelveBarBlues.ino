@@ -1,6 +1,7 @@
 // "Sequencer/Basic/TwelveBarBlues" - Plays the 12-blues chord progression
 //
-// This sketch shows how it's easy to program even more complex chord progressions with `midier::Sequencer`
+// This sketch shows how it's easy to program even more complex chord
+// progressions with custom configuration with `midier::Sequencer`
 //
 // Playing the following progression with seventh chords over A major scale:
 //    I  I  I  I
@@ -26,24 +27,32 @@ void setup()
 
 void loop()
 {
-    // create a configuration
-    midier::Config::Packed config;
-
-    // configure it to the following:
+    // create a configuration:
     //   A major scale
     //   Shuffle rhythm
     //   Use seventh chords
     //
-    config.note(midier::Note::A);
-    config.rhythm(midier::Rhythm::_8); // 1/8th note swung triplet
-    config.style.steps(4); // play the 7th degree as well
+    const midier::Config config =
+        {
+            .note = midier::Note::A,
+            .accidental = midier::Accidental::Natural,
+            .octave = 3,
+            .mode = midier::Mode::Ionian,
+            .rhythm = midier::Rhythm::_8, // 1/8th note swung triplet
+            .style = midier::Config::Style
+                {
+                    .steps = 4, // play the 7th degree as well
+                    .perm = 0,
+                    .looped = false,
+                },
+        };
 
     // create a container for one layer as only a single
     // layer will be played at a time and use the custom configuration
-    midier::Layers<1> layers(&config);
+    midier::Layers<1> layers;
 
     // create a sequencer from the layers container and specify BPM of 120
-    midier::Sequencer sequencer(layers, 120);
+    midier::Sequencer sequencer(layers, 120, config);
 
     // play the first section
     sequencer.play(1, { .bars = COMMON_TIME(4) });

@@ -121,6 +121,10 @@ struct Config
         Viewed(const Viewed &) = delete;
         Viewed& operator=(const Viewed &) = delete;
 
+        // queries
+        bool inner() const; // is pointing to the inner configuraion
+        bool outer() const; // is pointing to another configuraion
+
         // getters
         const Packed & data();
         Packed * view();
