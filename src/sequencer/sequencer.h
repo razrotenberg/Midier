@@ -84,6 +84,10 @@ struct Sequencer
     // this method is blocking and returns after the time duration has fully passed
     void run(const Time::Duration & duration);
 
+    // synchronously play a scale degree for a certain time duration
+    // the scale degree is stopped at the end of the duration
+    void play(Degree degree, const Time::Duration & duration);
+
     // exposed members
     Assist assist = Assist::No;
     ILayers layers;

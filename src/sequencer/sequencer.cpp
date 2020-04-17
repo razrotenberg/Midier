@@ -296,4 +296,11 @@ void Sequencer::run(const Time::Duration & duration)
     }
 }
 
+void Sequencer::play(Degree degree, const Time::Duration & duration)
+{
+    const Handle handle = start(degree);
+    run(duration);
+    stop(handle);
+}
+
 } // midier
