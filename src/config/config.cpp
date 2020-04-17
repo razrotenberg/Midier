@@ -18,25 +18,36 @@ inline short __get(short data, unsigned offset, short mask)
 
 } //
 
-Config::Packed::Packed() : Packed(Config()) // use default config
+Config::Style::Style(unsigned steps)                              : steps(steps) {}
+Config::Style::Style(unsigned steps, unsigned perm)               : steps(steps), perm(perm) {}
+Config::Style::Style(unsigned steps, unsigned perm, bool looped)  : steps(steps), perm(perm), looped(looped) {}
+
+Config::Config(Note note)                                                                               : note(note) {}
+Config::Config(Note note, Accidental accidental)                                                        : note(note), accidental(accidental) {}
+Config::Config(Note note, Accidental accidental, Octave octave)                                         : note(note), accidental(accidental), octave(octave) {}
+Config::Config(Note note, Accidental accidental, Octave octave, Mode mode)                              : note(note), accidental(accidental), octave(octave), mode(mode) {}
+Config::Config(Note note, Accidental accidental, Octave octave, Mode mode, Rhythm rhythm)               : note(note), accidental(accidental), octave(octave), mode(mode), rhythm(rhythm) {}
+Config::Config(Note note, Accidental accidental, Octave octave, Mode mode, Rhythm rhythm, Style style)  : note(note), accidental(accidental), octave(octave), mode(mode), rhythm(rhythm), style(style) {}
+
+Config::Packed::Packed() : Packed(Config {}) // use default config
 {}
 
-Config::Packed::Packed(const Config & unpacked)
+Config::Packed::Packed(const Config & spanned)
 {
-    *this = unpacked;
+    *this = spanned;
 }
 
-Config::Packed & Config::Packed::operator=(const Config & unpacked)
+Config::Packed & Config::Packed::operator=(const Config & spanned)
 {
-    note        (unpacked.note);
-    accidental  (unpacked.accidental);
-    octave      (unpacked.octave);
-    mode        (unpacked.mode);
-    rhythm      (unpacked.rhythm);
+    note        (spanned.note);
+    accidental  (spanned.accidental);
+    octave      (spanned.octave);
+    mode        (spanned.mode);
+    rhythm      (spanned.rhythm);
 
-    style.looped(unpacked.style.looped);
-    style.steps (unpacked.style.steps);
-    style.perm  (unpacked.style.perm);
+    style.looped(spanned.style.looped);
+    style.steps (spanned.style.steps);
+    style.perm  (spanned.style.perm);
 }
 
 Note Config::Packed::note() const
@@ -89,11 +100,6 @@ void Config::Packed::rhythm(Rhythm value)
     _data = __set(_data, 12, 0b1111, (short)value);
 }
 
-bool Config::Packed::Style::looped() const
-{
-    return __get(_data, 13, 0b1);
-}
-
 unsigned Config::Packed::Style::steps() const
 {
     return __get(_data, 10, 0b111);
@@ -104,9 +110,9 @@ unsigned Config::Packed::Style::perm() const
     return __get(_data, 0, 0b1111111111);
 }
 
-void Config::Packed::Style::looped(bool value)
+bool Config::Packed::Style::looped() const
 {
-    _data = __set(_data, 13, 0b1, (short)value);
+    return __get(_data, 13, 0b1);
 }
 
 void Config::Packed::Style::steps(unsigned value)
@@ -117,6 +123,11 @@ void Config::Packed::Style::steps(unsigned value)
 void Config::Packed::Style::perm(unsigned value)
 {
     _data = __set(_data, 0, 0b1111111111, value);
+}
+
+void Config::Packed::Style::looped(bool value)
+{
+    _data = __set(_data, 13, 0b1, (short)value);
 }
 
 Config::Viewed::Viewed() :

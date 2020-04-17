@@ -10,18 +10,41 @@ namespace midier
 
 struct Config
 {
+    // a spanned representation of a layer configuraion
+
     Note        note        = Note::C;
     Accidental  accidental  = Accidental::Natural;
     Octave      octave      = 3;
     Mode        mode        = Mode::Ionian;
     Rhythm      rhythm      = Rhythm::_7;
 
-    struct
+    struct Style
     {
-        bool        looped  = false;
         unsigned    steps   = 3;
         unsigned    perm    = 0;
-    } style;
+        bool        looped  = false;
+
+        // creation
+        Style() = default; // use all default values
+
+        // argument specification
+        Style(unsigned);
+        Style(unsigned, unsigned);
+        Style(unsigned, unsigned, bool);
+    };
+
+    Style style;
+
+    // creation
+    Config() = default; // use all default values
+
+    // argument specification
+    Config(Note);
+    Config(Note, Accidental);
+    Config(Note, Accidental, Octave);
+    Config(Note, Accidental, Octave, Mode);
+    Config(Note, Accidental, Octave, Mode, Rhythm);
+    Config(Note, Accidental, Octave, Mode, Rhythm, Style);
 
     struct Packed
     {
@@ -31,9 +54,9 @@ struct Config
         // its data in a more compact way and not fully spanned and naive
 
         // creation
-        Packed();
-        Packed(const Config &);
-        Packed & operator=(const Config &);
+        Packed();                           // default configuraion
+        Packed(const Config &);             // from a spanned configuraion
+        Packed & operator=(const Config &); // from a spanned configuraion
 
         // getters
         Note        note()          const;
@@ -52,14 +75,14 @@ struct Config
         struct Style
         {
             // getters
-            bool        looped()    const;
             unsigned    steps()     const;
             unsigned    perm()      const;
+            bool        looped()    const;
 
             // setters
-            void looped (bool);
             void steps  (unsigned);
             void perm   (unsigned);
+            void looped (bool);
 
             // from lsb to msb:
             //   bits 0:9   - permutation - [0,6!=720)
