@@ -12,8 +12,10 @@ Sequencer::Sequencer(ILayers layers, unsigned char bpm) :
     bpm(bpm)
 {}
 
-Layer::Tag Sequencer::start(Degree degree)
+Sequencer::Handle Sequencer::start(Degree degree)
 {
+    Sequencer::Handle handle;
+
     for (char i = 0; i < layers.count(); ++i)
     {
         auto & layer = layers[i];
@@ -54,89 +56,51 @@ Layer::Tag Sequencer::start(Degree degree)
             layer.record();
         }
 
-        // we were in pre-record state and the first layer was just played
-        // changing the state to `Record` will cause to actually start recording at
-        // the next click of `run()` and will record this newly inserted layer as well
-        if (state == State::Prerecord)
-        {
-            TRACE_1(F("Will record after prerecord"));
-            state = State::Record;
-        }
-
-        return i;
+        handle._layer = &layer;
+        break;
     }
 
-    TRACE_1(F("There's no place for a new layer"));
-    return -1;
+    if (handle._layer == nullptr)
+    {
+        TRACE_1(F("There's no place for a new layer"));
+    }
+
+    return handle;
 }
 
-void Sequencer::stop(Layer::Tag tag)
+void Sequencer::stop(Handle handle)
 {
-    Layer * const layer = layers.find(tag);
-
-    if (layer != nullptr)
+    if (handle._layer != nullptr)
     {
-        if (layer->state == Layer::State::Wait || layer->state == Layer::State::Wander)
-        {
-            layer->revoke();
-        }
-        else if (layer->state == Layer::State::Record)
-        {
-            layer->playback();
-        }
-
-        // do nothing if the layer is already in playback mode (let it keep playbacking)
-        // this could happen when the button is kept being pressed even after the entire
-        // recorded loop is over
-    }
-}
-
-void Sequencer::revoke(Layer::Tag tag)
-{
-    if (state == State::Wander)
-    {
-        TRACE_1(F("Not revoking any layer as we are wandering"));
-        return; // nothing to do when wandering
-    }
-
-    if (tag == -1)
-    {
-        // we want to revoke the last recorded (or being recorded) layer
-        // we cannot tell for sure which layer was the last one to be recorded,
-        // so we assume it is the layer with the highest tag (and the highest index)
-
-        for (unsigned i = layers.count(); i > 0; --i)
-        {
-            auto & layer = layers[i - 1];
-
-            if (layer.tag == -1)
-            {
-                continue;
-            }
-
-            if (layer.state == Layer::State::Record || layer.state == Layer::State::Playback)
-            {
-                layer.revoke();
-                break;
-            }
-        }
+        handle._layer->stop();
     }
     else
     {
-        Layer * const layer = layers.find(tag);
-
-        if (layer != nullptr)
-        {
-            layer->revoke();
-        }
+        TRACE_1(F("Requested to stop `nullptr` handle"));
     }
+}
 
-    // check if there is no more recorded layers and go back to wandering if so
+void Sequencer::revoke()
+{
+    // we want to revoke the last recorded (or being recorded) layer
+    // we cannot tell for sure which layer was the last one to be recorded,
+    // so we assume it is the layer with the highest tag (and the highest index)
 
-    if (layers.none([](const Layer & layer) { return layer.state == Layer::State::Record || layer.state == Layer::State::Playback; }))
+    for (unsigned i = layers.count(); i > 0; --i)
     {
-        TRACE_1(F("Going back to wandering as there are no recorded layers anymore"));
-        state = State::Wander;
+        auto & layer = layers[i - 1];
+
+        if (layer.tag == -1)
+        {
+            continue;
+        }
+
+        if (layer.state == Layer::State::Record || layer.state == Layer::State::Playback)
+        {
+            TRACE_3(F("Layer "), layer, F(" is probably the last recorded one"));
+            layer.revoke();
+            break;
+        }
     }
 }
 
@@ -144,10 +108,7 @@ void Sequencer::record()
 {
     if (state == State::Wander)
     {
-        // we want to set the state to `Prerecord` if there are no layers at the moment,
-        // so we will start recording when the first layer will be played
-        // we want to start recording immediately if there's a layer playing at the moment
-        state = layers.idle() ? State::Prerecord : State::Record;
+        state = State::Prerecord;
     }
     else if (state == State::Prerecord)
     {
@@ -205,6 +166,24 @@ Sequencer::Bar Sequencer::click(Run run)
         {
             TRACE_1(F("Reseting start beat as no more layers are being played"));
             _started.bar = -1;
+        }
+    }
+
+    if (state == State::Record || state == State::Playback || state == State::Overlay) // check if should go back to wandering
+    {
+        if (layers.all([](const Layer & layer){ return layer.state == Layer::State::Wander; }))
+        {
+            TRACE_1(F("Going back to wandering as there are no recorded layers anymore"));
+            state = State::Wander;
+        }
+    }
+
+    if (state == State::Prerecord) // check if should start recording
+    {
+        if (layers.used() > 0) // some layer has started since we were marked for prerecording
+        {
+            TRACE_1(F("Will record after prerecord"));
+            state = State::Record;
         }
     }
 

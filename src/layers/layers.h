@@ -38,6 +38,7 @@ struct ILayers
     // generic lambda evaluation methods
     // they iterate and evaluate on used layers only
     void eval(void(*callback)(Layer &));
+    bool all(bool(*predicate)(const Layer &));
     bool any(bool(*predicate)(const Layer &));
     bool none(bool(*predicate)(const Layer &));
 

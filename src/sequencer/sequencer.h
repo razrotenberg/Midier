@@ -42,17 +42,25 @@ struct Sequencer
         Async,
     };
 
+    // this class is made to hide the underlying `Layer` from the client
+    // so he or she will not call `Layer` methods directly but will call
+    // `Sequencer` methods only
+    class Handle
+    {
+        friend class Sequencer;
+        Layer * _layer = nullptr;
+    };
+
     // creation
     Sequencer(ILayers layers, unsigned char bpm = 60);
 
     // start and stop layers
-    Layer::Tag start(Degree degree); // return corresponding tag or (-1) if could not play
-    void stop(Layer::Tag tag);
+    Handle start(Degree degree);
+    void stop(Handle handle);
 
-    // revoke a recorded layer
-    // passing (-1) as `tag` means to revoke the last recorded layer
+    // revoke the last recorded layer
     // doing nothing if wandering
-    void revoke(Layer::Tag tag = -1);
+    void revoke();
 
     // state changes
     void record(); // toggle between record/playback/overlay modes

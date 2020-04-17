@@ -25,6 +25,22 @@ Layer::Layer(Tag tag, Degree chord, const Time & start) :
     }
 }
 
+void Layer::stop()
+{
+    if (state == Layer::State::Wait || state == Layer::State::Wander)
+    {
+        revoke();
+    }
+    else if (state == Layer::State::Record)
+    {
+        playback();
+    }
+
+    // do nothing if the layer is already in playback mode (let it keep playbacking)
+    // this could happen when the button is kept being pressed even after the entire
+    // recorded loop is over
+}
+
 void Layer::record()
 {
     if (state == State::Wait)

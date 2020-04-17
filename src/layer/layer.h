@@ -28,6 +28,7 @@ struct Layer
     Layer(Tag tag, Degree chord, const Time & start);
 
     // state changes
+    void stop();
     void record();
     void playback();
     void revoke();

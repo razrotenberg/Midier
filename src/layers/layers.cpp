@@ -95,6 +95,24 @@ void ILayers::eval(void(*callback)(Layer &))
     }
 }
 
+bool ILayers::all(bool(*predicate)(const Layer &))
+{
+    for (const auto & layer : *this)
+    {
+        if (layer.tag == -1)
+        {
+            continue;
+        }
+
+        if (!predicate(layer))
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 bool ILayers::any(bool(*predicate)(const Layer &))
 {
     for (const auto & layer : *this)
