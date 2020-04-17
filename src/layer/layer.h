@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../config/config.h"
+#include "../debug/debug.h"
 #include "../degree/degree.h"
 #include "../mode/mode.h"
 #include "../midi/midi.h"
@@ -16,16 +17,24 @@ struct Layer
 {
     enum class State : char
     {
+        Idle,
         Wait,
         Wander,
         Record,
         Playback,
     };
 
-    using Tag = char;
-
     Layer() = default;
-    Layer(Tag tag, Degree chord, const Time & start);
+    Layer(
+#ifdef DEBUG
+        unsigned char id,
+#endif
+        Degree chord,
+        const Time & start);
+
+    // queries
+    bool idle() const;
+    bool running() const;
 
     // state changes
     void stop();
@@ -36,8 +45,11 @@ struct Layer
     // runs all the logic of this layer once
     void click();
 
-    Tag tag = -1;
-    State state;
+#ifdef DEBUG
+    unsigned char id;
+#endif
+
+    State state = State::Idle;
     Degree chord;
     Time start;
 

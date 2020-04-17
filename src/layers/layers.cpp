@@ -33,13 +33,13 @@ unsigned ILayers::count() const
     return _count;
 }
 
-unsigned ILayers::used() const
+unsigned ILayers::running() const
 {
     unsigned count = 0;
 
     for (auto & layer : (ILayers &)*this)
     {
-        if (layer.tag != -1)
+        if (layer.running())
         {
             ++count;
         }
@@ -50,7 +50,7 @@ unsigned ILayers::used() const
 
 bool ILayers::idle() const
 {
-    return used() == 0;
+    return running() == 0;
 }
 
 Layer & ILayers::operator[](unsigned index)
@@ -72,7 +72,7 @@ void ILayers::eval(void(*callback)(Layer &))
 {
     for (auto & layer : *this)
     {
-        if (layer.tag == -1)
+        if (layer.idle())
         {
             continue;
         }
@@ -85,7 +85,7 @@ bool ILayers::all(bool(*predicate)(const Layer &))
 {
     for (const auto & layer : *this)
     {
-        if (layer.tag == -1)
+        if (layer.idle())
         {
             continue;
         }
@@ -103,7 +103,7 @@ bool ILayers::any(bool(*predicate)(const Layer &))
 {
     for (const auto & layer : *this)
     {
-        if (layer.tag == -1)
+        if (layer.idle())
         {
             continue;
         }

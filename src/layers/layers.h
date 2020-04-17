@@ -23,9 +23,9 @@ struct ILayers
     ILayers(Layer layers[], unsigned count);
 
     // queries
-    unsigned count() const;
-    unsigned used() const; // how many layers are used
-    bool idle() const; // if no layers are used
+    unsigned count() const; // how many there are in total
+    unsigned running() const; // how many layers are running
+    bool idle() const; // if no layers are running
 
     // getters
     Layer & operator[](unsigned index);

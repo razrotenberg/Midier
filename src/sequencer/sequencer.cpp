@@ -31,9 +31,9 @@ Sequencer::Handle Sequencer::start(Degree degree)
     {
         auto & layer = layers[i];
 
-        if (layer.tag != -1)
+        if (layer.running())
         {
-            continue; // this layer is used
+            continue;
         }
 
         auto start = Time::now;
@@ -54,7 +54,11 @@ Sequencer::Handle Sequencer::start(Degree degree)
             }
         }
 
-        layer = Layer(i, degree, start);
+        layer = Layer(
+#ifdef DEBUG
+            i, // layer id
+#endif
+            degree, start);
 
         // all layers share common configuration by default
         layer.config = &config;
@@ -92,13 +96,13 @@ void Sequencer::revoke()
 {
     // we want to revoke the last recorded (or being recorded) layer
     // we cannot tell for sure which layer was the last one to be recorded,
-    // so we assume it is the layer with the highest tag (and the highest index)
+    // so we assume it is the layer in the highest index
 
     for (unsigned i = layers.count(); i > 0; --i)
     {
         auto & layer = layers[i - 1];
 
-        if (layer.tag == -1)
+        if (layer.idle())
         {
             continue;
         }
@@ -188,7 +192,7 @@ Sequencer::Bar Sequencer::click(Run run)
 
     if (_state == State::Prerecord) // check if should start recording
     {
-        if (layers.used() > 0) // some layer has started since we were marked for prerecording
+        if (layers.running() > 0) // some layer has started since we were marked for prerecording
         {
             TRACE_1(F("Will record after prerecord"));
             _state = State::Record;

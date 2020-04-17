@@ -50,7 +50,7 @@ void print(const Time & time)
 
 void print(const Layer & layer)
 {
-    print((int)layer.tag);
+    print(layer.id);
 }
 
 void prefix(const __FlashStringHelper * file, int line, const char function[])

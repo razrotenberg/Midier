@@ -1,6 +1,5 @@
 #include "layer.h"
 
-#include "../debug/debug.h"
 #include "../scale/scale.h"
 #include "../style/style.h"
 #include "../triad/triad.h"
@@ -8,8 +7,14 @@
 namespace midier
 {
 
-Layer::Layer(Tag tag, Degree chord, const Time & start) :
-    tag(tag),
+Layer::Layer(
+#ifdef DEBUG
+    unsigned char id,
+#endif
+    Degree chord, const Time & start) :
+#ifdef DEBUG
+    id(id),
+#endif
     chord(chord),
     start(start)
 {
@@ -23,6 +28,16 @@ Layer::Layer(Tag tag, Degree chord, const Time & start) :
         TRACE_6(F("Adding layer "), *this, F(" of scale degree "), chord, F(" to start at future beat "), start);
         state = State::Wait;
     }
+}
+
+bool Layer::idle() const
+{
+    return state == State::Idle;
+}
+
+bool Layer::running() const
+{
+    return !idle();
 }
 
 void Layer::stop()
@@ -85,7 +100,7 @@ void Layer::revoke()
         midi::off(played.number); // stop the note that is still being played by this layer
     }
 
-    tag = -1;
+    state = State::Idle;
 }
 
 void Layer::click()
