@@ -84,10 +84,20 @@ void Sequencer::stop(Handle handle)
 {
     if (handle._layer != nullptr)
     {
-        handle._layer->stop();
+        if (handle._layer->running())
+        {
+            handle._layer->stop();
+        }
+        else
+        {
+            // this could happen if the layer was manually revoked while still
+            // being pressed and now it's stopped being pressed
+            TRACE_1(F("Requested to stop an idle layer"));
+        }
     }
     else
     {
+        // this could happen if there was no place for more layers
         TRACE_1(F("Requested to stop `nullptr` handle"));
     }
 }
