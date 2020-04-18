@@ -21,34 +21,50 @@ Layer::Layer(
     if (start == Time::now)
     {
         TRACE_4(F("Starting layer "), *this, F(" of scale degree "), chord);
-        state = State::Wander;
+        _state = State::Wander;
     }
     else
     {
         TRACE_6(F("Adding layer "), *this, F(" of scale degree "), chord, F(" to start at future beat "), start);
-        state = State::Wait;
+        _state = State::Wait;
     }
 }
 
 bool Layer::idle() const
 {
-    return state == State::Idle;
+    return _state == State::Idle;
 }
 
 bool Layer::running() const
 {
-    return !idle();
+    return _state != State::Idle;
+}
+
+bool Layer::waiting() const
+{
+    return _state == State::Wait;
+}
+
+bool Layer::wandering() const
+{
+    return _state == State::Wander;
+}
+
+bool Layer::looping() const
+{
+    return _state == State::Record || _state == State::Playback;
 }
 
 void Layer::stop()
 {
-    if (state == Layer::State::Wait || state == Layer::State::Wander)
+    if (_state == Layer::State::Wait || _state == Layer::State::Wander)
     {
         revoke();
     }
-    else if (state == Layer::State::Record)
+    else if (_state == Layer::State::Record)
     {
-        playback();
+        TRACE_3(F("Marking layer "), *this, F(" for playback"));
+        _state = State::Playback;
     }
 
     // do nothing if the layer is already in playback mode (let it keep playbacking)
@@ -58,35 +74,15 @@ void Layer::stop()
 
 void Layer::record()
 {
-    if (state == State::Wait)
+    if (_state == State::Wait)
     {
         TRACE_3(F("Marking non-started layer "), *this, F(" for record"));
-        loop.bar = 0; // this should indicate `click()` to start recording when layer will be started
+        _loop.bar = 0; // this should indicate `click()` to start recording when layer will be started
     }
     else
     {
         TRACE_3(F("Marking layer "), *this, F(" for record"));
-        state = State::Record;
-        loop.bar = -1;
-    }
-}
-
-void Layer::playback()
-{
-    if (Time::now == loop.start)
-    {
-        // if the layer was to complete a full loop, it would have been set to playback
-        // state by `click()` and this very method would not have been called
-
-        TRACE_3(F("Layer "), *this, F(" was stopped before started to record"));
-        revoke();
-    }
-    else
-    {
-        TRACE_2(F("Stopping to record finite layer "), *this);
-
-        state = State::Playback;
-        loop.end = Time::now; // the layer will not be played from the very next click
+        _state = State::Record;
     }
 }
 
@@ -94,30 +90,18 @@ void Layer::revoke()
 {
     TRACE_2(F("Revoking layer "), *this);
 
-    if (played.subdivisions != -1)
+    if (_played.subdivisions != -1)
     {
         TRACE_2(F("A note is still being played for revoked layer "), *this);
-        midi::off(played.number); // stop the note that is still being played by this layer
+        midi::off(_played.number); // stop the note that is still being played by this layer
     }
 
-    state = State::Idle;
+    _state = State::Idle; // will affect immediately
 }
 
 void Layer::click()
 {
-    if (state == State::Wait && Time::now == start) // check if waiting and should start now
-    {
-        TRACE_2(F("Starting layer "), *this);
-        state = State::Wander;
-
-        if (loop.bar == 0) // the layer was marked for recording upon starting
-        {
-            TRACE_2(F("Immediately recording layer "), *this);
-            record();
-        }
-    }
-
-    if (played.subdivisions != -1) // check if a note is being played and should stop
+    if (_played.subdivisions != -1) // check if a note is being played and should stop
     {
         // what's the rate of the rhythm?
         const auto rate = rhythm::rate(config->rhythm());
@@ -128,16 +112,50 @@ void Layer::click()
         // how many subdivisions exist between every two units?
         const auto subdivisions = (unsigned)(Time::Subdivisions / count);
 
-        if (++played.subdivisions >= subdivisions)
+        if (++_played.subdivisions >= subdivisions)
         {
-            midi::off(played.number);
-            played.subdivisions = -1;
+            midi::off(_played.number);
+            _played.subdivisions = -1;
         }
     }
 
-    if (state == State::Wander || state == State::Record || state == State::Playback) // check if should advance `bar`
+    if (_state == State::Playback)
     {
-        if (state == State::Playback && bar == -1)
+        if (_loop.end.bar == -1) // check if was just marked for playback
+        {
+            TRACE_2(F("Stopping to record layer "), *this);
+            _loop.end = Time::now;
+        }
+
+        if (Time::now == _loop.end) // check if should exit the playback loop now
+        {
+            if (_loop.end != _loop.start)
+            {
+                TRACE_3(F("Layer "), *this, F(" is exiting the playback loop"));
+                bar = -1; // we have reached the end of the recording of this finite layer
+            }
+            else
+            {
+                // the layer is infinite and therefore kept continuous
+            }
+        }
+    }
+
+    if (_state == State::Wait && Time::now == start) // check if waiting and should start now
+    {
+        TRACE_2(F("Starting layer "), *this);
+        _state = State::Wander;
+
+        if (_loop.bar == 0) // the layer was marked for recording upon starting
+        {
+            TRACE_2(F("Immediately recording layer "), *this);
+            _state = State::Record;
+        }
+    }
+
+    if (_state == State::Wander || _state == State::Record || _state == State::Playback) // check if should advance `bar`
+    {
+        if (_state == State::Playback && bar == -1)
         {
             // no need to advance `bar` as we are in playback mode and out of the loop
         }
@@ -148,47 +166,32 @@ void Layer::click()
         }
     }
 
-    if (state == State::Record)
+    if (_state == State::Record)
     {
-        if (loop.bar == -1) // check if the layer was just marked for record
+        if (_loop.start.bar == -1) // check if was just marked for record
         {
-            // only now we record `loop.start` and `loop.bar` since both
-            // `Time::now` and `bar` could have changed since the marking
-            loop.start = Time::now;
-            loop.bar = bar;
+            _loop.start = Time::now;
+            _loop.bar = bar;
 
             TRACE_4(F("Starting to record layer "), *this, F(" at bar "), bar);
         }
-        else if (Time::now == loop.start) // check if this layer is infinite
+        else if (Time::now == _loop.start) // check if this layer is infinite
         {
             // the layer was recorded throughout the entire record loop
 
-            state = State::Playback;
-            loop.end = Time::now;
+            _state = State::Playback;
+            _loop.end = Time::now;
 
             TRACE_3(F("Layer "), *this, F(" is infinite"));
         }
     }
 
-    if (state == State::Playback && Time::now == loop.end) // check if should exit the playback loop now
-    {
-        if (loop.end != loop.start)
-        {
-            TRACE_3(F("Layer "), *this, F(" is exiting the playback loop"));
-            bar = -1; // we have reached the end of the recording of this finite layer
-        }
-        else
-        {
-            // the layer is infinite and therefore kept continuous
-        }
-    }
-
-    if (state == State::Playback && Time::now == loop.start) // check if we are out of the playback loop and should enter now
+    if (_state == State::Playback && Time::now == _loop.start) // check if we are out of the playback loop and should enter now
     {
         if (bar == -1)
         {
-            TRACE_4(F("Layer "), *this, F(" is entering the playback loop with bar "), loop.bar);
-            bar = loop.bar;
+            TRACE_4(F("Layer "), *this, F(" is entering the playback loop with bar "), _loop.bar);
+            bar = _loop.bar;
         }
         else
         {
@@ -198,12 +201,12 @@ void Layer::click()
 
     // now, after checking all the stuff above, play a note if you want to
 
-    if (state == State::Wait)
+    if (_state == State::Wait)
     {
         return; // not started yet
     }
 
-    if (state == State::Playback && bar == -1)
+    if (_state == State::Playback && bar == -1)
     {
         return; // in playback mode and out of loop
     }
@@ -234,20 +237,20 @@ void Layer::click()
             scale::quality(config->mode(), chord),
             style::degree(config->style.steps(), config->style.perm(), index));
 
-    if (played.subdivisions != -1)
+    if (_played.subdivisions != -1)
     {
         TRACE_2(F("A note is still being played for layer "), *this);
 
         // at most one note can be played at a time by every layer
         // if there still is a note being played because of this layer, we
         // stop playing it right before starting to play the new note
-        midi::off(played.number);
+        midi::off(_played.number);
     }
 
-    played.subdivisions = 0; // start counting the number of clicks the note is playing
-    played.number = midi::number(note, config->octave());
+    _played.subdivisions = 0; // start counting the number of clicks the note is playing
+    _played.number = midi::number(note, config->octave());
 
-    midi::on(played.number);
+    midi::on(_played.number, (unsigned)volume);
 }
 
 } // midier

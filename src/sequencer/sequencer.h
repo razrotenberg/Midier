@@ -47,7 +47,6 @@ struct Sequencer
 
     // queries
     bool recording() const;
-    bool looping() const;
 
     // start and stop layers
     Handle start(Degree degree);

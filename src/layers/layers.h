@@ -35,14 +35,14 @@ struct ILayers
     Iterator end();
 
     // generic lambda evaluation methods
-    // they iterate and evaluate on used layers only
+    // they iterate and evaluate on running layers only
     void eval(void(*callback)(Layer &));
     bool all(bool(*predicate)(const Layer &));
     bool any(bool(*predicate)(const Layer &));
     bool none(bool(*predicate)(const Layer &));
 
     // aggregated `Layer` methods
-    // they are evaluated on all used layers
+    // they are evaluated on all running layers
     void record();
     void click();
     void revoke();

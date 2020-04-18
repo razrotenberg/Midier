@@ -18,11 +18,6 @@ bool Sequencer::recording() const
     return _state == State::Prerecord || _state == State::Record || _state == State::Overlay;
 }
 
-bool Sequencer::looping() const
-{
-    return _state == State::Record || _state == State::Playback || _state == State::Overlay;
-}
-
 Sequencer::Handle Sequencer::start(Degree degree)
 {
     Sequencer::Handle handle;
@@ -117,7 +112,7 @@ void Sequencer::revoke()
             continue;
         }
 
-        if (layer.state == Layer::State::Record || layer.state == Layer::State::Playback)
+        if (layer.looping())
         {
             TRACE_3(F("Layer "), layer, F(" is probably the last recorded one"));
             layer.revoke();
@@ -182,7 +177,7 @@ Sequencer::Bar Sequencer::click(Run run)
 
     Bar bar = Bar::Same;
 
-    if (_started.bar != -1) // should we reset 'started'?
+    if (_started.bar != -1) // check if we should reset `started`
     {
         if (_started.subdivision == Time::now.subdivision && layers.idle())
         {
@@ -191,9 +186,9 @@ Sequencer::Bar Sequencer::click(Run run)
         }
     }
 
-    if (looping()) // check if should go back to wandering
+    if (_state == State::Record || _state == State::Playback || _state == State::Overlay) // check if should go back to wandering
     {
-        if (layers.all([](const Layer & layer){ return layer.state == Layer::State::Wander; }))
+        if (layers.all([](const Layer & layer){ return layer.wandering(); }))
         {
             TRACE_1(F("Going back to wandering as there are no recorded layers anymore"));
             _state = State::Wander;
@@ -204,7 +199,6 @@ Sequencer::Bar Sequencer::click(Run run)
     {
         if (layers.running() > 0) // some layer has started since we were marked for prerecording
         {
-            TRACE_1(F("Will record after prerecord"));
             _state = State::Record;
         }
     }
@@ -245,7 +239,7 @@ Sequencer::Bar Sequencer::click(Run run)
 
             layers.eval([](Layer & layer)
                 {
-                    if (layer.state == Layer::State::Wander)
+                    if (layer.waiting() || layer.wandering())
                     {
                         layer.record();
                     }
@@ -255,7 +249,7 @@ Sequencer::Bar Sequencer::click(Run run)
         _previous = _state; // save the state after we finished comparing it
     }
 
-    if (looping())
+    if (_state == State::Record || _state == State::Playback || _state == State::Overlay)
     {
         const auto difference = Time::now - _record.when;
 

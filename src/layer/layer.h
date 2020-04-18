@@ -15,15 +15,6 @@ namespace midier
 
 struct Layer
 {
-    enum class State : char
-    {
-        Idle,
-        Wait,
-        Wander,
-        Record,
-        Playback,
-    };
-
     Layer() = default;
     Layer(
 #ifdef DEBUG
@@ -35,11 +26,13 @@ struct Layer
     // queries
     bool idle() const;
     bool running() const;
+    bool waiting() const;
+    bool wandering() const;
+    bool looping() const;
 
-    // state changes
+    // actions
     void stop();
     void record();
-    void playback();
     void revoke();
 
     // runs all the logic of this layer once
@@ -49,26 +42,10 @@ struct Layer
     unsigned char id;
 #endif
 
-    State state = State::Idle;
     Degree chord;
     Time start;
-
-    struct {
-        // the layer is played at `start` and is not played at `end`; [start,end)
-        Time start;
-        Time end;
-        short bar = -1; // the bar index in which we recorded
-    } loop;
-
     Config::Viewed config;
 
-    struct {
-        // information about the last MIDI note number that was played
-        // at most one MIDI note is played at every moment by a layer
-        // this means that we support gate values of no more than 100% (legato)
-        char subdivisions = -1; // how many subdivisions the note has been playing for
-        midi::Number number;
-    } played;
 
     // Layer::Period is the number represents the periodity of the bar index. the bar index is incremented
     // every time a full bar has passed since the layer was first started. for finite layers, the bar index
@@ -104,6 +81,33 @@ struct Layer
 
     // the index of the bar within the logical loop it's being played in
     short bar = -1; // must be of a big enough size in order to hold Layer::Period
+
+private:
+    enum class State : char
+    {
+        Idle,
+        Wait,
+        Wander,
+        Record,
+        Playback,
+    };
+
+    State _state = State::Idle;
+
+    struct {
+        // the layer is played at `start` and is not played at `end`; [start,end)
+        Time start;
+        Time end;
+        short bar = -1; // the bar index in which we recorded
+    } _loop;
+
+    struct {
+        // information about the last MIDI note number that was played
+        // at most one MIDI note is played at every moment by a layer
+        // this means that we support gate values of no more than 100% (legato)
+        char subdivisions = -1; // how many subdivisions the note has been playing for
+        midi::Number number;
+    } _played;
 };
 
 } // midier
