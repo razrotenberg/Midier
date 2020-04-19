@@ -11,23 +11,16 @@ Layer::Layer(
 #ifdef DEBUG
     unsigned char id,
 #endif
-    Degree chord, const Time & start) :
+    Degree chord,
+    unsigned char delay) :
 #ifdef DEBUG
     id(id),
 #endif
     chord(chord),
-    start(start)
+    start({ .bar = -1, .subdivision = delay }), // we use `start` to hold `delay` as it will not be used until the layer will actually start
+    _state(State::Wait)
 {
-    if (start == Time::now)
-    {
-        TRACE_4(F("Starting layer "), *this, F(" of scale degree "), chord);
-        _state = State::Wander;
-    }
-    else
-    {
-        TRACE_6(F("Adding layer "), *this, F(" of scale degree "), chord, F(" to start at future beat "), start);
-        _state = State::Wait;
-    }
+    TRACE_7(F("New layer "), *this, F(" of scale degree "), chord, F(" will start in "), (int)start.subdivision, F(" subdivisions"));
 }
 
 bool Layer::idle() const
@@ -141,9 +134,11 @@ void Layer::click()
         }
     }
 
-    if (_state == State::Wait && Time::now == start) // check if waiting and should start now
+    if (_state == State::Wait && start.subdivision-- == 0) // check if waiting and should start now
     {
         TRACE_2(F("Starting layer "), *this);
+
+        start = Time::now;
         _state = State::Wander;
 
         if (_loop.bar == 0) // the layer was marked for recording upon starting

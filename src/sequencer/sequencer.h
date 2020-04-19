@@ -11,12 +11,8 @@ struct Sequencer
     {
         No,
 
-        // numbers represeting the # of subdivisions to round
-        _12 = 12,
-        _8 = 8,
-        _6 = 6,
-        _4 = 4,
-        _3 = 3,
+        Half = 2,
+        Full = 1,
     };
 
     enum class Bar : char
@@ -110,7 +106,14 @@ private:
         char bars; // # of recorded bars
     } _record;
 
-    Time _started; // first note ever played
+    // this is the subdivision of the first note ever played.
+    // it is used to delay the start of new layers to match the rhythm when in assist mode.
+    // we record full bars only. therefore, even if the time will be changed because of
+    // resetting it at the end of the recorded loop, only the bar will change and the
+    // subdivision will be kept the same. calculating delays in terms of subdivisions
+    // is robust to beat changes and frugal in memory.
+    char _started = -1;
+
     State _state = State::Wander;
     State _previous = _state;
 };

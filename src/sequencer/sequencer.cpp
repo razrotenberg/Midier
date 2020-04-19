@@ -31,29 +31,36 @@ Sequencer::Handle Sequencer::start(Degree degree)
             continue;
         }
 
-        auto start = Time::now;
+        unsigned char delay = 0;
 
-        if (_started.bar == -1)
+        if (_started == -1)
         {
-            TRACE_1(F("First layer starting"));
-            _started = Time::now;
+            TRACE_1(F("First layer starting now"));
+            _started = Time::now.subdivision;
         }
         else if (assist != Assist::No)
         {
-            const auto jumps = (unsigned)assist;
-            const auto round = Time::Subdivisions / jumps;
+            // what's the rate of the common rhythm
+            const auto rate = rhythm::rate(config.rhythm());
 
-            while (((start - _started).subdivisions % round) != 0)
-            {
-                ++start;
-            }
+            // how many (assisted) units are there in a single bar
+            const auto units = (unsigned)rate * (unsigned)assist;
+
+            // how many subdivisions every unit takes
+            const auto jumps = Time::Subdivisions / units;
+
+            // how many subdivisions passed since the last jump
+            const auto passed = (Time::now - Time { .bars = 0, .subdivisions = _started }).subdivisions % jumps;
+
+            // how many subdivisions are left until the next jump
+            delay = (jumps - passed) % jumps;
         }
 
         layer = Layer(
 #ifdef DEBUG
             i, // layer id
 #endif
-            degree, start);
+            degree, delay);
 
         // all layers share common configuration by default
         layer.config = &config;
@@ -177,12 +184,12 @@ Sequencer::Bar Sequencer::click(Run run)
 
     Bar bar = Bar::Same;
 
-    if (_started.bar != -1) // check if we should reset `started`
+    if (_started != -1) // check if we should reset `_started`
     {
-        if (_started.subdivision == Time::now.subdivision && layers.idle())
+        if (_started == Time::now.subdivision && layers.idle())
         {
             TRACE_1(F("Reseting start beat as no more layers are being played"));
-            _started.bar = -1;
+            _started = -1;
         }
     }
 

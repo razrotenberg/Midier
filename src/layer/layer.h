@@ -21,7 +21,7 @@ struct Layer
         unsigned char id,
 #endif
         Degree chord,
-        const Time & start);
+        unsigned char delay);
 
     // queries
     bool idle() const;
