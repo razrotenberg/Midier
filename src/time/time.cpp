@@ -45,20 +45,6 @@ bool operator!=(const Time & lhs, const Time & rhs)
     return !(lhs == rhs);
 }
 
-bool operator<=(const Time & lhs, const Time & rhs)
-{
-    if (lhs.bar < rhs.bar)
-    {
-        return true;
-    }
-    else if (lhs.bar > rhs.bar)
-    {
-        return false;
-    }
-
-    return lhs.subdivision <= rhs.subdivision;
-}
-
 Time::Difference operator-(const Time & to, const Time & from)
 {
     char bars = mod(to.bar - from.bar, Time::Bars);
