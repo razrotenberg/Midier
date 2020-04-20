@@ -8,55 +8,27 @@
 namespace midier
 {
 
-struct Config
+namespace config
 {
-    // a spanned representation of a layer configuraion
-
-    Note        note        = Note::C;
-    Accidental  accidental  = Accidental::Natural;
-    Octave      octave      = 3;
-    Mode        mode        = Mode::Ionian;
-    Rhythm      rhythm      = Rhythm::_7;
-
-    struct Style
-    {
-        unsigned    steps   = 3;
-        unsigned    perm    = 0;
-        bool        looped  = false;
-
-        // creation
-        Style() = default; // use all default values
-
-        // argument specification
-        Style(unsigned);
-        Style(unsigned, unsigned);
-        Style(unsigned, unsigned, bool);
-    };
-
-    Style style;
-
-    // creation
-    Config() = default; // use all default values
-
-    // argument specification
-    Config(Note);
-    Config(Note, Accidental);
-    Config(Note, Accidental, Octave);
-    Config(Note, Accidental, Octave, Mode);
-    Config(Note, Accidental, Octave, Mode, Rhythm);
-    Config(Note, Accidental, Octave, Mode, Rhythm, Style);
-
     struct Packed
     {
-        // we want to be able to represent `Config` in the minimum possible amount
-        // of memory, as it is saved for every layer
-        // therefore, we implement this packed version of `Config` which stores
+        // we want to be able to represent a configuraion in the minimum
+        // possible amount of memory, as it is saved for every layer
+        // therefore, we implement this packed version of it which stores
         // its data in a more compact way and not fully spanned and naive
 
         // creation
-        Packed();                           // default configuraion
-        Packed(const Config &);             // from a spanned configuraion
-        Packed & operator=(const Config &); // from a spanned configuraion
+        Packed(); // default configuraion
+
+        // argument specification
+        Packed(Note);
+        Packed(Note, Accidental);
+        Packed(Note, Accidental, Octave);
+        Packed(Note, Accidental, Octave, Mode);
+        Packed(Note, Accidental, Octave, Mode, Rhythm);
+        Packed(Note, Accidental, Octave, Mode, Rhythm, unsigned);
+        Packed(Note, Accidental, Octave, Mode, Rhythm, unsigned, unsigned);
+        Packed(Note, Accidental, Octave, Mode, Rhythm, unsigned, unsigned, bool);
 
         // getters
         Note        note()          const;
@@ -64,36 +36,29 @@ struct Config
         Octave      octave()        const;
         Mode        mode()          const;
         Rhythm      rhythm()        const;
+        unsigned    steps()         const;
+        unsigned    perm()          const;
+        bool        looped()        const;
 
-        // setters
-        void note       (Note);
-        void accidental (Accidental);
-        void octave     (Octave);
-        void mode       (Mode);
-        void rhythm     (Rhythm);
+        // in-place setters
+        Packed & note       (Note);
+        Packed & accidental (Accidental);
+        Packed & octave     (Octave);
+        Packed & mode       (Mode);
+        Packed & rhythm     (Rhythm);
+        Packed & steps      (unsigned);
+        Packed & perm       (unsigned);
+        Packed & looped     (bool);
 
-        struct Style
-        {
-            // getters
-            unsigned    steps()     const;
-            unsigned    perm()      const;
-            bool        looped()    const;
-
-            // setters
-            void steps  (unsigned);
-            void perm   (unsigned);
-            void looped (bool);
-
-            // from lsb to msb:
-            //   bits 0:9   - permutation - [0,6!=720)
-            //   bits 10:12 - steps       - [3,6]
-            //   bit  13    - looped      - [0,1]
-            //
-            // the two lsbs are not used
-            private: short _data;
-        };
-
-        Style style;
+        // copying setters
+        Packed note       (Note)        const;
+        Packed accidental (Accidental)  const;
+        Packed octave     (Octave)      const;
+        Packed mode       (Mode)        const;
+        Packed rhythm     (Rhythm)      const;
+        Packed steps      (unsigned)    const;
+        Packed perm       (unsigned)    const;
+        Packed looped     (bool)        const;
 
         // from lsb to msb:
         //   bits 0:3   - note          - [0,11]
@@ -101,14 +66,17 @@ struct Config
         //   bits 6:8   - octave        - [1,7]
         //   bits 9:11  - mode          - [0,6]
         //   bits 12:15 - rhythm        - [0,10]
-        private: short _data;
+        //   bits 16:18 - steps         - [3,6]
+        //   bits 19:28 - permutation   - [0,6!=720)
+        //   bit  29    - looped        - [0,1]
+        private: long _data;
     };
 
     struct Viewed
     {
         // every layer may have its own configuraion, but we want to also
         // support sharing configuraion among layers.
-        // therefore, every layer has to have a `Config` member inside of it,
+        // therefore, every layer has to have a `Packed` member inside of it,
         // so it could hold a specific configuraion if detached from the common one.
         // in addition, the layer holds a view to the current configuration,
         // which could point to its own configuraion or to a common configuraion
@@ -140,6 +108,8 @@ struct Config
         Packed _data;
         Packed * _view;
     };
-};
+}
+
+using Config = config::Packed;
 
 } // midier

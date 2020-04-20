@@ -87,7 +87,7 @@ struct Sequencer
     Assist assist = Assist::No;
     ILayers layers;
     unsigned char bpm;
-    Config::Packed config; // common layer configuration
+    Config config; // common layer configuration
 
 private:
     enum class State : char

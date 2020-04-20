@@ -44,7 +44,7 @@ struct Layer
 
     Degree chord;
     Time start;
-    Config::Viewed config;
+    config::Viewed config;
 
 
     // Layer::Period is the number represents the periodity of the bar index. the bar index is incremented

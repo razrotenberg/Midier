@@ -39,12 +39,9 @@ void loop()
             .octave = 3,
             .mode = midier::Mode::Ionian,
             .rhythm = midier::Rhythm::_8, // 1/8th note swung triplet
-            .style = midier::Config::Style
-                {
-                    .steps = 4, // play the 7th degree as well
-                    .perm = 0,
-                    .looped = false,
-                },
+            .steps = 4, // play the 7th degree as well
+            .perm = 0,
+            .looped = false,
         };
 
     // create a container for one layer as only a single

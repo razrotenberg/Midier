@@ -2,145 +2,184 @@
 
 namespace midier
 {
+namespace config
+{
 
 namespace
 {
 
-inline short __set(short data, unsigned offset, short mask, short value)
+inline long __set(long data, unsigned offset, long mask, long value)
 {
     return (data & ~(mask << offset)) | ((value & mask) << offset);
 }
 
-inline short __get(short data, unsigned offset, short mask)
+inline long __get(long data, unsigned offset, long mask)
 {
     return (data >> offset) & mask;
 }
 
 } //
 
-Config::Style::Style(unsigned steps)                              : steps(steps) {}
-Config::Style::Style(unsigned steps, unsigned perm)               : steps(steps), perm(perm) {}
-Config::Style::Style(unsigned steps, unsigned perm, bool looped)  : steps(steps), perm(perm), looped(looped) {}
-
-Config::Config(Note note)                                                                               : note(note) {}
-Config::Config(Note note, Accidental accidental)                                                        : note(note), accidental(accidental) {}
-Config::Config(Note note, Accidental accidental, Octave octave)                                         : note(note), accidental(accidental), octave(octave) {}
-Config::Config(Note note, Accidental accidental, Octave octave, Mode mode)                              : note(note), accidental(accidental), octave(octave), mode(mode) {}
-Config::Config(Note note, Accidental accidental, Octave octave, Mode mode, Rhythm rhythm)               : note(note), accidental(accidental), octave(octave), mode(mode), rhythm(rhythm) {}
-Config::Config(Note note, Accidental accidental, Octave octave, Mode mode, Rhythm rhythm, Style style)  : note(note), accidental(accidental), octave(octave), mode(mode), rhythm(rhythm), style(style) {}
-
-Config::Packed::Packed() : Packed(Config {}) // use default config
-{}
-
-Config::Packed::Packed(const Config & spanned)
+Packed::Packed()
 {
-    *this = spanned;
+    note        (Note::C);
+    accidental  (Accidental::Natural);
+    octave      (3);
+    mode        (Mode::Ionian);
+    rhythm      (Rhythm::Triplet);
+    steps       (3);
+    perm        (0);
+    looped      (false);
 }
 
-Config::Packed & Config::Packed::operator=(const Config & spanned)
-{
-    note        (spanned.note);
-    accidental  (spanned.accidental);
-    octave      (spanned.octave);
-    mode        (spanned.mode);
-    rhythm      (spanned.rhythm);
+Packed::Packed(Note n)                                                                              : Packed()                      { note      (n);    }
+Packed::Packed(Note n, Accidental a)                                                                : Packed(n)                     { accidental(a);    }
+Packed::Packed(Note n, Accidental a, Octave o)                                                      : Packed(n, a)                  { octave    (o);    }
+Packed::Packed(Note n, Accidental a, Octave o, Mode m)                                              : Packed(n, a, o)               { mode      (m);    }
+Packed::Packed(Note n, Accidental a, Octave o, Mode m, Rhythm r)                                    : Packed(n, a, o, m)            { rhythm    (r);    }
+Packed::Packed(Note n, Accidental a, Octave o, Mode m, Rhythm r, unsigned s)                        : Packed(n, a, o, m, r)         { steps     (s);    }
+Packed::Packed(Note n, Accidental a, Octave o, Mode m, Rhythm r, unsigned s, unsigned p)            : Packed(n, a, o, m, r, s)      { perm      (p);    }
+Packed::Packed(Note n, Accidental a, Octave o, Mode m, Rhythm r, unsigned s, unsigned p, bool l)    : Packed(n, a, o, m, r, s, p)   { looped    (l);    }
 
-    style.looped(spanned.style.looped);
-    style.steps (spanned.style.steps);
-    style.perm  (spanned.style.perm);
-}
-
-Note Config::Packed::note() const
+Note Packed::note() const
 {
     return (Note)__get(_data, 0, 0b1111);
 }
 
-Accidental Config::Packed::accidental() const
+Accidental Packed::accidental() const
 {
     return (Accidental)(__get(_data, 4, 0b11) - 1);
 }
 
-Octave Config::Packed::octave() const
+Octave Packed::octave() const
 {
     return (Octave)__get(_data, 6, 0b111);
 }
 
-Mode Config::Packed::mode() const
+Mode Packed::mode() const
 {
     return (Mode)__get(_data, 9, 0b111);
 }
 
-Rhythm Config::Packed::rhythm() const
+Rhythm Packed::rhythm() const
 {
     return (Rhythm)__get(_data, 12, 0b1111);
 }
 
-void Config::Packed::note(Note value)
+unsigned Packed::steps() const
 {
-    _data = __set(_data, 0, 0b1111, (short)value);
+    return __get(_data, 16, 0b111);
 }
 
-void Config::Packed::accidental(Accidental value)
+unsigned Packed::perm() const
 {
-    _data = __set(_data, 4, 0b11, (short)value + 1);
+    return __get(_data, 19, 0b1111111111);
 }
 
-void Config::Packed::octave(Octave value)
+bool Packed::looped() const
+{
+    return __get(_data, 29, 0b1);
+}
+
+Packed & Packed::note(Note value)
+{
+    _data = __set(_data, 0, 0b1111, (long)value);
+    return *this;
+}
+
+Packed & Packed::accidental(Accidental value)
+{
+    _data = __set(_data, 4, 0b11, (long)value + 1);
+    return *this;
+}
+
+Packed & Packed::octave(Octave value)
 {
     _data = __set(_data, 6, 0b111, value);
+    return *this;
 }
 
-void Config::Packed::mode(Mode value)
+Packed & Packed::mode(Mode value)
 {
-    _data = __set(_data, 9, 0b111, (short)value);
+    _data = __set(_data, 9, 0b111, (long)value);
+    return *this;
 }
 
-void Config::Packed::rhythm(Rhythm value)
+Packed & Packed::rhythm(Rhythm value)
 {
-    _data = __set(_data, 12, 0b1111, (short)value);
+    _data = __set(_data, 12, 0b1111, (long)value);
+    return *this;
 }
 
-unsigned Config::Packed::Style::steps() const
+Packed & Packed::steps(unsigned value)
 {
-    return __get(_data, 10, 0b111);
+    _data = __set(_data, 16, 0b111, value);
+    return *this;
 }
 
-unsigned Config::Packed::Style::perm() const
+Packed & Packed::perm(unsigned value)
 {
-    return __get(_data, 0, 0b1111111111);
+    _data = __set(_data, 19, 0b1111111111, value);
+    return *this;
 }
 
-bool Config::Packed::Style::looped() const
+Packed & Packed::looped(bool value)
 {
-    return __get(_data, 13, 0b1);
+    _data = __set(_data, 29, 0b1, (long)value);
+    return *this;
 }
 
-void Config::Packed::Style::steps(unsigned value)
+Packed Packed::note(Note value) const
 {
-    _data = __set(_data, 10, 0b111, value);
+    return Packed(*this).note(value);
 }
 
-void Config::Packed::Style::perm(unsigned value)
+Packed Packed::accidental(Accidental value) const
 {
-    _data = __set(_data, 0, 0b1111111111, value);
+    return Packed(*this).accidental(value);
 }
 
-void Config::Packed::Style::looped(bool value)
+Packed Packed::octave(Octave value) const
 {
-    _data = __set(_data, 13, 0b1, (short)value);
+    return Packed(*this).octave(value);
 }
 
-Config::Viewed::Viewed() :
+Packed Packed::mode(Mode value) const
+{
+    return Packed(*this).mode(value);
+}
+
+Packed Packed::rhythm(Rhythm value) const
+{
+    return Packed(*this).rhythm(value);
+}
+
+Packed Packed::steps(unsigned value) const
+{
+    return Packed(*this).steps(value);
+}
+
+Packed Packed::perm(unsigned value) const
+{
+    return Packed(*this).perm(value);
+}
+
+Packed Packed::looped(bool value) const
+{
+    return Packed(*this).looped(value);
+}
+
+Viewed::Viewed() :
     _data(),
     _view(&_data)
 {}
 
-Config::Viewed::Viewed(Config::Viewed && config)
+Viewed::Viewed(Viewed && config)
 {
-    *this = (Config::Viewed &&)config;
+    *this = (Viewed &&)config;
 }
 
-Config::Viewed & Config::Viewed::operator=(Config::Viewed && other)
+Viewed & Viewed::operator=(Viewed && other)
 {
     if (other.inner())
     {
@@ -154,39 +193,40 @@ Config::Viewed & Config::Viewed::operator=(Config::Viewed && other)
     return *this;
 }
 
-bool Config::Viewed::inner() const
+bool Viewed::inner() const
 {
     return _view == &_data;
 }
 
-bool Config::Viewed::outer() const
+bool Viewed::outer() const
 {
     return !inner();
 }
 
-const Config::Packed & Config::Viewed::data()
+const Packed & Viewed::data()
 {
     return _data;
 }
 
-Config::Packed * Config::Viewed::view()
+Packed * Viewed::view()
 {
     return _view;
 }
 
-Config::Packed * Config::Viewed::operator->()
+Packed * Viewed::operator->()
 {
     return _view;
 }
 
-void Config::Viewed::operator=(const Config::Packed & other)
+void Viewed::operator=(const Packed & other)
 {
     _view = &(_data = other);
 }
 
-void Config::Viewed::operator=(Config::Packed * other)
+void Viewed::operator=(Packed * other)
 {
     _view = other;
 };
 
+} // config
 } // midier

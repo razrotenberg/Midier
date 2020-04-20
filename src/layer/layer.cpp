@@ -212,25 +212,25 @@ void Layer::click()
         return; // not playing right now rhythmically
     }
 
-    char steps = config->style.steps();
+    char steps = config->steps();
 
-    if (config->style.looped())
+    if (config->looped())
     {
         steps = (steps * 2) - 2;
     }
 
     index %= steps;
 
-    if (index >= config->style.steps())
+    if (index >= config->steps())
     {
-        index = config->style.steps() - (index - config->style.steps() + 1) - 1; // the respective mirrored index
+        index = config->steps() - (index - config->steps() + 1) - 1; // the respective mirrored index
     }
 
     const auto note = config->note() + config->accidental()
         + scale::interval(config->mode(), chord)
         + triad::interval(
             scale::quality(config->mode(), chord),
-            style::degree(config->style.steps(), config->style.perm(), index));
+            style::degree(config->steps(), config->perm(), index));
 
     if (_played.subdivisions != -1)
     {
