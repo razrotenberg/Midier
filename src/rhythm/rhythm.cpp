@@ -38,6 +38,7 @@ const Description PROGMEM _7  = "[*   *   *   ]";
 const Description PROGMEM _8  = "[*       *   ]";
 const Description PROGMEM _9  = "[*      (*)  ]";
 const Description PROGMEM _10 = "[* * * * * * ]";
+const Description PROGMEM _11 = "[*   * *   * ]";
 
 } // descriptions
 
@@ -62,6 +63,8 @@ const float PROGMEM _8  [] = { _1_3(0),                   _1_3(2)   };  // 1/8th
 const float PROGMEM _9  [] = { _1_3(0), _1_3(3),          _1_3(5)   };  // 2-bar 1/8th note swing     [*      (*)  ]
 const float PROGMEM _10 [] =                                            // 1/16th note sextuplet      [* * * * * * ]
             { _1_6(0), _1_6(1), _1_6(2), _1_6(3), _1_6(4), _1_6(5) };
+const float PROGMEM _11 [] =                                            // 1/16th note swung tuplet   [*   * *   * ]
+            { _1_6(0),          _1_6(2), _1_6(3),          _1_6(5) };
 
 }
 
@@ -108,10 +111,11 @@ const Rhythmer __rhythmers[] PROGMEM =
         RHYTHMER(_4,  Rate::_1_16),
         RHYTHMER(_5,  Rate::_1_16),
         RHYTHMER(_6,  Rate::_1_16),
-        RHYTHMER(_7,  Rate::_1_8_triplet),
-        RHYTHMER(_8,  Rate::_1_8_triplet),
-        RHYTHMER(_9,  Rate::_1_8_triplet),
-        RHYTHMER(_10, Rate::_1_16_triplet),
+        RHYTHMER(_7,  Rate::triplet),
+        RHYTHMER(_8,  Rate::triplet),
+        RHYTHMER(_9,  Rate::triplet),
+        RHYTHMER(_10, Rate::sextuplet),
+        RHYTHMER(_11, Rate::sextuplet),
     };
 
 static_assert(sizeof(__rhythmers) / sizeof(__rhythmers[0]) == (unsigned)Rhythm::Count, "Unexpected number of rhythmers declared");
