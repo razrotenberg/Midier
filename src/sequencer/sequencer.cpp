@@ -7,7 +7,16 @@
 namespace midier
 {
 
-Sequencer::Sequencer(ILayers layers, unsigned char bpm, const Config & config) :
+Sequencer::Sequencer(ILayers layers) : Sequencer(layers, Config { /* default configuration */ })
+{}
+
+Sequencer::Sequencer(ILayers layers, const Config & config) : Sequencer(layers, config, 60)
+{}
+
+Sequencer::Sequencer(ILayers layers, unsigned char bpm) : Sequencer(layers, Config { /* default configuration */ }, bpm)
+{}
+
+Sequencer::Sequencer(ILayers layers, const Config & config, unsigned char bpm) :
     layers(layers),
     bpm(bpm),
     config(config)
@@ -307,6 +316,14 @@ void Sequencer::run(const Time::Duration & duration)
     {
         click(Run::Sync);
     }
+}
+
+void Sequencer::run(float bars)
+{
+    const unsigned integer = (unsigned)bars;
+    const float fractional = (bars - (long)bars);
+
+    run({ .bars = integer, .subdivisions = fractional * Time::Subdivisions });
 }
 
 void Sequencer::play(Degree degree, const Time::Duration & duration)

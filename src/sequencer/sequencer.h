@@ -39,7 +39,10 @@ struct Sequencer
     };
 
     // creation
-    Sequencer(ILayers layers, unsigned char bpm = 60, const Config & config = { /* default configuration */ });
+    Sequencer(ILayers layers);
+    Sequencer(ILayers layers, const Config & config);
+    Sequencer(ILayers layers,                        unsigned char bpm);
+    Sequencer(ILayers layers, const Config & config, unsigned char bpm);
 
     // queries
     bool recording() const;
@@ -76,8 +79,9 @@ struct Sequencer
     Bar click(Run run);
 
     // run synchronously for a certain time duration
-    // this method is blocking and returns after the time duration has fully passed
+    // these methods are blocking and return after the time duration has fully passed
     void run(const Time::Duration & duration);
+    void run(float bars);
 
     // synchronously play a scale degree for a certain time duration
     // the scale degree is stopped at the end of the duration

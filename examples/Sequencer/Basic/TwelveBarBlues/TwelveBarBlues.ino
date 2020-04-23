@@ -34,14 +34,14 @@ void loop()
     //
     const midier::Config config =
         {
-            .note = midier::Note::A,
+            .note       = midier::Note::A,
             .accidental = midier::Accidental::Natural,
-            .octave = 3,
-            .mode = midier::Mode::Ionian,
-            .rhythm = midier::Rhythm::_8, // 1/8th note swung triplet
-            .steps = 4, // play the 7th degree as well
-            .perm = 0,
-            .looped = false,
+            .octave     = 3,
+            .mode       = midier::Mode::Ionian,
+            .rhythm     = midier::Rhythm::Swung_Triplet,
+            .steps      = 4, // play the 7th degree as well
+            .perm       = 0,
+            .looped     = false,
         };
 
     // create a container for one layer as only a single
@@ -49,7 +49,7 @@ void loop()
     midier::Layers<1> layers;
 
     // create a sequencer from the layers container and specify BPM of 120
-    midier::Sequencer sequencer(layers, 120, config);
+    midier::Sequencer sequencer(layers, config, 120);
 
     // play the first section
     sequencer.play(1, { .bars = COMMON_TIME(4) });
