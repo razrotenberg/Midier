@@ -87,6 +87,10 @@ Sequencer::Handle Sequencer::start(Degree degree)
     {
         TRACE_1(F("There's no place for a new layer"));
     }
+    else
+    {
+        handle.config = &handle._layer->config;
+    }
 
     return handle;
 }

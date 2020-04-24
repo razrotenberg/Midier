@@ -32,8 +32,11 @@ struct Sequencer
     // this class is made to hide the underlying `Layer` from the client
     // so he or she will not call `Layer` methods directly but will call
     // `Sequencer` methods only
-    class Handle
+    struct Handle
     {
+        config::Viewed * config = nullptr;
+
+    private:
         friend class Sequencer;
         Layer * _layer = nullptr;
     };
