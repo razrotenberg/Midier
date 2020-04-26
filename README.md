@@ -241,7 +241,7 @@ Here's a summary of the potential changes of state of a `Sequencer`:
 
 *wander* &#x2192; *pre-record* &#x2192; *record* &#x2192; *playback* &#x2192; *overlay* &#x2192; *playback* &#x2192; ... &#x2192; *wander*
 
-> Check out the [Record](examples/Sequencer/Advanced/Record/Record.ino) example that records a few bars and playback them
+> Check out examples [Record](examples/Sequencer/Advanced/Record/Record.ino) and [overlay](examples/Sequencer/Advanced/overlay/overlay.ino) that record a few bars and playback them
 
 ## Setup
 
