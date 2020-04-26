@@ -30,6 +30,12 @@ void Time::operator++()
     }
 }
 
+Time::Duration::Duration(char bars, char subdivisions)
+{
+    this->bars = bars;
+    this->subdivisions = subdivisions;
+}
+
 Time::Duration::Duration(float bars)
 {
     const unsigned integer = (unsigned)bars;

@@ -38,6 +38,7 @@ struct Time
     struct Duration : Difference
     {
         Duration(float bars);
+        Duration(char bars, char subdivisions);
 
         unsigned total() const; // total number of subdivisions
     };
