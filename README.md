@@ -265,6 +265,23 @@ This let's you call `click()` asynchronously from your `loop()` method while sti
 
 > Check out the [Async](examples/Sequencer/Advanced/Async/Async.ino) example that uses the asynchronous interface and changes the sequencer BPM to demonstrate an interactive task
 
+### Assistance
+
+The assistance mode in *Midier* determines when a new layer will actually starts.
+
+By default, assistance is set to `Assist::No`. This means new layers will start immediately at the next click after the call to `start()`.
+This may not always be ideal, as it may be pretty hard for humans to start layers on correct timing (for example by clicking a button).
+
+*Midier* supports two other assistance modes to help with that, and cause new layers to be delayed just by a bit to be synchronized with previous layers.
+
+`Assist::Full` specifies that layers should be synchronized with the full rate of the current rhythm.
+For example, if the current rhythm is in rate of eighth notes, then new layers will start on exact eighth notes.
+
+`Assist::Half` specifies that layers should be synchronized with the full rate of the current rhythm or the exact half of it.
+For example, if the current rhythm is in rate of eighth notes, then new layers will start on exact eighth notes, or on exact sixteenth notes.
+
+> Check out the [Assist](examples/Sequencer/Advanced/Assist/Assist.ino) example that demonstrates the different assistance modes
+
 ## Setup
 
 *Midier* sends MIDI commands over the Arduino's serial connection. These MIDI commands can be the input to any device that supports MIDI as input.
