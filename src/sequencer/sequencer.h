@@ -85,7 +85,6 @@ struct Sequencer
     // run synchronously for a certain time duration
     // these methods are blocking and return after the time duration has fully passed
     void run(const Time::Duration & duration);
-    void run(float bars);
 
     // synchronously play a scale degree for a certain time duration
     // the scale degree is stopped at the end of the duration

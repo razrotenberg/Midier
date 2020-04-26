@@ -30,7 +30,16 @@ void Time::operator++()
     }
 }
 
-unsigned Time::Difference::total() const
+Time::Duration::Duration(float bars)
+{
+    const unsigned integer = (unsigned)bars;
+    const float fractional = (bars - (long)bars);
+
+    this->bars = integer;
+    this->subdivisions = fractional * Time::Subdivisions;
+}
+
+unsigned Time::Duration::total() const
 {
     return (unsigned)bars * Time::Subdivisions + (unsigned)subdivisions;
 }

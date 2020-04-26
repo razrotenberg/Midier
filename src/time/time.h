@@ -33,11 +33,14 @@ struct Time
     {
         char bars;
         char subdivisions;
+    };
+
+    struct Duration : Difference
+    {
+        Duration(float bars);
 
         unsigned total() const; // total number of subdivisions
     };
-
-    using Duration = Difference;
 
     static Time now;
 };
