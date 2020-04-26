@@ -90,7 +90,7 @@ sequencer.play(5, { .bars = 1 });
 sequencer.play(1, { .bars = 1 });
 ```
 
-> Check out examples [I-IV-V-I](examples/Sequencer/Basic/I-IV-V-I/I-IV-V-I.ino) and [TwelveBarBlues](examples/Sequencer/Basic/TwelveBarBlues/TwelveBarBlues.ino) that play common chord progressions
+> Check out examples [Canon](examples/Sequencer/Basic/Canon/Canon.ino), [I-IV-V-I](examples/Sequencer/Basic/I-IV-V-I/I-IV-V-I.ino) and [TwelveBarBlues](examples/Sequencer/Basic/TwelveBarBlues/TwelveBarBlues.ino) that play common chord progressions
 
 ### Configuration
 
