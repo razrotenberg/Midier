@@ -1,8 +1,247 @@
 # Midier
 
-Midier is a library written in C++ to create, play, record and loop MIDI notes, arpeggios and sequences on Arduino
+Midier is a library written in C++ to play, record, loop and program MIDI notes, arpeggios and sequences on Arduino
 
----
+## What is Midier?
+
+*Midier* is a library for Arduino, that enables creating, playing, recording, looping and programming MIDI notes, arpeggios, chord progressions and complex sequences easily.
+
+### Playing Notes
+
+At its core, *Midier* enables playing MIDI notes.
+
+```
+midier::midi::play(midier::Note::G);
+```
+
+> Check out the [Notes](examples/Notes/Notes.ino) example that plays all the notes
+
+### Intervals
+
+*Midier* allows you to intuitively use musical intervals to calculate note values. Thus, *Midier* provides an easy API to easily build and play arpeggios and chords.
+
+```
+// the notes in a C major chord
+midier::Note root = midier::Note::C;
+midier::Note third = root + midier::Interval::M3;
+midier::Note fifth = root + midier::Interval::P5;
+
+// play a C major arpeggio
+midier::midi::play(root);
+midier::midi::play(third);
+midier::midi::play(fifth);
+```
+
+> Check out the [Intervals](examples/Intervals/Intervals.ino) example that plays all the major and minor chords
+
+### Chord Qualities
+
+*Midier* provides an even easier way to generate triads (3-note chords) and seventh-chords (4-note chords) by querying the intervals of common chord qualities.
+
+All supported qualities are listed in [quality.h](src/quality/quality.h).
+
+> Check out examples [Triads](examples/Chords/Triads/Triads.ino) and [SeventhChords](examples/Chords/SeventhChords/SeventhChords.ino) that play all qualities of triads and seventh-chords
+
+### Scales
+
+*Midier* provides an easy way to play scales. It supports the seven modes of the diatonic scale, which are listed in [mode.h](src/mode/mode.h).
+
+You can query the quality of any scale degree of any of the seven common modes, as well as the interval of the scale degree from the scale root. Using this two pieces of information - the interval and the quality - you can easily play its chord or arpeggio.
+
+```
+midier::Mode mode = midier::Mode::Ionian;
+int degree = 5;
+
+midier::Quality quality = midier::scale::quality(mode, degree);
+midier::Interval interval = midier::scale::interval(mode, degree);
+```
+
+> Check out the [Scales](examples/Scales/Scales.ino) example that plays all degrees in the G major scale
+
+### Chord Progressions and Complex Sequences
+
+In addition to providing an interface for playing notes, and using musical intervals and scales to generate chords and arpeggios, *Midier* also provides an even easier to use interface for creating and playing chord progressions and complex sequences. This interface is `Sequencer` and declared in [sequencer.h](src/sequencer/sequencer.h).
+
+In many ways, while coming up with the idea of *Midier* and its uses, the `Sequencer` interface was the one meant to be exposed to the user, while all the above are essential for implementing it, and may also not be used by the user at all.
+
+There are both synchronous and asynchronous interfaces to use `Sequencer`.
+It's easy to explore the capabilities of *Midier* using the synchronous interface, with regular sequential lines of code (as in most of the examples).
+The asynchronous interface may be used by more complex Arduino projects that also have other things to do (such as handling user I/O).
+
+A `Sequencer` object provides an easy interface to play arpeggios of different scale degrees.
+An arpeggio of a scale degree that is being played in a `Sequencer` is called a `Layer`.
+`Layer`s can be played at any time, in any order, and for any duration of time.
+`Layer`s can be played sequentially one after another, simultaneously at the same time, or in parallel with some overlap.
+This enables to easily play both simple and complex sequences.
+
+Playing an arpeggiated chord progression is as easy as the next few lines of code:
+
+```
+// create a container for the layers
+midier::Layers<1> layers;
+
+// create the sequencer
+midier::Sequencer sequencer(layers);
+
+// play I-IV-V-I chord progression
+sequencer.play(1, { .bars = 1 });
+sequencer.play(4, { .bars = 1 });
+sequencer.play(5, { .bars = 1 });
+sequencer.play(1, { .bars = 1 });
+```
+
+> Check out examples [I-IV-V-I](examples/Sequencer/Basic/I-IV-V-I/I-IV-V-I.ino) and [TwelveBarBlues](examples/Sequencer/Basic/TwelveBarBlues/TwelveBarBlues.ino) that play common chord progressions
+
+### Configuration
+
+You can configure almost any aspect of an arpeggio with *Midier*.
+Here's an example of a `Config` object, which is declared in [config.h](src/config/config.h):
+
+```
+midier::Config config =
+    {
+        .note = midier::Note::G,
+        .accidental = midier::Accidental::Sharp,
+        .octave = 3,
+        .mode = midier::Mode::Aeolian,
+        .rhythm = midier::Rhythm::Triplet,
+        .steps = 4,
+        .perm = 17,
+        .looped = true,
+    };
+```
+
+#### Fields
+
+##### Root
+
+The root note of the scale is specified by `.note`, `.accidental`, and `.octave`.
+In the example above the arpeggio will be in a scale starting in G# in octave 3.
+
+##### Mode
+
+`Layer`s are scale degrees being played as arpeggios. The field `.mode` specifies the scale which the arpeggio is in.
+In the example above, the arpeggio will be in a G# minor scale (aeolian mode).
+Currently, *Midier* supports the seven modes of the diatonic scale:
+- Ionian
+- Dorian
+- Phrygian
+- Lydian
+- Mixolydian
+- Aeolian
+- Locrian
+
+##### Rhythm
+
+An arpeggio is a sequence of notes. The field `.rhythm` specifies how these notes should be played, rhythmically.
+Declared and documented in [rhythm.h](src/rhythm/rhythm.h), *Midier* supports several rhythms, in both straight and swing feels:
+
+| Index | Name            | Pattern                                                                                          | Time                      |
+|-------|-----------------|--------------------------------------------------------------------------------------------------|---------------------------|
+| 0     | Quarter         | &#x2587;&#x2581;&#x2581;&#x2581;&#x2581;&#x2581;&#x2581;&#x2581;&#x2581;&#x2581;&#x2581;&#x2581; | 1/4                       |
+| 1     | Eighth          | &#x2587;&#x2581;&#x2581;&#x2581;&#x2581;&#x2581;&#x2587;&#x2581;&#x2581;&#x2581;&#x2581;&#x2581; | 1/8 1/8                   |
+| 2     | Sixteenth       | &#x2587;&#x2581;&#x2581;&#x2587;&#x2581;&#x2581;&#x2587;&#x2581;&#x2581;&#x2587;&#x2581;&#x2581; | 1/16 1/16 1/16 1/16       |
+| 3     | 1-e-and         | &#x2587;&#x2581;&#x2581;&#x2587;&#x2581;&#x2581;&#x2587;&#x2581;&#x2581;&#x2581;&#x2581;&#x2581; | 1/16 1/16 1/8             |
+| 4     | 1-and-a         | &#x2587;&#x2581;&#x2581;&#x2581;&#x2581;&#x2581;&#x2587;&#x2581;&#x2581;&#x2587;&#x2581;&#x2581; | 1/8 1/16 1/16             |
+| 5     | 1-e-a           | &#x2587;&#x2581;&#x2581;&#x2587;&#x2581;&#x2581;&#x2581;&#x2581;&#x2581;&#x2587;&#x2581;&#x2581; | 1/16 1/8 1/16             |
+| 6     | e-and-a         | &#x2581;&#x2581;&#x2581;&#x2587;&#x2581;&#x2581;&#x2587;&#x2581;&#x2581;&#x2587;&#x2581;&#x2581; | 1/16-rest 1/16 1/16 1/16  |
+| 7     | Triplet         | &#x2587;&#x2581;&#x2581;&#x2581;&#x2587;&#x2581;&#x2581;&#x2581;&#x2587;&#x2581;&#x2581;&#x2581; | 1/8 note triplet          |
+| 8     | Swung Triplet   | &#x2587;&#x2581;&#x2581;&#x2581;&#x2581;&#x2581;&#x2581;&#x2581;&#x2587;&#x2581;&#x2581;&#x2581; | 1/8 note swung triplet    |
+| 9     | Two Bar Swing   | &#x2587;&#x2581;&#x2581;&#x2581;&#x2581;&#x2581;&#x2581;&#x2581;&#x2583;&#x2581;&#x2581;&#x2581; | 2-bar 1/8 note swing      |
+| 10    | Sextuplet       | &#x2587;&#x2581;&#x2587;&#x2581;&#x2587;&#x2581;&#x2587;&#x2581;&#x2587;&#x2581;&#x2587;&#x2581; | 1/16 note sextuplet       |
+| 11    | Swung Sextuplet | &#x2587;&#x2581;&#x2581;&#x2581;&#x2587;&#x2581;&#x2587;&#x2581;&#x2581;&#x2581;&#x2587;&#x2581; | 1/16 note swung sextuplet |
+
+##### Steps
+
+The field `.steps` specifies the number of notes that should be played in the arpeggio. This could be 3, 4, 5 or 6.
+Playing 3 steps means playing chord degrees I, III and V, which is a triad.
+Playing 4 steps means to also play degree VII, making the arpeggio a seventh chord.
+Playing 5 and 6 steps means to play degrees I and III an octave higher (counted as degrees 8 and 10 respectively).
+
+##### Permutation
+
+The field `.perm` specifies the order in which the notes of the arpeggio should be played.
+The maximum possible value of `perm` depends on the number of steps of the arpeggio, and is the factorial of it.
+For 3 steps, there are 6 permutations, for 4 steps 24, for 5 steps 120, and for 6 steps there are 720.
+*Midier* uses an algoritm, which is fully documented in [style.cpp](src/style/style.cpp), to generate any possible permutation of the arpeggio notes.
+*Midier* also provides an interface to get a string describing the permutation by its index, by calling `midier::style::description()`.
+
+##### Looped
+
+If field `.looped` is set to `true`, all notes of the arpeggio (with any number of steps) are played in reverse order after being played normally.
+This results in an infinite loop of notes being played ascending and descending.
+Any configuration of number of steps and the permutation, can also be played `looped`.
+This doubles the amount of possible configurations of an arpeggio in *Midier*.
+
+#### Common Configuration
+
+By default, all `Layer`s that are being played using the same `Sequencer` share a common configuration.
+This is possible because `Sequencer` has a `Config` member, which is pointed by all `Layer`s by default.
+Thus, changing the configuration of a `Sequencer` will immediately and automatically affect all current `Layer`s and all the next ones as well.
+
+> Check out the [CommonConfiguration](examples/Sequencer/Advanced/CommonConfiguration/CommonConfiguration.ino) example that modifies the common configuration while playing a sequence
+
+#### Layer Configuration
+
+Every `Layer` can be detached from the common configuration and be configured differently.
+This enables you play complex sequences of layers from different scales, with different number of steps and permutation, and in a different rhythm.
+
+For example, you can play a `Layer` in C major scale playing triads in eighth note triplets, while simultaneously playing a `Layer` in G minor scale playing seventh-chords in sixteenth notes.
+
+`Layer`s that were detached from the common configuration can be reattached to it, and vice versa.
+This let's you enjoy the maximum freedom of experimenting with a layer configuration while always being able to go back and use the common configuration.
+
+> Check out the [LayerConfiguration](examples/Sequencer/Advanced/LayerConfiguration/LayerConfiguration.ino) example that detaches a layer from the common configuration and then re-attaches it
+
+### Recording and Looping
+
+In addition to playing MIDI sequences, *Midier* also supports recording and looping sequences.
+
+#### Wander
+
+By default, a `Sequencer` is in *wander* state.
+This means that layers start playing on a call to `start()`, are being played for some time, and then stop playing on a call to `stop()`.
+
+#### Record
+
+A `Sequencer` object can also record what is being played.
+While recording, every starting and stopping of any layer will be remembered.
+A `Sequencer` records full bars, and any number of bars can be recorded up to a certain limit, which is 48 (`Time::Bars`) currently.
+
+A call to `record()` on a `Sequencer` which is in *wander* state will eventually start recording.
+If there are layers being played on the call to `record()`, the `Sequencer` will enter *record* state and start recording immediately.
+If there are no layers being played on the call to `record()`, the `Sequencer` will enter *pre-record* state.
+Then, when the first layer starts playing, the `Sequencer` will enter *record* state and start recording.
+
+#### Playback
+
+While in *record* state, calling `record()` will cause the `Sequencer` to stop recording and enter *playback* state.
+In *playback* state, the `Sequencer` will play the recorded bars repeatedly.
+Every layer that was recorded when the `Sequencer` was previously in *record* state will play automatically in *playback* mode.
+
+New layers can be played while in *playback* mode.
+They will be played on top of the recorded loop and will not be recorded themselves.
+
+#### Overlay
+
+While in *playback* state, calling `record()` will cause the `Sequencer` to enter *overlay* state and start recording once again.
+While in *overlay* state, new layers will be recorded on top of the already recorded loop.
+In oppose to *record* state, no new bars are recorded in *playback* state, and the number of recorded will not change.
+Calling `record` while in *overlay* state will change the state of a `Sequencer` to *playback*.
+
+#### Summary
+
+Calling `record()` on a `Sequencer` will change its state depending on the current state the `Sequencer` is in.
+At first, a `Sequencer` is in *wander* state and calling `record()` will eventually change it to *record* (potentially via *pre-record*).
+Calling `record()` will then determine the number of recorded bars and change the state to *playback*.
+Then, calling `record()` will toggle between *overlay* and *playback* states.
+
+At any time, a call to `wander()` will set a `Sequencer` to *wander* state and will cause it to immediately stop recording and playing back any layers.
+Here's a summary of the potential changes of state of a `Sequencer`:
+
+*wander* &#x2192; *pre-record* &#x2192; *record* &#x2192; *playback* &#x2192; *overlay* &#x2192; *playback* &#x2192; ... &#x2192; *wander*
+
+> Check out the [Record](examples/Sequencer/Advanced/Record/Record.ino) example that records a few bars and playback them
 
 ## Setup
 
@@ -44,7 +283,7 @@ As said, *Midier* only sends MIDI commands. This means that there needs to be so
 
 If you are connecting your Arduino to a device that has a MIDI-in plug, such as a synthesizer, the device will generate sound from the MIDI commands.
 If you are connecting your Arduino to a computer, you should use a software to convert these MIDI commands into sound.
-Many DAW software can do that. For example: Ableton, Cubase, Logic Pro, GarageBand, Pro Tools, and many more.
+Many DAW software can do that. For example: Ableton, Cubase, Logic Pro, GarageBand, Pro Tools, [LMMS](https://lmms.io/), and many more.
 
 ## Debugging
 
