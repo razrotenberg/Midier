@@ -95,6 +95,18 @@ Sequencer::Handle Sequencer::start(Degree degree)
     return handle;
 }
 
+Sequencer::Handle Sequencer::start(Degree degree, const Config & config)
+{
+    const Handle handle = start(degree);
+
+    if (handle._layer != nullptr)
+    {
+        handle._layer->config = config;
+    }
+
+    return handle;
+}
+
 void Sequencer::stop(Handle handle)
 {
     if (handle._layer != nullptr)
@@ -333,6 +345,13 @@ void Sequencer::run(float bars)
 void Sequencer::play(Degree degree, const Time::Duration & duration)
 {
     const Handle handle = start(degree);
+    run(duration);
+    stop(handle);
+}
+
+void Sequencer::play(Degree degree, const Time::Duration & duration, const Config & config)
+{
+    const Handle handle = start(degree, config);
     run(duration);
     stop(handle);
 }

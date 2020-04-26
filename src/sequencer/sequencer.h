@@ -52,6 +52,7 @@ struct Sequencer
 
     // start and stop layers
     Handle start(Degree degree);
+    Handle start(Degree degree, const Config & config);
     void stop(Handle handle);
 
     // revoke the last recorded layer
@@ -89,6 +90,7 @@ struct Sequencer
     // synchronously play a scale degree for a certain time duration
     // the scale degree is stopped at the end of the duration
     void play(Degree degree, const Time::Duration & duration);
+    void play(Degree degree, const Time::Duration & duration, const Config & config);
 
     // exposed members
     Assist assist = Assist::No;
