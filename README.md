@@ -243,6 +243,28 @@ Here's a summary of the potential changes of state of a `Sequencer`:
 
 > Check out examples [Record](examples/Sequencer/Advanced/Record/Record.ino) and [overlay](examples/Sequencer/Advanced/overlay/overlay.ino) that record a few bars and playback them
 
+### Asynchronous Interface
+
+*Midier* provides both synchronous and asynchronous interfaces for `Sequencer::click()`.
+You can choose whether to use the synchronous or asynchronous interfaces by specifying `Run::Sync` and `Run::Async` respectively on a call to `Sequencer::click()`.
+
+The synchronous API may be easier to use, and is good for simple and straight-forward uses, such as most of the examples of *Midier*.
+When the method is called synchronously, it will not return until the click will actually happen.
+When the click happens depends on the BPM of the `Sequencer`, and the time the previous click took place.
+A certain amount of time has to pass between clicks in order to satisfy the specified BPM.
+
+This asynchronous API is useful when you have more things you need to do and you can't wait for the click to actually happen.
+This could happen for example if you handle user I/O operations such as button clicks.
+I/O operations should be handled immediately, and waiting for the synchronous methods will create latency and bad feedback for the user.
+
+Using the asynchronous API will cause `click()` to return immediately.
+The click will take place on a call to `click()` if enough time has passed since the precious click.
+In case not enough time has passed since the previous click, `click()` will do nothing and return immediately.
+
+This let's you call `click()` asynchronously from your `loop()` method while still doing more tasks and without creating latency.
+
+> Check out the [Async](examples/Sequencer/Advanced/Async/Async.ino) example that uses the asynchronous interface and changes the sequencer BPM to demonstrate an interactive task
+
 ## Setup
 
 *Midier* sends MIDI commands over the Arduino's serial connection. These MIDI commands can be the input to any device that supports MIDI as input.
