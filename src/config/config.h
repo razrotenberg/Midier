@@ -90,6 +90,8 @@ struct Viewed
     Viewed(const Viewed &) = delete;
     Viewed& operator=(const Viewed &) = delete;
 
+    Viewed(Packed *);
+
     // queries
     bool inner() const; // is pointing to the inner configuraion
     bool outer() const; // is pointing to another configuraion

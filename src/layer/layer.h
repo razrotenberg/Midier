@@ -21,7 +21,8 @@ struct Layer
         unsigned char id,
 #endif
         Degree chord,
-        unsigned char delay);
+        unsigned char delay,
+        Config * config);
 
     // queries
     bool idle() const;
@@ -45,7 +46,6 @@ struct Layer
     Degree chord;
     Time start;
     config::Viewed config;
-
 
     // Layer::Period is the number represents the periodity of the bar index. the bar index is incremented
     // every time a full bar has passed since the layer was first started. for finite layers, the bar index

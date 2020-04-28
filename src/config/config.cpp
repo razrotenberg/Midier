@@ -193,6 +193,11 @@ Viewed & Viewed::operator=(Viewed && other)
     return *this;
 }
 
+Viewed::Viewed(Packed * config) : Viewed()
+{
+    *this = config;
+}
+
 bool Viewed::inner() const
 {
     return _view == &_data;

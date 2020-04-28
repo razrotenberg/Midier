@@ -12,12 +12,14 @@ Layer::Layer(
     unsigned char id,
 #endif
     Degree chord,
-    unsigned char delay) :
+    unsigned char delay,
+    Config * config) :
 #ifdef DEBUG
     id(id),
 #endif
     chord(chord),
     start({ .bar = -1, .subdivision = delay }), // we use `start` to hold `delay` as it will not be used until the layer will actually start
+    config(config), // all layers share common configuration by default
     _state(State::Wait)
 {
     TRACE_7(F("New layer "), *this, F(" of scale degree "), chord, F(" will start in "), (int)start.subdivision, F(" subdivisions"));

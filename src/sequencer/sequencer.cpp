@@ -69,10 +69,7 @@ Sequencer::Handle Sequencer::start(Degree degree)
 #ifdef DEBUG
             i, // layer id
 #endif
-            degree, delay);
-
-        // all layers share common configuration by default
-        layer.config = &config;
+            degree, delay, &config);
 
         if (_state == State::Record || _state == State::Overlay)
         {
