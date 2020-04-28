@@ -2,9 +2,57 @@
 
 Midier is a library written in C++ to play, record, loop and program MIDI notes, arpeggios and sequences on Arduino
 
-## What is Midier?
+## What Is Midier?
 
 *Midier* is a library for Arduino, that enables creating, playing, recording, looping and programming MIDI notes, arpeggios, chord progressions and complex sequences easily.
+
+## Listen to Examples
+
+There are plenty of examples of *Midier* that require nothing but an Arduino and a USB cable that you can run.
+Running the examples is super easy, and you will see how you can do cool stuff with *Midier* with only a few lines of code.
+
+Listen to a few melodies created easily with *Midier*:
+
+| Name | Description | &#127926; |
+|------|-------------|-----------|
+| [Canon](examples/Sequencer/Basic/Canon/Canon.ino) | Plays Pachelbel’s Canon in D major | [Listen](examples/Sequencer/Basic/Canon/Canon.mp3) |
+| [I-IV-V-I](examples/Sequencer/Basic/I-IV-V-I/I-IV-V-I.ino) | Plays the common I-IV-V-I chord progression | [Listen](examples/Sequencer/Basic/I-IV-V-I/I-IV-V-I.mp3) |
+| [12-Bar Blues](examples/Sequencer/Basic/TwelveBarBlues/TwelveBarBlues.ino) | Plays a 12-bar blues chord progression | [Listen](examples/Sequencer/Basic/TwelveBarBlues/TwelveBarBlues.mp3) |
+
+See how simple it is to implement I-IV-V-I for example:
+
+```
+midier::Layers<1> layers;
+midier::Sequencer sequencer(layers);
+
+sequencer.play(1, { .bars = 1 });
+sequencer.play(4, { .bars = 1 });
+sequencer.play(5, { .bars = 1 });
+sequencer.play(1, { .bars = 1 });
+```
+
+Here is a table of all examples provided in addition to the three melodies above.
+The examples are documented and show how to use all of the features of *Midier*.
+Each example has a purpose and shows some feature of *Midier*.
+The table is ordered in the recommended steps to master *Midier*:
+
+| Name | Description | &#127926; |
+|------|-------------|-----------|
+| [Notes](examples/Notes/Notes.ino) | Plays the basic notes sequentially | [Listen](examples/Notes/Notes.mp3) |
+| [Intervals](examples/Intervals/Intervals.ino) | Plays major and minor chords of root notes | [Listen](examples/Intervals/Intervals.mp3) |
+| [Triads](examples/Chords/Triads/Triads.ino) | Plays all triad qualities of root notes | [Listen](examples/Chords/Triads/Triads.mp3) |
+| [Seventh Chords](examples/Chords/SeventhChords/SeventhChords.ino) | Plays all seventh chords of root notes | [Listen](examples/Chords/SeventhChords/SeventhChords.mp3) |
+| [Scales](examples/Scales/Scales.ino) | Plays all triads in a scale | [Listen](examples/Scales/Scales.mp3) |
+| [Common Configuration](examples/Sequencer/Advanced/CommonConfiguration/CommonConfiguration.ino) | Changes the common configuration of a `Sequencer` in runtime | [Listen](examples/Sequencer/Advanced/CommonConfiguration/CommonConfiguration.mp3) |
+| [Layer Configuration](examples/Sequencer/Advanced/LayerConfiguration/LayerConfiguration.ino) | Detaching and re-attaching a layer from the common configuration | [Listen](examples/Sequencer/Advanced/LayerConfiguration/LayerConfiguration.mp3) |
+| [Record](examples/Sequencer/Advanced/Record/Record.ino) | Recording and playbacking layers | [Listen](examples/Sequencer/Advanced/Record/Record.mp3) |
+| [Overlay](examples/Sequencer/Advanced/Overlay/Overlay.ino) | Recording additional layers over a recorded loop | [Listen](examples/Sequencer/Advanced/Overlay/Overlay.mp3) |
+| [Assist](examples/Sequencer/Advanced/Assist/Assist.ino) | Plays layers with different assistance modes | [Listen](examples/Sequencer/Advanced/Assist/Assist.mp3) |
+| [Async](examples/Sequencer/Advanced/Async/Async.ino) | Uses the async API and changes the sequencer BPM in runtime | [Listen](examples/Sequencer/Advanced/Async/Async.mp3) |
+
+Read the [Setup](#Setup) section below for more information of the setup required to run the examples.
+
+## How to Use Midier?
 
 ### Playing Notes
 
