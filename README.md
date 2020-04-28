@@ -2,6 +2,24 @@
 
 Midier is a library written in C++ to play, record, loop and program MIDI notes, arpeggios and sequences on Arduino
 
+## Table of Contents
+
+* [What Is Midier?](#what-is-midier)
+* [Listen to Examples](#listen-to-examples)
+* [How to Use Midier?](#how-to-use-midier)
+    * [Playing Notes](#playing-notes)
+    * [Intervals](#intervals)
+    * [Chord Qualities](#chord-qualities)
+    * [Scales](#scales)
+    * [Chord Progressions and Complex Sequences](#chord-progressions-and-complex-sequences)
+    * [Configuration](#configuration)
+    * [Recording and Looping](#recording-and-looping)
+    * [Asynchronous Interface](#asynchronous-interface)
+    * [Assistance](#assistance)
+* [Setup](#setup)
+* [Debugging](#debugging)
+* [Classes](#classes)
+
 ## What Is Midier?
 
 *Midier* is a library for Arduino, that enables creating, playing, recording, looping and programming MIDI notes, arpeggios, chord progressions and complex sequences easily.
