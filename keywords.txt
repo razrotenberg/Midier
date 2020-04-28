@@ -1,0 +1,226 @@
+########################
+# Datatypes (KEYWORD1) #
+########################
+
+# config.h
+Config	KEYWORD1
+Packed	KEYWORD1
+Viewed	KEYWORD1
+
+# degree.h
+Degree	KEYWORD1
+
+# interval.h
+Interval	KEYWORD1
+
+# layer.h
+Layer	KEYWORD1
+
+# layers.h
+ILayers	KEYWORD1
+Layers	KEYWORD1
+
+# midi.h
+Number	KEYWORD1
+
+# mode.h
+Mode	KEYWORD1
+Name	KEYWORD1
+
+# note.h
+Accidental	KEYWORD1
+Note	KEYWORD1
+
+# octave.h
+Octave	KEYWORD1
+
+# quality.h
+Quality	KEYWORD1
+
+# rhythm.h
+Description	KEYWORD1
+Rate	KEYWORD1
+Rhythm	KEYWORD1
+
+# sequencer.h
+Assist	KEYWORD1
+Bar	KEYWORD1
+Handle	KEYWORD1
+Run	KEYWORD1
+Sequencer	KEYWORD1
+
+# style.h
+Description	KEYWORD1
+
+# time.h
+Difference	KEYWORD1
+Duration	KEYWORD1
+Time	KEYWORD1
+
+####################################
+# Methods and Functions (KEYWORD2) #
+####################################
+
+# config.h
+inner	KEYWORD2
+outer	KEYWORD2
+view	KEYWORD2
+data	KEYWORD2
+
+# layer.h
+click	KEYWORD2
+idle	KEYWORD2
+looping	KEYWORD2
+record	KEYWORD2
+revoke	KEYWORD2
+running	KEYWORD2
+stop	KEYWORD2
+waiting	KEYWORD2
+wandering	KEYWORD2
+
+# layers.h
+all	KEYWORD2
+any	KEYWORD2
+click	KEYWORD2
+count	KEYWORD2
+eval	KEYWORD2
+idle	KEYWORD2
+none	KEYWORD2
+record	KEYWORD2
+revoke	KEYWORD2
+running	KEYWORD2
+
+# midi.h
+number	KEYWORD2
+on	KEYWORD2
+off	KEYWORD2
+play	KEYWORD2
+
+# mode.h
+name	KEYWORD2
+
+# rhythm.h
+description	KEYWORD2
+played	KEYWORD2
+rate	KEYWORD2
+
+# scale.h
+interval	KEYWORD2
+quality	KEYWORD2
+
+# sequencer.h
+click	KEYWORD2
+play	KEYWORD2
+record	KEYWORD2
+revoke	KEYWORD2
+recording	KEYWORD2
+run	KEYWORD2
+start	KEYWORD2
+stop	KEYWORD2
+wander	KEYWORD2
+
+# style.h
+degree	KEYWORD2
+count	KEYWORD2
+description	KEYWORD2
+
+# time.h
+total	KEYWORD2
+
+# triad.h
+interval	KEYWORD2
+
+########################
+# Constants (LITERAL1) #
+########################
+
+# interval.h
+P1	LITERAL1
+m2	LITERAL1
+M2	LITERAL1
+m3	LITERAL1
+M3	LITERAL1
+P4	LITERAL1
+A4	LITERAL1
+d5	LITERAL1
+P5	LITERAL1
+A5	LITERAL1
+m6	LITERAL1
+M6	LITERAL1
+m7	LITERAL1
+M7	LITERAL1
+P8	LITERAL1
+
+# mode.h
+Ionian	LITERAL1
+Dorian	LITERAL1
+Phrygian	LITERAL1
+Lydian	LITERAL1
+Mixolydian	LITERAL1
+Aeolian	LITERAL1
+Locrian	LITERAL1
+Count	LITERAL1
+
+# note.h
+C	LITERAL1
+D	LITERAL1
+E	LITERAL1
+F	LITERAL1
+G	LITERAL1
+A	LITERAL1
+B	LITERAL1
+Flat	LITERAL1
+Natural	LITERAL1
+Sharp	LITERAL1
+
+# quality.h
+m7b5	LITERAL1
+m7	LITERAL1
+dom7	LITERAL1
+maj7	LITERAL1
+aug7	LITERAL1
+dim	LITERAL1
+minor	LITERAL1
+major	LITERAL1
+aug	LITERAL1
+
+# rhythm.h
+_1_4	LITERAL1
+_1_8	LITERAL1
+_1_16	LITERAL1
+triplet	LITERAL1
+sextuplet	LITERAL1
+_0	LITERAL1
+_1	LITERAL1
+_2	LITERAL1
+_3	LITERAL1
+_4	LITERAL1
+_5	LITERAL1
+_6	LITERAL1
+_7	LITERAL1
+_8	LITERAL1
+_9	LITERAL1
+_10	LITERAL1
+_11	LITERAL1
+Quarter	LITERAL1
+Eighth	LITERAL1
+Sixteenth	LITERAL1
+One_E_And	LITERAL1
+One_And_A	LITERAL1
+One_E_A	LITERAL1
+E_And_A	LITERAL1
+Triplet	LITERAL1
+Swung_Triplet	LITERAL1
+Two_Bar_Swing	LITERAL1
+Sextuplet	LITERAL1
+Swung_Sextuplet	LITERAL1
+Count	LITERAL1
+
+# sequencer.h
+No	LITERAL1
+Half	LITERAL1
+Full	LITERAL1
+None	LITERAL1
+Same	LITERAL1
+Sync	LITERAL1
+Async	LITERAL1
