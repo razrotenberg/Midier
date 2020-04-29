@@ -8,6 +8,14 @@ namespace midier
 namespace midi
 {
 
+enum class Velocity : char
+{
+    // values are MIDI velocity
+
+    High = 127, // maximum velocity
+    Low  = 75,
+};
+
 // represents a MIDI note number
 using Number = unsigned char;
 
@@ -15,7 +23,7 @@ using Number = unsigned char;
 Number number(Note note, Octave octave);
 
 // send a 'NOTE_ON' MIDI command
-void on(Number number, unsigned velocity = 127); // by default max velocity
+void on(Number number, Velocity velocity = Velocity::High); // by default max velocity
 
 // send a 'NOTE_OFF' MIDI command
 void off(Number number);

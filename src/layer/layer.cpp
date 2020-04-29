@@ -247,7 +247,7 @@ void Layer::click()
     _played.subdivisions = 0; // start counting the number of clicks the note is playing
     _played.number = midi::number(note, config->octave());
 
-    midi::on(_played.number, (unsigned)volume);
+    midi::on(_played.number, velocity);
 }
 
 } // midier

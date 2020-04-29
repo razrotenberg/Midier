@@ -46,6 +46,7 @@ struct Layer
     Degree chord;
     Time start;
     config::Viewed config;
+    midi::Velocity velocity = midi::Velocity::High;
 
     // Layer::Period is the number represents the periodity of the bar index. the bar index is incremented
     // every time a full bar has passed since the layer was first started. for finite layers, the bar index

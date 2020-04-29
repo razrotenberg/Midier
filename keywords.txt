@@ -22,6 +22,7 @@ Layers	KEYWORD1
 
 # midi.h
 Number	KEYWORD1
+Velocity    KEYWORD1
 
 # mode.h
 Mode	KEYWORD1
@@ -150,6 +151,10 @@ M6	LITERAL1
 m7	LITERAL1
 M7	LITERAL1
 P8	LITERAL1
+
+# midi.h
+High    LITERAL1
+Low LITERAL1
 
 # mode.h
 Ionian	LITERAL1
