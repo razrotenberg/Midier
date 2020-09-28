@@ -5,6 +5,8 @@
 #include "../layer/layer.h"
 #include "../time/time.h"
 
+#if defined(ARDUINO)
+
 namespace midier
 {
 namespace debug
@@ -75,4 +77,55 @@ void prefix(const __FlashStringHelper * file, int line, const char function[])
 } // debug
 } // midier
 
-#endif
+#elif defined(__EMSCRIPTEN__)
+
+namespace midier
+{
+namespace debug
+{
+
+void prefix(char const * file, int line, const char function[])
+{
+    char const * pos = strrchr(file, '/');
+    if (pos != nullptr)
+    {
+        file = pos + 1;
+    }
+
+    PRINT("[");
+    PRINT(Time::now);
+    PRINT("] ");
+    PRINT(file);
+    PRINT(':');
+    PRINT(line);
+    PRINT(" @ ");
+    PRINT(function);
+    PRINT("(): ");
+}
+
+} // debug
+
+std::ostream & operator<<(std::ostream & os, const Time & time)
+{
+    os << (int)Time::now.bar;
+    os << '.';
+
+    if (Time::now.subdivision < 10)
+    {
+        os << '0';
+    }
+
+    os << (int)Time::now.subdivision;
+    return os;
+}
+
+std::ostream & operator<<(std::ostream & os, const Layer & layer)
+{
+    return os << (unsigned)layer.id;
+}
+
+} // midier
+
+#endif // ARDUINO / __EMSCRIPTEN__
+
+#endif // DEBUG

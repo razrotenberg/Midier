@@ -4,14 +4,20 @@
 
 #ifdef DEBUG
 
-#include <Arduino.h>
-
 namespace midier
 {
 
 struct Layer;
 struct Time;
 
+} // midier
+
+#if defined(ARDUINO)
+
+#include <Arduino.h>
+
+namespace midier
+{
 namespace debug
 {
 
@@ -52,6 +58,32 @@ void prefix(const __FlashStringHelper * file, int line, const char function[]);
 #define PRINTLN(x)      debug::println(x)
 #define TRACE_START()   debug::prefix(F(__FILE__), __LINE__, __FUNCTION__)
 #define TRACE_END() PRINTLN()
+
+#elif defined(__EMSCRIPTEN__)
+
+#include <iostream>
+
+namespace midier
+{
+
+namespace debug
+{
+
+void prefix(char const * file, int line, const char function[]);
+
+} // debug
+
+std::ostream & operator<<(std::ostream &, const Time &);
+std::ostream & operator<<(std::ostream &, const Layer &);
+
+} // midier
+
+#define F(x) (x)
+#define PRINT(x) std::cout << (x)
+#define TRACE_START() debug::prefix(__FILE__, __LINE__, __FUNCTION__)
+#define TRACE_END() std::cout << std::endl
+
+#endif // ARDUINO / __EMSCRIPTEN__
 
 #define TRACE_1(x1)                         TRACE_START(); PRINT(x1);                                                                               TRACE_END()
 #define TRACE_2(x1,x2)                      TRACE_START(); PRINT(x1); PRINT(x2);                                                                    TRACE_END()
