@@ -2,12 +2,16 @@
 
 #include "../debug/debug.h"
 
+#ifdef ARDUINO
 #include <Arduino.h>
+#endif // ARDUINO
 
 namespace midier
 {
 namespace midi
 {
+
+#ifdef ARDUINO
 
 namespace
 {
@@ -27,10 +31,14 @@ void send(byte command, byte data1, byte data2)
 
 } //
 
+#endif // ARDUINO
+
 Number number(Note note, Octave octave)
 {
     return 24 + (12 * (octave - 1)) + (char)note;
 }
+
+#ifdef ARDUINO
 
 void on(Number number, Velocity velocity)
 {
@@ -55,6 +63,8 @@ void play(Note note, Octave octave, unsigned duration)
     delay(duration);
     off(no);
 }
+
+#endif // ARDUINO
 
 } // midi
 } // midier
