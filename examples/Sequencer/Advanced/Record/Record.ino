@@ -3,7 +3,7 @@
 // This example shows how one can record a few bars and then play more
 // layers on top of them while in playback mode.
 //
-// Setup needed to run the examples: https://github.com/levosos/Midier#setup
+// Setup needed to run the examples: https://github.com/razrotenberg/Midier#setup
 // No additional setup is required for this sketch
 //
 #include <Midier.h>
@@ -12,7 +12,7 @@ void setup()
 {
     // if you are connecting using USB, set the baud rate that is configured in the serial-to-MIDI software
     // if you are connecting using a physical MIDI connector and cable, set it to 31250
-    // if you're not sure what this is, or which baud rate to use: https://github.com/levosos/Midier#baud-rate
+    // if you're not sure what this is, or which baud rate to use: https://github.com/razrotenberg/Midier#baud-rate
     Serial.begin(9600);
 }
 
