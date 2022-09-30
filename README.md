@@ -400,6 +400,23 @@ To enable debug mode, uncomment line #3 in [debug.h](src/debug/debug.h). This de
 
 Strings should pass to `TRACE_*()` macros wrapped with the macro `F()` (e.g. `TRACE_1(F("Hello, world"))`) to place the strings in the program memory (flash) instead of in the RAM.
 
+## What's next
+
+
+
+<!-- ## Algorithm
+
+### Time Signatures
+
+Currently all bars are counted in time signature 1:4. `Time::Subdivisions` represents a full bar and maybe should represent a beat (a quarter/eighth note) and be configurable.
+
+### Gate Value
+
+Currently, notes are being played the entire unit they should be playe.
+For example, when playing eighth notes, every note will be played for half a bar, and the MIDI *note off* command will be sent only after a haf bar passed.
+
+This should be configurable, just like Ableton's arpeggiator gate value control. -->
+
 ## Classes
 
 ### Interval
@@ -457,3 +474,33 @@ Every triad (3-note) quality has a matching seventh-chord (4-note) quality with 
 Therefore, in order to support both 7-th chords (4 notes) and triads (3 notes) qualities, we define triad qualities as an alias to a matching seventh-chord quality.
 
 There's no need at the moment to be able to distinguish between 3-note qualities and their matching 4-note qualities by having different enum values.
+
+### MIDI
+
+A `namespace` exposing methods that send MIDI commands to play a certain note.
+Default octave for playing a note is 3.
+
+### Sequencer
+
+Sequencer is the main class being used by project *Arpeggino*.
+New layers are inserted with respective degrees.
+At most one `Sequencer` can run at a moment as calling its `click()` method modified global variables of *Midier*.
+
+### Rate
+
+An `enum class` of the rates of the rhythm.
+Values are how many times it's in a bar (1/4).
+
+### Layer
+
+Playing a note
+stopping if revoked
+stopping before playing the next note
+stopping if passed enough time (in terms of subdivisions)
+
+### Layers
+
+A utility class to help managing a list of `Layer`s.
+It offers easy iteration on used layers, lambda evaluation, aggregated `Layer` methods (`revoke()`, `record()`, `play()`, `click()`).
+
+<!-- LINE 71: The algorithm and main concepts of `Sequencer` are desribed below at the section [Algorithm](#Algorithm). -->

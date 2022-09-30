@@ -1,6 +1,11 @@
 #include "mode.h"
 
+#if defined(ARDUINO)
 #include <Arduino.h>
+#else
+#include <string.h>
+#define PROGMEM // nothing
+#endif
 
 namespace midier
 {
@@ -34,10 +39,14 @@ static_assert(sizeof(__names) / sizeof(__names[0]) == (unsigned)Mode::Count, "Un
 
 void name(Mode mode, /* out */ Name & name)
 {
+#if defined(ARDUINO)
     strcpy_P(
         /* out */ name,
         (char const *)pgm_read_ptr(&(__names[(unsigned)mode]))
     );
+#else
+    strcpy(/* out */ name, __names[(unsigned)mode]);
+#endif
 }
 
 } // mode

@@ -3,7 +3,7 @@
 namespace midier
 {
 
-Time Time::now = { .bar = 0, .subdivision = 0 };
+Time Time::now(/* bar = */ 0, /* subdivision = */ 0);
 
 namespace
 {

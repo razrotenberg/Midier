@@ -1,0 +1,4 @@
+{
+    "board": "arduino:avr:uno",
+    "sketch": "examples/Sequencer/Basic/TwelveBarBlues/TwelveBarBlues.ino"
+}

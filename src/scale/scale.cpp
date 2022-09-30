@@ -1,6 +1,11 @@
 #include "scale.h"
 
+#if defined(ARDUINO)
 #include <Arduino.h>
+#else
+#define PROGMEM // nothing
+typedef unsigned char byte;
+#endif
 
 namespace midier
 {
@@ -49,7 +54,11 @@ Interval interval(Mode mode, Degree degree)
         octaver = octaver + Interval::P8;
     }
 
+#if defined(ARDUINO)
     return octaver + (Interval)pgm_read_byte(pgm_read_ptr(__all + (unsigned)mode) + (degree - 1));
+#else
+    return octaver + __all[(unsigned)mode][degree - 1];
+#endif
 }
 
 Quality quality(Mode mode, Degree degree)
@@ -61,7 +70,11 @@ Quality quality(Mode mode, Degree degree)
     static_assert(__count == 7, "Expected 7 qualities to be declared");
     static_assert(sizeof(Quality) == sizeof(byte), "Unexpected size of 'Quality'");
 
+#if defined(ARDUINO)
     return (Quality)pgm_read_byte(__qualities + ((degree - 1 + (unsigned)mode) % __count));
+#else
+    return __qualities[(degree - 1 + (unsigned)mode) % __count];
+#endif
 }
 
 } // scale

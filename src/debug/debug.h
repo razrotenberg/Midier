@@ -1,6 +1,6 @@
 #pragma once
 
-// #define DEBUG // toggle debug mode
+#define DEBUG // toggle debug mode
 
 #ifdef DEBUG
 

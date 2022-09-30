@@ -2,6 +2,10 @@
 
 #include "../layers/layers.h"
 
+#ifdef ARDUINO
+#define SUPPORT_BLOCKING_API
+#endif
+
 namespace midier
 {
 
@@ -23,12 +27,6 @@ struct Sequencer
         // bar index
     };
 
-    enum class Run : char
-    {
-        Sync,
-        Async,
-    };
-
     // this class is made to hide the underlying `Layer` from the client
     // so he or she will not call `Layer` methods directly but will call
     // `Sequencer` methods only
@@ -44,8 +42,11 @@ struct Sequencer
     // creation
     Sequencer(ILayers layers);
     Sequencer(ILayers layers, const Config & config);
+
+#ifdef SUPPORT_BLOCKING_API
     Sequencer(ILayers layers,                        unsigned char bpm);
     Sequencer(ILayers layers, const Config & config, unsigned char bpm);
+#endif
 
     // queries
     bool recording() const;
@@ -68,7 +69,11 @@ struct Sequencer
     //   2) reset the beat if reached the end of the recorded loop
     //   3) click all layers
     //
-    // this can be done either synchronously or asynchronously
+    // returns an indicator of any changes in the record loop bar or its index
+    // if we are currently inside a record loop
+    //
+#ifdef SUPPORT_BLOCKING_API
+    // in Arduino, this can be done either synchronously or asynchronously
     //
     // synchronous calls are blocking and wait for enough time to pass before
     // actually clicking the next subdivision in order for the bar to take
@@ -77,11 +82,18 @@ struct Sequencer
     // asynchronous calls are non-blocking and return `Bar::Same` if it's too
     // soon to actually click
     //
-    // returns an indicator of any changes in the record loop bar or its index
-    // if we are currently inside a record loop
-    //
-    Bar click(Run run);
+    enum class Run : char
+    {
+        Sync,
+        Async,
+    };
 
+    Bar click(Run run);
+#else
+    Bar click();
+#endif
+
+#ifdef SUPPORT_BLOCKING_API
     // run synchronously for a certain time duration
     // these methods are blocking and return after the time duration has fully passed
     void run(const Time::Duration & duration);
@@ -90,14 +102,17 @@ struct Sequencer
     // the scale degree is stopped at the end of the duration
     void play(Degree degree, const Time::Duration & duration);
     void play(Degree degree, const Time::Duration & duration, const Config & config);
+#endif
 
     // exposed members
+#ifdef SUPPORT_BLOCKING_API
+    unsigned char bpm;
+#endif
     Assist assist = Assist::No;
     ILayers layers;
-    unsigned char bpm;
     Config config; // common layer configuration
 
-private:
+// private:
     enum class State : char
     {
         Wander,
@@ -107,7 +122,9 @@ private:
         Overlay,
     };
 
+#ifdef SUPPORT_BLOCKING_API
     unsigned long long _clicked = -1; // timestamp of previous click
+#endif
 
     struct {
         Time when; // when we started to record

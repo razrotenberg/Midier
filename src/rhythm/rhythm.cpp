@@ -4,7 +4,13 @@
 #include "../layer/layer.h"
 #include "../time/time.h"
 
+#if defined(ARDUINO)
 #include <Arduino.h>
+#else
+#include <string.h>
+#define max(a,b) ((a)>(b)?(a):(b))
+#define PROGMEM // nothing
+#endif
 
 namespace midier
 {
@@ -70,27 +76,43 @@ const float PROGMEM _11 [] =                                            // 1/16t
 
 struct Rhythmer
 {
-    void description(/* out */ Description & out)
+    void description(/* out */ Description & out) const
     {
+#if defined(ARDUINO)
         strcpy_P(
             /* out */ out,
             (char const *)pgm_read_ptr(&(this->_description))
         );
+#else
+        strcpy(/* out */ out, _description);
+#endif
     }
 
     Rate rate() const
     {
+#if defined(ARDUINO)
         return (Rate)pgm_read_byte(&(this->_rate));
+#else
+        return _rate;
+#endif
     }
 
     unsigned count() const
     {
+#if defined(ARDUINO)
         return (unsigned)pgm_read_byte(&(this->_count));
+#else
+        return _count;
+#endif
     }
 
-    float portion(unsigned index)
+    float portion(unsigned index) const
     {
+#if defined(ARDUINO)
         return pgm_read_float((float const *)pgm_read_ptr(&(this->_portions)) + index);
+#else
+        return _portions[index];
+#endif
     }
 
     // members should not be accessed directly as they hold addresses to PROGMEM

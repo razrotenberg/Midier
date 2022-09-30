@@ -18,11 +18,11 @@ Layer::Layer(
     id(id),
 #endif
     chord(chord),
-    start({ .bar = -1, .subdivision = delay }), // we use `start` to hold `delay` as it will not be used until the layer will actually start
+    start(/* bar = */ -1, /* subdivision = */ delay), // we use `start` to hold `delay` as it will not be used until the layer will actually start
     config(config), // all layers share common configuration by default
     _state(State::Wait)
 {
-    TRACE_7(F("New layer "), *this, F(" of scale degree "), chord, F(" will start in "), (int)start.subdivision, F(" subdivisions"));
+    TRACE_7(F("New layer "), *this, F(" of scale degree "), (unsigned)chord, F(" will start in "), (int)start.subdivision, F(" subdivisions"));
 }
 
 bool Layer::idle() const

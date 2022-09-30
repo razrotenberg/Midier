@@ -83,6 +83,11 @@ struct Layer
     // the index of the bar within the logical loop it's being played in
     short bar = -1; // must be of a big enough size in order to hold Layer::Period
 
+    // 11 bits are enough for 'bar' (max is `Period`) WHAT ABOUT (-1)?
+    // 1 bit is enough for 'volume'
+    // 3 bits are enough for 'degree'
+    // 2 bits are enough for 'state' (currently)
+
 private:
     enum class State : char
     {

@@ -25,9 +25,13 @@ struct Time
     //   3) 1/8 triplet (3 notes in a bar)
     // therefore, we use a multiply of 12 for the number of subdivisions in a bar,
     // as it gives us the needed rhythmic precision
-    // we use 96 in order to shorten the delay after every subdivision played
-    //
+    // in general, we use 96 in order to shorten the delay after every subdivision played
+    // when building for WebAssembly,
+#ifdef __EMSCRIPTEN__
+    constexpr static auto Subdivisions = 36;
+#else
     constexpr static auto Subdivisions = 96;
+#endif
 
     struct Difference
     {
@@ -43,7 +47,12 @@ struct Time
         unsigned total() const; // total number of subdivisions
     };
 
-    static Time now;
+    static Time now; // TODO: make a constant getter
+
+    static inline void click()
+    {
+        ++Time::now;
+    }
 };
 
 bool operator==(const Time & lhs, const Time & rhs);

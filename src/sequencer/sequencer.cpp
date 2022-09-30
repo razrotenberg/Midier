@@ -2,13 +2,19 @@
 
 #include "../debug/debug.h"
 
+#if defined(ARDUINO)
 #include <Arduino.h>
+#endif
+
+#include <iostream>
 
 namespace midier
 {
 
 Sequencer::Sequencer(ILayers layers) : Sequencer(layers, Config { /* default configuration */ })
 {}
+
+#ifdef SUPPORT_BLOCKING_API
 
 Sequencer::Sequencer(ILayers layers, const Config & config) : Sequencer(layers, config, 60)
 {}
@@ -17,10 +23,19 @@ Sequencer::Sequencer(ILayers layers, unsigned char bpm) : Sequencer(layers, Conf
 {}
 
 Sequencer::Sequencer(ILayers layers, const Config & config, unsigned char bpm) :
-    layers(layers),
     bpm(bpm),
+    layers(layers),
     config(config)
 {}
+
+#else
+
+Sequencer::Sequencer(ILayers layers, const Config & config) :
+    layers(layers),
+    config(config)
+{}
+
+#endif
 
 bool Sequencer::recording() const
 {
@@ -45,7 +60,7 @@ Sequencer::Handle Sequencer::start(Degree degree)
         if (_started == -1)
         {
             TRACE_1(F("First layer starting now"));
-            _started = Time::now.subdivision;
+            _started = Time::now.subdivision; // this is not risked by beat changes
         }
         else if (assist != Assist::No)
         {
@@ -59,7 +74,7 @@ Sequencer::Handle Sequencer::start(Degree degree)
             const auto jumps = Time::Subdivisions / units;
 
             // how many subdivisions passed since the last jump
-            const auto passed = (Time::now - Time { .bars = 0, .subdivisions = _started }).subdivisions % jumps;
+            const auto passed = (Time::now - Time(/* bars = */ 0, /* subdivision = */ _started)).subdivisions % jumps;
 
             // how many subdivisions are left until the next jump
             delay = (jumps - passed) % jumps;
@@ -175,6 +190,8 @@ void Sequencer::wander()
     _state = State::Wander;
 }
 
+#ifdef SUPPORT_BLOCKING_API
+
 Sequencer::Bar Sequencer::click(Run run)
 {
     const auto bps = (float)bpm / 60.f; // beats per second
@@ -204,13 +221,24 @@ Sequencer::Bar Sequencer::click(Run run)
 
     // only now we are actually starting to click
 
+#else
+
+Sequencer::Bar Sequencer::click()
+{
+
+#endif
+
     Bar bar = Bar::Same;
 
+        // std::cout << "XXX0 this=" << (void*)this << std::endl;
+        // std::cout << "XXX0 _started=" << (int)_started << std::endl;
     if (_started != -1) // check if we should reset `_started`
     {
         if (_started == Time::now.subdivision && layers.idle())
         {
             TRACE_1(F("Reseting start beat as no more layers are being played"));
+            // std::cout << "XXX _started=" << (int)_started << std::endl;
+            // TRACE_1((void*)this);
             _started = -1;
         }
     }
@@ -314,12 +342,16 @@ Sequencer::Bar Sequencer::click(Run run)
     // let all layers click
     layers.click();
 
+#ifdef ARDUINO
     // after playing all the layers, we advance the global time
-    ++Time::now;
+    Time::click();
+#endif
 
     // let the client know if the bar has changed
     return bar;
 }
+
+#ifdef SUPPORT_BLOCKING_API
 
 void Sequencer::run(const Time::Duration & duration)
 {
@@ -344,5 +376,7 @@ void Sequencer::play(Degree degree, const Time::Duration & duration, const Confi
     run(duration);
     stop(handle);
 }
+
+#endif
 
 } // midier
