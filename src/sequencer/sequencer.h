@@ -15,7 +15,7 @@ struct Sequencer
         Full = 1,
     };
 
-    enum class Bar : char
+    enum Bar : short
     {
         None = -1,
         Same = 0,

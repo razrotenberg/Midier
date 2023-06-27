@@ -15,11 +15,6 @@ inline char mod(char i, char n) // positive mod operator
 
 } //
 
-Time::Time(char bar, char subdivision) :
-    bar(bar),
-    subdivision(subdivision)
-{}
-
 void Time::operator++()
 {
     subdivision = (subdivision + 1) % Time::Subdivisions;
