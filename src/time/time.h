@@ -5,8 +5,6 @@ namespace midier
 
 struct Time
 {
-    Time() = default;
-    Time(char bar, char subdivision);
 
     // the following types can be 'char' as long as Time::Bars and Time::Subdivisions are less than 127
     char bar = -1;

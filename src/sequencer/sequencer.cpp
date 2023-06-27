@@ -3,6 +3,7 @@
 #include "../debug/debug.h"
 
 #include <Arduino.h>
+#include <climits>
 
 namespace midier
 {
@@ -59,7 +60,7 @@ Sequencer::Handle Sequencer::start(Degree degree)
             const auto jumps = Time::Subdivisions / units;
 
             // how many subdivisions passed since the last jump
-            const auto passed = (Time::now - Time { .bars = 0, .subdivisions = _started }).subdivisions % jumps;
+            const auto passed = (Time::now - Time { .bar = 0, .subdivision = _started }).subdivisions % jumps;
 
             // how many subdivisions are left until the next jump
             delay = (jumps - passed) % jumps;
@@ -181,7 +182,7 @@ Sequencer::Bar Sequencer::click(Run run)
     const auto mspb = 1000.f / bps; // ms per beat
     const auto mspc = mspb / (float)midier::Time::Subdivisions; // ms per click
 
-    if (_clicked == -1)
+    if (_clicked == ULLONG_MAX)
     {
         // this is the very first click so no need to wait
     }

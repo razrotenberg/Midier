@@ -21,7 +21,7 @@ enum class Note : char
     // we might represent other values, in run-time, as notes as well, e.g. 'C = 12', 'G# = 20'
 };
 
-enum class Accidental : char
+enum class Accidental : short
 {
     // the values are the number of semitones (and direction)
     // the note should be modified by this accidental
